@@ -1,4 +1,4 @@
-./node_modules
-./js
+node_modules
+js
 Icon?
 npm-debug.log

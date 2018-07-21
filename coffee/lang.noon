@@ -1,0 +1,248 @@
+coffee js
+    keyword
+        if
+        then 
+        else 
+        do
+        for
+        while
+        new
+        try
+        catch
+        return
+        switch
+        break
+        continue
+        true
+        typeof
+        __dirname
+        __filename
+        first
+        last
+        valid
+        empty
+        clamp
+        watch
+        str
+        pos
+        elem
+        stopEvent
+
+    module
+        childp
+        matchr
+        prefs
+        slash
+        noon
+        args
+        console
+        process
+        global
+        module
+        exports
+        window
+        document
+        fs
+        os
+
+    function
+        log
+        
+    function call
+        err
+        error
+
+    nil
+        null
+        false
+        undefined
+        
+    require
+        require
+      
+coffee
+        
+    keyword
+        of
+        in
+        is
+        by
+        or
+        and
+        not
+        when
+        unless
+        super
+        extends
+                
+js
+    keyword
+        var
+        case
+        this
+        
+    keyword function                
+        function
+
+json noon
+    keyword
+        true
+    nil
+        null
+        false
+        
+cpp hpp cxx c h
+                    
+    keyword
+        if 
+        else
+        for 
+        while
+        switch
+        case
+        break
+        continue
+        return
+        virtual
+        static_cast
+        dynamic_cast
+        reinterpret_cast
+        const_cast
+        cast
+        sizeof
+        this
+        true
+        enum
+        struct
+        class
+        public
+        private
+        typename
+        typedef
+        namespace
+        using
+        template
+        inline
+                        
+    keyword type                        
+        int
+        auto
+        void
+        bool
+        char
+        byte
+        long
+        float
+        double
+        unsigned
+        int8
+        int16
+        int32
+        uint8
+        uint16
+        uint32
+        int64
+        uint64
+        size_t
+
+    punctuation keyword
+        const
+        override
+        static
+
+    template                    
+        TMap
+        TArray
+        TSubclassOf  
+
+    nil
+        NULL
+        nullptr
+        false
+        Error
+        ERROR
+
+    define  
+        t-1 #
+        ifdef
+        ifndef
+        include
+        pragma
+        undef
+        once
+       
+html htm
+    keyword
+        t-1 < </
+        a
+        b
+        p
+        ul
+        li
+        br
+        tr
+        th
+        td
+        dt
+        hr
+        div
+        nav
+        img
+        pre
+        head
+        meta
+        html 
+        body 
+        span
+        link
+        section 
+        header
+        footer
+        script
+        style
+        table
+        title
+        blockquote
+        center
+        canvas
+        DOCTYPE
+
+html htm svg  
+    keyword    
+        t-1 < 
+        g
+        svg
+        path
+        rect
+        line
+        defs
+        text
+        tspan
+        circle
+        ellipse
+        polygon
+        polyline
+        pattern
+        filter
+        stop
+        radialGradient
+        linearGradient
+        
+    property
+        id
+        type
+        href
+        src
+        rel
+        lang
+        class
+        charset
+        tabindex
+plist
+    keyword
+        t-1 <
+        array
+        dict
+        key
+        string
+        
