@@ -1,4 +1,11 @@
+#  0000000   0000000   00000000  00000000  00000000  00000000              000   0000000  
+# 000       000   000  000       000       000       000                   000  000       
+# 000       000   000  000000    000000    0000000   0000000               000  0000000   
+# 000       000   000  000       000       000       000             000   000       000  
+#  0000000   0000000   000       000       00000000  00000000         0000000   0000000   
+
 coffee js
+    
     keyword
         if
         then 
@@ -60,8 +67,19 @@ coffee js
     require
         require
       
+#  0000000   0000000   00000000  00000000  00000000  00000000  
+# 000       000   000  000       000       000       000       
+# 000       000   000  000000    000000    0000000   0000000   
+# 000       000   000  000       000       000       000       
+#  0000000   0000000   000       000       00000000  00000000  
+
 coffee
-        
+       
+    comment
+        tail    #
+        start   ###
+        end     ###
+
     keyword
         of
         in
@@ -75,6 +93,12 @@ coffee
         super
         extends
                 
+#       000   0000000  
+#       000  000       
+#       000  0000000   
+# 000   000       000  
+#  0000000   0000000   
+
 js
     keyword
         var
@@ -84,6 +108,12 @@ js
     keyword function                
         function
 
+#       000   0000000   0000000   000   000        000   000   0000000    0000000   000   000  
+#       000  000       000   000  0000  000        0000  000  000   000  000   000  0000  000  
+#       000  0000000   000   000  000 0 000        000 0 000  000   000  000   000  000 0 000  
+# 000   000       000  000   000  000  0000        000  0000  000   000  000   000  000  0000  
+#  0000000   0000000    0000000   000   000        000   000   0000000    0000000   000   000  
+
 json noon
     keyword
         true
@@ -91,11 +121,42 @@ json noon
         null
         false
         
+noon
+    comment
+        line  #
+        
+#  0000000  00000000   00000000 
+# 000       000   000  000   000
+# 000       00000000   00000000 
+# 000       000        000      
+#  0000000  000        000      
+
 cpp hpp cxx c h
-                    
-    keyword
-        if 
+
+    define or keyword  
+        t-1 
+            |#|     define
+            ||      keyword
+        if
         else
+        ifdef
+        undef
+        ifndef
+        define
+        endif
+    
+    define
+        t-1     
+            |#|     define
+        include
+        pragma
+        
+    once
+        w-1
+            pragma  define
+        once
+
+    keyword
         for 
         while
         switch
@@ -161,19 +222,26 @@ cpp hpp cxx c h
         false
         Error
         ERROR
+      
+cpp hpp cxx c h js
 
-    define  
-        t-1 #
-        ifdef
-        ifndef
-        include
-        pragma
-        undef
-        once
-       
+    comment
+        tail    //
+        start   /*
+        end     */
+        
+# 000   000  000000000  00     00  000      
+# 000   000     000     000   000  000      
+# 000000000     000     000000000  000      
+# 000   000     000     000 0 000  000      
+# 000   000     000     000   000  0000000  
+
 html htm
+
     keyword
-        t-1 < </
+        t-1 
+            <   keyword
+            </  keyword
         a
         b
         p
@@ -205,11 +273,27 @@ html htm
         blockquote
         center
         canvas
+        
+    doctype
+        t-1 
+            <!  keyword
         DOCTYPE
 
+#  0000000  000   000   0000000   
+# 000       000   000  000        
+# 0000000    000 000   000  0000  
+#      000     000     000   000  
+# 0000000       0       0000000   
+
 html htm svg  
-    keyword    
-        t-1 < 
+
+    comment
+        start   <!--
+        end     -->
+    
+    svg keyword    
+        t-1 
+            <   keyword
         g
         svg
         path
@@ -238,11 +322,27 @@ html htm svg
         class
         charset
         tabindex
+        
+# 00000000   000      000   0000000  000000000  
+# 000   000  000      000  000          000     
+# 00000000   000      000  0000000      000     
+# 000        000      000       000     000     
+# 000        0000000  000  0000000      000     
+
 plist
     keyword
-        t-1 <
+        t-1 
+            <   keyword
         array
         dict
         key
         string
+      
+sh
+    comment
+        line    #
+        
+iss
+    comment
+        line    ;
         

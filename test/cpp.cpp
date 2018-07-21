@@ -1,5 +1,17 @@
+#pragma once
+
 #include "GridMode.h"
 #include "UObject/ConstructorHelpers.h"
+
+#ifdef hello
+# if 
+#   define world
+# else
+#   undef
+# endif
+#else 
+#pragma once
+#endif
 
 AGridMode::AGridMode()
 {

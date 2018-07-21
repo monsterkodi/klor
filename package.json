@@ -1,12 +1,19 @@
 {
   "name": "kork",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "syntax highlighting",
   "main": "js/syntax.js",
   "author": "monsterkodi",
   "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monsterkodi/kork.git"
+  },
+  "bugs": {
+    "url": "https://github.com/monsterkodi/kork/issues"
+  },
   "dependencies": {
-    "kxk": "https://github.com/monsterkodi/kork.git"
+    "kxk": "https://github.com/monsterkodi/kxk.git"
   },
   "devDependencies": {
     "assert": "^1.4.1",
