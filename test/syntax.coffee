@@ -483,6 +483,7 @@ describe 'syntax', ->
     it 'strings', ->
         
         rgs = Syntax.ranges 'a="\'X\'"'
+        log rgs
         expect(rgs).to.deep.include 
             start: 3
             match: "'X'"
