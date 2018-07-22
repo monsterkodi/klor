@@ -214,6 +214,17 @@ describe 'syntax', ->
         rgs = Syntax.ranges "0.0000f", 'cpp'
         inc rgs, 2, "0000f", 'number float'
             
+    #       000   0000000  
+    #       000  000       
+    #       000  0000000   
+    # 000   000       000  
+    #  0000000   0000000   
+    
+    it 'js', ->
+        
+        rgs = Syntax.ranges "func = function() {", 'js'
+        inc rgs, 0, 'func', 'function'
+        
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
     # 000       000   000  000000    000000    0000000   0000000   
@@ -223,8 +234,10 @@ describe 'syntax', ->
     it 'coffee', ->
         
         rgs = Syntax.ranges "mthd:  (arg)    => @member memarg", 'coffee'
-        inc rgs, 0, 'mthd', 'method'
-        inc rgs, 4, ':',    'method punctuation'
+        inc rgs, 0,  'mthd', 'method'
+        inc rgs, 4,  ':',    'method punctuation'
+        inc rgs, 16, '=',    'function tail bound punctuation'
+        inc rgs, 17, '>',    'function head bound punctuation'
         
         rgs = Syntax.ranges "@height/2 + @height/6", 'coffee'
         inc rgs, 8, "2", 'number'
@@ -270,14 +283,14 @@ describe 'syntax', ->
         rgs = Syntax.ranges " a: =>", 'coffee'
         inc rgs, 1, "a", 'method'
         inc rgs, 2, ":", 'method punctuation'
-        inc rgs, 4, "=", 'function tail bound'
-        inc rgs, 5, ">", 'function head bound'
+        inc rgs, 4, "=", 'function tail bound punctuation'
+        inc rgs, 5, ">", 'function head bound punctuation'
         
         rgs = Syntax.ranges " a: ->", 'coffee'
         inc rgs, 1, "a", 'method'
         inc rgs, 2, ":", 'method punctuation'
-        inc rgs, 4, "-", 'function tail'
-        inc rgs, 5, ">", 'function head'
+        inc rgs, 4, "-", 'function tail punctuation'
+        inc rgs, 5, ">", 'function head punctuation'
             
         rgs = Syntax.ranges " a: b", 'coffee'
         inc rgs, 1, "a", 'dictionary key'

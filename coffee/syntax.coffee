@@ -197,11 +197,20 @@ class Syntax
 
             getValue = (back=-1)     -> Syntax.getValue obj, back 
             setValue = (back, value) -> Syntax.setValue obj, back, value  
+            
             setClass = (clss) ->
-                if obj.coffee and last(obj.rgs)?.match == '@'
-                    if clss == 'text'
-                        clss = 'member'
-                    last(obj.rgs).value = clss + ' punctuation'
+                
+                if obj.coffee 
+                    
+                    if last(obj.rgs)?.match == '@'
+                        if clss == 'text'
+                            clss = 'member'
+                        last(obj.rgs).value = clss + ' punctuation'
+                        
+                else if obj.js
+                    
+                    if clss == 'keyword function'
+                        Syntax.replace obj, -2, [{word:true}, {match:'='}], [{value:'function'}]
                 
                 obj.rgs.push
                     start: obj.index - word.length
@@ -241,7 +250,13 @@ class Syntax
                                 return setClass matchValue
                 else 
                     return setClass wordValue
-
+                    
+            # 000   000  00000000  000   000  
+            # 000   000  000        000 000   
+            # 000000000  0000000     00000    
+            # 000   000  000        000 000   
+            # 000   000  00000000  000   000  
+    
             if /^(0x|#)[a-fA-F\d][a-fA-F\d][a-fA-F\d]+$/.test word
                 if word[0] == '0'
                     setValue -2, 'number hex punctuation'
@@ -282,7 +297,7 @@ class Syntax
                 if obj.last.endsWith "#"
                     setValue -1, 'cssid punctuation'
                     return setClass 'cssid'
-                    
+                                        
             #  0000000  00000000   00000000   
             # 000       000   000  000   000  
             # 000       00000000   00000000   
@@ -297,7 +312,7 @@ class Syntax
                         setValue -2, 'punctuation namespace'
                         setValue -1, 'punctuation namespace'
                         if char == '('
-                            return setClass 'function call' # cpp ( after ::
+                            return setClass 'function call' # cpp ::word (
                         return setClass 'property'
                 
                 if /^[\\_A-Z][\\_A-Z0-9]+$/.test word
@@ -383,7 +398,7 @@ class Syntax
                         setValue -2, 'obj' if getValue(-2) == 'text'
                         setValue -1, 'property punctuation'
                         if char == '(' 
-                            return setClass 'function call'
+                            return setClass 'function call' # cpp .word (
                         else
                             return setClass 'property'
                             
@@ -391,7 +406,7 @@ class Syntax
                     if getValue(-2) == 'property'
                         setValue -1, 'property punctuation'
                         if char == '(' 
-                            return setClass 'function call'
+                            return setClass 'function call' # cpp .property (
                         else
                             return setClass 'property'
                     else
@@ -471,8 +486,8 @@ class Syntax
                         if obj.turd.endsWith turd
                             Syntax.substitute obj, -3, ['dictionary key', 'dictionary punctuation'], ['method', 'method punctuation']
                             Syntax.replace    obj, -3, [{word:true}, {match:'='}], [{value:'function'}]
-                            setValue -1, 'function tail' + val
-                            value = 'function head' + val
+                            setValue -1, 'function tail' + val + ' punctuation'
+                            value = 'function head' + val + ' punctuation'
                 else if obj.xmllang
                     if obj.turd.endsWith '/>'
                         setValue -1, 'keyword punctuation'
