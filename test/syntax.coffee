@@ -213,7 +213,21 @@ describe 'syntax', ->
 
         rgs = Syntax.ranges "0.0000f", 'cpp'
         inc rgs, 2, "0000f", 'number float'
-            
+       
+    # 000   0000000   0000000  
+    # 000  000       000       
+    # 000  0000000   0000000   
+    # 000       000       000  
+    # 000  0000000   0000000   
+    
+    it 'iss', ->
+        
+        rgs = Syntax.ranges "a={#key}", 'iss'
+        inc rgs, 2, '{',   'property punctuation'
+        inc rgs, 3, "#",   'property punctuation'
+        inc rgs, 4, 'key', 'property'
+        inc rgs, 7, "}",   'property punctuation'
+        
     #       000   0000000  
     #       000  000       
     #       000  0000000   

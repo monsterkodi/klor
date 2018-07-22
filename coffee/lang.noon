@@ -431,16 +431,87 @@ plist
     keyword
         t-1 
             <   keyword
+            </  keyword
         array
         dict
         key
         string
+        plist
       
-sh
+#  0000000  000   000  
+# 000       000   000  
+# 0000000   000000000  
+#      000  000   000  
+# 0000000   000   000  
+
+sh bash
     comment
         line    #
         
-iss
-    comment
-        line    ;
+    keyword
+        cd 
+        rm
+        cp
+        open
+        while
+        ls
+        if
+        in
+        fi
+        do
+        npm
+        git
+        done
+        then
+        elif
+        else
+        case
+        esac
+        exit
+        echo
+        mkdir
         
+    module
+        getopts
+        
+# 000   0000000   0000000  
+# 000  000       000       
+# 000  0000000   0000000   
+# 000       000       000  
+# 000  0000000   0000000   
+
+iss
+    define
+        t-1 
+            |#|     define
+            ||      keyword
+        define
+    match
+        property
+            start   {#
+            end     }
+        namespace
+            start   [
+            end     ]
+        number hex
+            start   {{
+            end     }
+    keyword
+        appid
+        appname
+        appversion
+        apppublisher
+        apppublisherurl
+        appsupporturl
+        appupdatesurl
+        defaultdirname
+        defaultgroupname
+        allownoicons
+        outputdir
+        outputbasefilename
+        setupiconfile
+        compression
+        solidcompression
+        wizardimagefile
+        wizardsmallimagefile
+    

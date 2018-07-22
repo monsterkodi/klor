@@ -31,6 +31,7 @@ class Syntax
         
         Syntax.lang = {}
         Syntax.info = {}
+        Syntax.mtch = {}
         
         for extNames,valueWords of data
             for ext in extNames.split /\s/
@@ -40,6 +41,12 @@ class Syntax
                     if value == 'comment'
                         Syntax.info[ext] ?= {}
                         Syntax.info[ext][value] = words
+                    else if value == 'match'
+                        Syntax.mtch[ext] ?= {}
+                        for value,startEnd of words
+                            Syntax.mtch[ext][startEnd.end] ?= []
+                            startEnd.value = value
+                            Syntax.mtch[ext][startEnd.end].push startEnd
                     else
                         if not _.isArray words
                             for word,info of words
@@ -57,7 +64,7 @@ class Syntax
                             for word in words
                                 Syntax.lang[ext][word] = value
                                             
-        # log 'Syntax', str(Syntax.info)
+        # log 'Syntax', str(Syntax.mtch)
     
     # 00000000    0000000   000   000   0000000   00000000   0000000  
     # 000   000  000   000  0000  000  000        000       000       
@@ -85,11 +92,12 @@ class Syntax
         obj.xml      = true if obj.ext == 'xml'
         obj.styl     = true if obj.ext == 'styl'
         obj.css      = true if obj.ext == 'css'
+        obj.iss      = true if obj.ext == 'iss'
         obj.html     = true if obj.ext in ['html', 'htm']
         obj.plist    = true if obj.ext == 'plist'
         obj.jslang   = true if obj.coffee or obj.js
         obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx']
-        obj.dictlang = true if obj.jslang or obj.ext in ['json', 'yaml', 'yml']
+        obj.dictlang = true if obj.jslang or obj.iss or obj.ext in ['json', 'yaml', 'yml']
         obj.dotlang  = true if obj.cpplang or obj.jslang
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
@@ -147,7 +155,7 @@ class Syntax
                         
                     when '-'
                         
-                        if obj.noon or obj.styl or obj.css
+                        if obj.noon or obj.styl or obj.css or obj.iss
                             Syntax.doWord obj
                         else
                             Syntax.doPunct obj
@@ -504,6 +512,11 @@ class Syntax
                         else
                             obj.regexp = obj.index
         
+        if Syntax.mtch[obj.ext]?[obj.turd]?
+            
+            if matchValue = Syntax.match obj, Syntax.mtch[obj.ext][obj.turd]
+                value = matchValue
+                            
         obj.rgs.push
             start: obj.index
             match: obj.char
@@ -716,6 +729,7 @@ class Syntax
     #    000     000   000  000      000   000  000       
     #     0      000   000  0000000   0000000   00000000  
     
+    @getMatch: (obj, back)        -> obj.rgs[obj.rgs.length+back]?.match         
     @getValue: (obj, back)        -> obj.rgs[obj.rgs.length+back]?.value         
     @setValue: (obj, back, value) -> 
         if obj.rgs.length+back < obj.rgs.length and obj.rgs.length+back >= 0
@@ -777,4 +791,25 @@ class Syntax
             for key in Object.keys newObjs[index]
                 backObj[key] = newObjs[index][key]
            
+    # 00     00   0000000   000000000   0000000  000   000  
+    # 000   000  000   000     000     000       000   000  
+    # 000000000  000000000     000     000       000000000  
+    # 000 0 000  000   000     000     000       000   000  
+    # 000   000  000   000     000      0000000  000   000  
+    
+    @match: (obj, mtchs) ->
+        
+        for mtch in mtchs
+            startMatches = true
+            for index in [0...mtch.start.length]
+                if Syntax.getMatch(obj, -2-index) != mtch.start[mtch.start.length-1-index]
+                    startMatches = false
+                    break
+            if startMatches
+                for index in [0...mtch.start.length]
+                    Syntax.setValue obj, -2-index, mtch.value + ' punctuation'
+                Syntax.setValue obj, -1, mtch.value
+                return mtch.value + ' punctuation'
+        null
+                
 module.exports = Syntax
