@@ -82,6 +82,8 @@ class Syntax
         obj.js       = true if obj.ext == 'js'
         obj.noon     = true if obj.ext == 'noon'
         obj.xml      = true if obj.ext == 'xml'
+        obj.styl     = true if obj.ext == 'styl'
+        obj.css      = true if obj.ext == 'css'
         obj.html     = true if obj.ext in ['html', 'htm']
         obj.plist    = true if obj.ext == 'plist'
         obj.jslang   = true if obj.coffee or obj.js
@@ -139,7 +141,7 @@ class Syntax
                         
                     when '-'
                         
-                        if obj.noon
+                        if obj.noon or obj.styl or obj.css
                             Syntax.doWord obj
                         else
                             Syntax.doPunct obj
@@ -174,6 +176,12 @@ class Syntax
         char = obj.char ? ''
         
         obj.turd += char # don't use = here!
+
+
+        switch char
+            when ' ', '\t'
+                if obj.regexp? and not obj.escp
+                    delete obj.regexp # abort regexp on first unescaped space
         
         if valid obj.word
             
@@ -197,14 +205,15 @@ class Syntax
                     
                 null
             
-            if char == ':'
-                if obj.dictlang
-                    return setClass 'dictionary key'
+            switch char
+                when ':'
+                    if obj.dictlang
+                        return setClass 'dictionary key'
                 
             if obj.coffee
                 if getValue(-1)?.indexOf('punctuation') < 0
                     if word not in ['else', 'then', 'and', 'or', 'in']
-                        if last(obj.rgs).value not in ['keyword', 'function head']
+                        if last(obj.rgs).value not in ['keyword', 'function head', 'require']
                             setValue -1, 'function call'
                 
             # 000       0000000   000   000   0000000   
@@ -213,9 +222,10 @@ class Syntax
             # 000      000   000  000  0000  000   000  
             # 0000000  000   000  000   000   0000000   
             
-            if Syntax.lang[obj.ext]?[word]?
+            lcword = word.toLowerCase()
+            if Syntax.lang[obj.ext]?[lcword]?
                 
-                wordValue = Syntax.lang[obj.ext][word]
+                wordValue = Syntax.lang[obj.ext][lcword]
                 
                 if Syntax.info[obj.ext]?[wordValue]?
                     for valueInfo in Syntax.info[obj.ext][wordValue]
@@ -226,7 +236,13 @@ class Syntax
                                 return setClass matchValue
                 else 
                     return setClass wordValue
-                            
+
+            if /^(0x|#)[a-fA-F\d][a-fA-F\d][a-fA-F\d]+$/.test word
+                if word[0] == '0'
+                    setValue -2, 'number hex punctuation'
+                setValue -1, 'number hex punctuation'
+                return setClass 'number hex'
+                    
             # 000   000   0000000    0000000   000   000  
             # 0000  000  000   000  000   000  0000  000  
             # 000 0 000  000   000  000   000  000 0 000  
@@ -245,7 +261,23 @@ class Syntax
                             
                 if obj.last == ' ' and last(obj.rgs)?.value != 'text'
                     return setClass last(obj.rgs)?.value
-                                                
+                 
+            #  0000000  000000000  000   000  000      
+            # 000          000      000 000   000      
+            # 0000000      000       00000    000      
+            #      000     000        000     000      
+            # 0000000      000        000     0000000  
+            
+            if obj.styl or obj.css
+                
+                if obj.last.endsWith '.'
+                    setValue -1, 'class punctuation'
+                    return setClass 'class'
+                    
+                if obj.last.endsWith "#"
+                    setValue -1, 'cssid punctuation'
+                    return setClass 'cssid'
+                    
             #  0000000  00000000   00000000   
             # 000       000   000  000   000  
             # 000       00000000   00000000   
@@ -336,9 +368,6 @@ class Syntax
                         
                 return setClass 'number'
                             
-            if /^(0x)?[a-fA-F\d][a-fA-F\d][a-fA-F\d]+$/.test word
-                return setClass 'number hex'
-                    
             # 00000000   00000000    0000000   00000000   00000000  00000000   000000000  000   000 
             # 000   000  000   000  000   000  000   000  000       000   000     000      000 000  
             # 00000000   0000000    000   000  00000000   0000000   0000000       000       00000   
@@ -348,8 +377,8 @@ class Syntax
             if obj.dotlang
                 
                 if obj.last in ['.', ':']
-                    if getValue(-2) in ['text', 'module']
-                        setValue -2, 'obj'
+                    if getValue(-2) in ['text', 'module', 'member']
+                        setValue -2, 'obj' if getValue(-2) == 'text'
                         setValue -1, 'obj punctuation'
                         return setClass 'property'
                             
@@ -381,7 +410,7 @@ class Syntax
             else if obj.turd.length > 1 and obj.turd.trim().length == 1
                 if last(obj.turd) in '@+-\'"([{'
                     val = Syntax.getValue obj, -2
-                    if val not in ['keyword', 'function head']
+                    if val not in ['keyword', 'function head', 'require']
                         Syntax.setValue obj, -2, 'function call'
                         
             # function.call
@@ -422,7 +451,7 @@ class Syntax
         
         switch obj.char
             when ':'
-                if obj.turd.length == 1 and obj.dictlang
+                if obj.dictlang and obj.turd.length == 1
                     if last(obj.rgs)?.value == 'dictionary key'
                         value = 'dictionary punctuation'
             when '>'
@@ -437,6 +466,17 @@ class Syntax
                     if obj.turd.endsWith '/>'
                         setValue -1, 'keyword punctuation'
                     value = 'keyword punctuation'
+            when '/'
+                if obj.coffee 
+                    if not obj.escp
+                        if obj.regexp?
+                            for index in [obj.rgs.length-1..0]
+                                if obj.rgs[index].start < obj.regexp
+                                    break
+                                obj.rgs[index].value = 'regexp ' + obj.rgs[index].value
+                            value = 'regexp punctuation'
+                        else
+                            obj.regexp = obj.index
         
         obj.rgs.push
             start: obj.index

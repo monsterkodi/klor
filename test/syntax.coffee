@@ -16,6 +16,64 @@ chai.should()
 
 describe 'syntax', ->
     
+    it 'regexp', ->
+
+        rgs = Syntax.ranges "r=/a/", 'coffee'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: '/'
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: 'a'
+            value: 'regexp text'
+        expect(rgs).to.deep.include 
+            start: 4
+            match: '/'
+            value: 'regexp punctuation'
+    
+        rgs = Syntax.ranges 'a / b - c / d', 'coffee'
+        expect(rgs).to.not.deep.include 
+            start: 2
+            match: '/'
+            value: 'regexp punctuation'
+
+        rgs = Syntax.ranges 'f a/b, c/d', 'coffee'
+        expect(rgs).to.not.deep.include 
+            start: 3
+            match: '/'
+            value: 'regexp punctuation'
+            
+        rgs = Syntax.ranges "/(a|.*|\s\d\w\S\W$|^\s+)/", 'coffee'
+        expect(rgs).to.deep.include 
+            start: 0
+            match: '/'
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: 'a'
+            value: 'regexp text'
+        
+    # 00000000   00000000   0000000   000   000  000  00000000   00000000  
+    # 000   000  000       000   000  000   000  000  000   000  000       
+    # 0000000    0000000   000 00 00  000   000  000  0000000    0000000   
+    # 000   000  000       000 0000   000   000  000  000   000  000       
+    # 000   000  00000000   00000 00   0000000   000  000   000  00000000  
+    
+    it 'require', ->
+        
+        rgs = Syntax.ranges "util = require 'util'", 'coffee'
+        expect(rgs).to.deep.include 
+            start: 7
+            match: 'require'
+            value: 'require'
+    
+    # 000  000   000  000000000  00000000  00000000   00000000    0000000   000       0000000   000000000  000   0000000   000   000  
+    # 000  0000  000     000     000       000   000  000   000  000   000  000      000   000     000     000  000   000  0000  000  
+    # 000  000 0 000     000     0000000   0000000    00000000   000   000  000      000000000     000     000  000   000  000 0 000  
+    # 000  000  0000     000     000       000   000  000        000   000  000      000   000     000     000  000   000  000  0000  
+    # 000  000   000     000     00000000  000   000  000         0000000   0000000  000   000     000     000   0000000   000   000  
+    
     it 'interpolation', ->    
         
         rgs = Syntax.ranges '"#{666}"', 'coffee'
@@ -475,18 +533,22 @@ describe 'syntax', ->
             match: "value"
             value: 'property'
             
-        rgs = Syntax.ranges "if args.rights", 'coffee'
+        rgs = Syntax.ranges "if someObject.someProp", 'coffee'
         expect(rgs).to.deep.include
             start: 0
             match: "if"
             value: 'keyword'
         expect(rgs).to.deep.include
             start: 3
-            match: "args"
+            match: "someObject"
             value: 'obj'
         expect(rgs).to.deep.include 
-            start: 8
-            match: "rights"
+            start: 13
+            match: "."
+            value: 'obj punctuation'
+        expect(rgs).to.deep.include 
+            start: 14
+            match: "someProp"
             value: 'property'
             
         rgs = Syntax.ranges "a(b).length", 'coffee'
@@ -513,10 +575,10 @@ describe 'syntax', ->
             match: "6670"
             value: 'number'
 
-        rgs = Syntax.ranges "667AC"
+        rgs = Syntax.ranges "0x667AC"
         expect(rgs).to.deep.include
             start: 0
-            match: "667AC"
+            match: "0x667AC"
             value: 'number hex'
 
         rgs = Syntax.ranges "66.700"

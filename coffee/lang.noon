@@ -33,7 +33,7 @@ coffee js
         str
         pos
         elem
-        stopEvent
+        stopevent
 
     module
         childp
@@ -42,6 +42,7 @@ coffee js
         slash
         noon
         args
+        post
         console
         process
         global
@@ -211,19 +212,25 @@ cpp hpp cxx c h
         override
         static
 
-    template                    
-        TMap
-        TArray
-        TSubclassOf  
+    # template                    
+        # TMap
+        # TArray
+        # TSubclassOf  
 
     nil
-        NULL
+        err
+        null
         nullptr
         false
-        Error
-        ERROR
+        error
+        
+#     000      000         0000000   0000000   00     00  00     00  00000000  000   000  000000000  
+#    000      000         000       000   000  000   000  000   000  000       0000  000     000     
+#   000      000          000       000   000  000000000  000000000  0000000   000 0 000     000     
+#  000      000           000       000   000  000 0 000  000 0 000  000       000  0000     000     
+# 000      000             0000000   0000000   000   000  000   000  00000000  000   000     000     
       
-cpp hpp cxx c h js
+cpp hpp cxx c h js styl
 
     comment
         tail    //
@@ -253,16 +260,25 @@ html htm
         td
         dt
         hr
+        h1
+        h2
+        h3
+        h4
+        h5
         div
         nav
         img
         pre
+        map
+        area
         html
         head
         meta
         body 
         span
         link
+        input
+        button
         section 
         header
         footer
@@ -277,7 +293,7 @@ html htm
     doctype
         t-1 
             <!  keyword
-        DOCTYPE
+        doctype
 
 #  0000000  000   000   0000000   
 # 000       000   000  000        
@@ -294,6 +310,7 @@ html htm svg
     svg keyword    
         t-1 
             <   keyword
+            </  keyword
         g
         svg
         path
@@ -309,8 +326,8 @@ html htm svg
         pattern
         filter
         stop
-        radialGradient
-        linearGradient
+        radialgradient
+        lineargradient
         
     property
         id
@@ -320,9 +337,88 @@ html htm svg
         rel
         lang
         class
+        name
+        width
+        height
+        media
+        style
+        value
+        shape
+        coords
+        content
         charset
+        viewbox
         tabindex
+        onmouseover
+        onmouseout
+
+#  0000000  000000000  000   000  000      
+# 000          000      000 000   000      
+# 0000000      000       00000    000      
+#      000     000        000     000      
+# 0000000      000        000     0000000  
+
+styl
+    keyword
+        a
+        b
+        p
+        ul
+        li
+        tr
+        th
+        td
+        dt
+        hr
+        h1
+        h2
+        h3
+        h4
+        h5
+        div
+        nav
+        img
+        pre
+        map
+        area
+        html
+        head
+        meta
+        body 
+        span
+        link
+        input
+        button
+        section 
+        header
+        footer
+        script
+        style
+        table
+        title
+        blockquote
+        center
+        canvas
         
+    function
+        rgb
+        rgba
+        drop-shadow
+        linear-gradient
+        
+    important
+        t-1
+            !   nil
+        important
+        
+    property
+        t-1     
+            :    property
+        not
+        hover
+        active
+        last-child
+                
 # 00000000   000      000   0000000  000000000  
 # 000   000  000      000  000          000     
 # 00000000   000      000  0000000      000     
