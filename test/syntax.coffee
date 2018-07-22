@@ -16,8 +16,14 @@ chai.should()
 
 describe 'syntax', ->
     
+    # 00000000   00000000   0000000   00000000  000   000  00000000   
+    # 000   000  000       000        000        000 000   000   000  
+    # 0000000    0000000   000  0000  0000000     00000    00000000   
+    # 000   000  000       000   000  000        000 000   000        
+    # 000   000  00000000   0000000   00000000  000   000  000        
+    
     it 'regexp', ->
-
+        
         rgs = Syntax.ranges "r=/a/", 'coffee'
         expect(rgs).to.deep.include 
             start: 2
@@ -53,6 +59,39 @@ describe 'syntax', ->
             start: 2
             match: 'a'
             value: 'regexp text'
+            
+        rgs = Syntax.ranges "/^#include/", 'coffee'
+        expect(rgs).to.deep.include 
+            start: 0
+            match: '/'
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: "#"
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: "include"
+            value: 'regexp text'
+
+        rgs = Syntax.ranges "/\\'hello\\'/ ", 'coffee'
+        expect(rgs).to.deep.include 
+            start: 0
+            match: '/'
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 1
+            match: "\\"
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: "'"
+            value: 'regexp punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: "hello"
+            value: 'regexp text'
+            
         
     # 00000000   00000000   0000000   000   000  000  00000000   00000000  
     # 000   000  000       000   000  000   000  000  000   000  000       
@@ -378,6 +417,12 @@ describe 'syntax', ->
     #  0000000   0000000   000       000       00000000  00000000  
     
     it 'coffee', ->
+        
+        rgs = Syntax.ranges "@height/2 + @height/6", 'coffee'
+        expect(rgs).to.deep.include
+            start: 8
+            match: "2"
+            value: 'number'
         
         rgs = Syntax.ranges "a and b", 'coffee'
         expect(rgs).to.deep.include

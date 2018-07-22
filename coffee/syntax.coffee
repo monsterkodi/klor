@@ -65,7 +65,7 @@ class Syntax
     # 000   000  000   000  000  0000  000   000  000            000  
     # 000   000  000   000  000   000   0000000   00000000  0000000   
     
-    @ranges: (string, ext) ->
+    @ranges: (text, ext) ->
         
         Syntax.init()
         
@@ -76,7 +76,8 @@ class Syntax
             word:   ''   # currently parsed word
             turd:   ''   # currently parsed stuff inbetween words 
             last:   ''   # the turd before the current/last-completed word
-            index:  0  
+            index:  0 
+            text:   text
             
         obj.coffee   = true if obj.ext == 'coffee'
         obj.js       = true if obj.ext == 'js'
@@ -92,9 +93,11 @@ class Syntax
         obj.dotlang  = true if obj.cpplang or obj.jslang
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
-        # log 'ranges', obj.ext, string
+        # log '------------ ranges:', obj.ext, text
         
-        for char in string
+        for char in text
+            
+            # log "char: '#{char}'"
             
             if obj.char == '\\'
                 if obj.escp 
@@ -133,11 +136,14 @@ class Syntax
                     
                     when "'", '"', '`'
                         
-                        Syntax.startString obj
+                        if not obj.escp
+                            Syntax.startString obj
+                        else
+                            Syntax.doPunct obj
                         
                     when '+', '*', '<', '>', '=', '^', '~', '@', '$', '&', '%', '#', '/', '\\', ':', '.', ';', ',', '!', '?', '|', '{', '}', '(', ')', '[', ']'
                         
-                        Syntax.doPunct obj                    
+                        Syntax.doPunct obj
                         
                     when '-'
                         
@@ -155,7 +161,7 @@ class Syntax
                         Syntax.doWord obj
                         
                 if char not in [' ', '\t']
-                    Syntax.nonSpace obj
+                    Syntax.coffeeCall obj
                     
             obj.index++
           
@@ -176,7 +182,6 @@ class Syntax
         char = obj.char ? ''
         
         obj.turd += char # don't use = here!
-
 
         switch char
             when ' ', '\t'
@@ -213,8 +218,8 @@ class Syntax
             if obj.coffee
                 if getValue(-1)?.indexOf('punctuation') < 0
                     if word not in ['else', 'then', 'and', 'or', 'in']
-                        if last(obj.rgs).value not in ['keyword', 'function head', 'require']
-                            setValue -1, 'function call'
+                        if last(obj.rgs).value not in ['keyword', 'function head', 'require', 'number']
+                            setValue -1, 'function call' # coffee endWord -1 no punctuation and word != 'else ...'
                 
             # 000       0000000   000   000   0000000   
             # 000      000   000  0000  000  000        
@@ -292,7 +297,7 @@ class Syntax
                         setValue -2, 'punctuation namespace'
                         setValue -1, 'punctuation namespace'
                         if char == '('
-                            return setClass 'function call'
+                            return setClass 'function call' # cpp ( after ::
                         return setClass 'property'
                 
                 if /^[\\_A-Z][\\_A-Z0-9]+$/.test word
@@ -333,8 +338,8 @@ class Syntax
                     setValue -1, 'property punctuation'
                     return setClass 'property'
                             
-                if char == '('
-                    return setClass 'function call'
+                if char == '(' 
+                    return setClass 'function call' # cpp (
                     
                 if first(obj.words).startsWith('U') and first(obj.rgs)?.value == 'macro'
                     if word.startsWith 'Blueprint'
@@ -394,30 +399,29 @@ class Syntax
             return setClass 'text'
         null
           
-    # 000   000   0000000   000   000   0000000  00000000    0000000    0000000  00000000  
-    # 0000  000  000   000  0000  000  000       000   000  000   000  000       000       
-    # 000 0 000  000   000  000 0 000  0000000   00000000   000000000  000       0000000   
-    # 000  0000  000   000  000  0000       000  000        000   000  000       000       
-    # 000   000   0000000   000   000  0000000   000        000   000   0000000  00000000  
+    #  0000000   0000000   00000000  00000000  00000000  00000000         0000000   0000000   000      000      
+    # 000       000   000  000       000       000       000             000       000   000  000      000      
+    # 000       000   000  000000    000000    0000000   0000000         000       000000000  000      000      
+    # 000       000   000  000       000       000       000             000       000   000  000      000      
+    #  0000000   0000000   000       000       00000000  00000000         0000000  000   000  0000000  0000000  
     
-    @nonSpace: (obj) ->
+    @coffeeCall: (obj) ->
         
         if obj.coffee
             
             if obj.turd.length == 1 and obj.turd == '('
-                Syntax.setValue obj, -2, 'function call'
+                Syntax.setValue obj, -2, 'function call' # coffee call (
                 
-            else if obj.turd.length > 1 and obj.turd.trim().length == 1
+            else if obj.turd.length > 1 and obj.turd[obj.turd.length-2] == ' ' # obj.turd.trim().length == 1
                 if last(obj.turd) in '@+-\'"([{'
+                    if last(obj.turd) in '+-'
+                        if obj.text[obj.index+1] == ' '
+                            return # bail out if next character is a space (cheater!)
                     val = Syntax.getValue obj, -2
-                    if val not in ['keyword', 'function head', 'require']
-                        Syntax.setValue obj, -2, 'function call'
-                        
-            # function.call
-            # (@?[a-zA-Z]\w*)
-            # (?!\s+or|\s+i[fs]|\s+and|\s+then)
-            # (?=\(|\s+[@\w\d\"\'\(\[\{])    
-            
+                    if valid(val) and val not in ['keyword', 'function head', 'require']
+                        if val.indexOf('punctuation') < 0
+                            Syntax.setValue obj, -2, 'function call' # coffee call @+-\'"([{
+                                    
     # 000   000   0000000   00000000   0000000    
     # 000 0 000  000   000  000   000  000   000  
     # 000000000  000   000  0000000    000   000  
@@ -502,6 +506,7 @@ class Syntax
     @checkComment: (obj) ->
         
         return if empty Syntax.info[obj.ext]?.comment
+        return if obj.regexp?
                         
         comment = Syntax.info[obj.ext].comment
         
