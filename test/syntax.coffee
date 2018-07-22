@@ -247,6 +247,9 @@ describe 'syntax', ->
     
     it 'coffee', ->
         
+        rgs = Syntax.ranges "exist?.prop", 'coffee'
+        inc rgs, 7, 'prop', 'property'
+        
         rgs = Syntax.ranges "mthd:  (arg)    => @member memarg", 'coffee'
         inc rgs, 0,  'mthd', 'method'
         inc rgs, 4,  ':',    'method punctuation'

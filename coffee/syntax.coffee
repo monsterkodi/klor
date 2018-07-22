@@ -411,16 +411,27 @@ class Syntax
                             return setClass 'property'
                             
                 if obj.last.endsWith '.'
+                    
                     if getValue(-2) == 'property'
+                        
                         setValue -1, 'property punctuation'
                         if char == '(' 
                             return setClass 'function call' # cpp .property (
                         else
                             return setClass 'property'
-                    else
-                        if obj.last.length > 1 and obj.last[obj.last.length-2] in [')', ']']
+
+                    if obj.last.length > 1 
+                        
+                        if obj.last[obj.last.length-2] in [')', ']']
                             setValue -1, 'property punctuation'
                             return setClass 'property'
+                        
+                        if obj.coffee
+                            if obj.last[obj.last.length-2] == '?'
+                                setValue -3, 'obj' if getValue(-3) == 'text'
+                                setValue -2, 'operator punctuation'
+                                setValue -1, 'property punctuation'
+                                return setClass 'property'
                      
             if obj.cpplang or obj.js
                 if char == '(' 
