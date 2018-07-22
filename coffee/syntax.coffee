@@ -6,7 +6,7 @@
 0000000      000     000   000     000     000   000  000   000
 ###
 
-{ slash, first, valid, empty, last, noon, str, error, log, $, _ } = require 'kxk'
+{ slash, first, valid, empty, last, noon, str, error, log, $, _ } = require '../../kxk'
 
 log = console.log
 
@@ -94,8 +94,30 @@ class Syntax
         
         for char in string
             
+            if obj.char == '\\'
+                if obj.escp 
+                    delete obj.escp
+                else
+                    obj.escp = true
+            else
+                delete obj.escp
+                
             obj.char = char
             
+            if obj.interpolation and obj.char == '}'
+                Syntax.endWord obj
+                obj.rgs.push
+                    start: obj.index
+                    match: obj.char
+                    value: "#{obj.interpolation} punctuation"
+                                
+                obj.string =
+                    value:  obj.interpolation
+                    start:  obj.index+1
+                    match:  ''
+                obj.index++
+                continue
+                    
             if obj.string
                 
                 Syntax.doString obj
@@ -173,7 +195,6 @@ class Syntax
                     match: word
                     value: clss
                     
-                # log "end word '#{char}'", str obj.rgs
                 null
             
             if char == ':'
@@ -441,12 +462,7 @@ class Syntax
     @checkComment: (obj) ->
         
         return if empty Syntax.info[obj.ext]?.comment
-        
-        if obj.coffee 
-            if last(obj.turd) == '#{' and obj.string.value != 'string single'
-                obj.string = null
-                return
-                
+                        
         comment = Syntax.info[obj.ext].comment
         
         if comment.line and obj.turd.endsWith(comment.line) and not obj.turd.endsWith('\\'+comment.line) and empty(obj.words)
@@ -551,12 +567,24 @@ class Syntax
     
     @doString: (obj) ->
 
+        if obj.coffee 
+            if obj.char == '{' and obj.string.value != 'string single' and obj.string.match.endsWith "#"
+                obj.interpolation = obj.string.value
+                obj.rgs.push obj.string
+                obj.rgs.push
+                    start: obj.index
+                    match: obj.char
+                    value: "#{obj.interpolation} punctuation"
+                
+                delete obj.string
+                return
+        
         stringType = switch obj.char
             when "'" then 'string single'
             when '"' then 'string double'
             when '`' then 'string backtick'
         
-        if obj.string.value == stringType
+        if not obj.escp and obj.string.value == stringType
 
             if valid obj.string.match.trim()
                 obj.rgs.push obj.string
@@ -583,43 +611,21 @@ class Syntax
         
         strOrCmt = obj[key]
         
-        log 'cont', key, str strOrCmt
-
         switch obj.char
-            
-            when "'", '"', '`', '-', '+', '*', '<', '>', '=', '^', '~', '@', '$', '&', '%', '#', '/', '\\', ':', '.', ';', ',', '!', '?', '|', '{', '}', '(', ')', '[', ']'
-                
-                if strOrCmt.value.endsWith 'punctuation'
-                    strOrCmt.match += obj.char
-                else
-                    obj.rgs.push strOrCmt
-                    obj[key] =
-                        value:  strOrCmt.value + ' punctuation'
-                        start:  obj.index+1
-                        match:  ''
-                
+                            
             when ' ', '\t'
                 
                 if strOrCmt.match == ''
                     strOrCmt.start += 1
                 else
-                    obj.rgs.push strOrCmt
+                    obj.rgs.push strOrCmt if valid strOrCmt.match
                     obj[key] = 
                         value: strOrCmt.value
                         start: obj.index+1
                         match: ''
-                null
-                
             else 
 
-                if strOrCmt.value.endsWith 'punctuation'
-                    obj.rgs.push strOrCmt
-                    obj[key] =
-                        value: strOrCmt.value.slice 0, strOrCmt.value.length - ' punctuation'.length - 1 
-                        start: obj.index+1
-                        match: ''
-                else
-                    strOrCmt.match += obj.char
+                strOrCmt.match += obj.char
                     
         null
                 

@@ -6,9 +6,9 @@
    000     00000000  0000000      000   
 ###
 
-{ log } = require 'kxk'
+{ log } = require '../../kxk'
 
-Syntax = require '..'
+Syntax = require '../js/syntax'
 assert = require 'assert'
 chai   = require 'chai'
 expect = chai.expect
@@ -16,6 +16,137 @@ chai.should()
 
 describe 'syntax', ->
     
+    it 'interpolation', ->    
+        
+        rgs = Syntax.ranges '"#{666}"', 'coffee'
+        expect(rgs).to.deep.include 
+            start: 0
+            match: '"'
+            value: 'string double punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: '666'
+            value: 'number'
+        expect(rgs).to.deep.include 
+            start: 7
+            match: '"'
+            value: 'string double punctuation'
+    
+    #  0000000  000000000  00000000   000  000   000   0000000    0000000  
+    # 000          000     000   000  000  0000  000  000        000       
+    # 0000000      000     0000000    000  000 0 000  000  0000  0000000   
+    #      000     000     000   000  000  000  0000  000   000       000  
+    # 0000000      000     000   000  000  000   000   0000000   0000000   
+    
+    it 'strings', ->
+       
+        rgs = Syntax.ranges """a="\\"E\\"" """
+        expect(rgs).to.deep.include 
+            start: 2
+            match: '"'
+            value: 'string double punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: '\\"E\\"'
+            value: 'string double'
+        expect(rgs).to.deep.include 
+            start: 8
+            match: '"'
+            value: 'string double punctuation'
+        
+        rgs = Syntax.ranges 'a="\'X\'"'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: '"'
+            value: 'string double punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: "'X'"
+            value: 'string double'
+        expect(rgs).to.deep.include 
+            start: 6
+            match: '"'
+            value: 'string double punctuation'
+
+        rgs = Syntax.ranges 'a=\'"X"\''
+        expect(rgs).to.deep.include 
+            start: 2
+            match: "'"
+            value: 'string single punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: '"X"'
+            value: 'string single'
+        expect(rgs).to.deep.include 
+            start: 6
+            match: "'"
+            value: 'string single punctuation'
+
+        rgs = Syntax.ranges 'a=`"X"`'
+        expect(rgs).to.deep.include 
+            start: 2
+            match: "`"
+            value: 'string backtick punctuation'
+        expect(rgs).to.deep.include 
+            start: 3
+            match: '"X"'
+            value: 'string backtick'
+        expect(rgs).to.deep.include 
+            start: 6
+            match: "`"
+            value: 'string backtick punctuation'
+            
+        rgs = Syntax.ranges 'a="  \'X\'  Y  " '
+        expect(rgs).to.deep.include 
+            start: 2
+            match: '"'
+            value: 'string double punctuation'
+        expect(rgs).to.deep.include 
+            start: 5
+            match: "'X'"
+            value: 'string double'
+        expect(rgs).to.deep.include 
+            start: 10
+            match: "Y"
+            value: 'string double'
+        expect(rgs).to.deep.include 
+            start: 13
+            match: '"'
+            value: 'string double punctuation'
+                        
+        rgs = Syntax.ranges 'a="";b=" ";c="X"'
+        for i in [2,3,7,9,13,15]
+            expect(rgs).to.deep.include 
+                start: i
+                match: '"'
+                value: 'string double punctuation'
+        expect(rgs).to.deep.include 
+            start: 14
+            match: 'X'
+            value: 'string double'
+                
+        rgs = Syntax.ranges "a='';b=' ';c='Y'"
+        for i in [2,3,7,9,13,15]
+            expect(rgs).to.deep.include 
+                start: i
+                match: "'"
+                value: 'string single punctuation'
+        expect(rgs).to.deep.include 
+            start: 14
+            match: 'Y'
+            value: 'string single'
+                
+        rgs = Syntax.ranges "a=``;b=` `;c=`Z`"
+        for i in [2,3,7,9,13,15]
+            expect(rgs).to.deep.include 
+                start: i
+                match: "`"
+                value: 'string backtick punctuation'
+        expect(rgs).to.deep.include 
+            start: 14
+            match: 'Z'
+            value: 'string backtick'
+                
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     000       
     # 000       000   000  000000000  000000000  0000000   000 0 000     000     0000000   
@@ -25,7 +156,6 @@ describe 'syntax', ->
     it 'comments', ->
         
         rgs = Syntax.ranges "hello # world", 'coffee'
-        log rgs
         expect(rgs).to.deep.include 
             start: 6
             match: "#"
@@ -36,7 +166,6 @@ describe 'syntax', ->
             value: 'comment'
 
         rgs = Syntax.ranges "   # bla blub", 'noon'
-        log rgs
         expect(rgs).to.deep.include 
             start: 3
             match: "#"
@@ -474,66 +603,6 @@ describe 'syntax', ->
             match: "0"
             value: 'semver'
                             
-    #  0000000  000000000  00000000   000  000   000   0000000    0000000  
-    # 000          000     000   000  000  0000  000  000        000       
-    # 0000000      000     0000000    000  000 0 000  000  0000  0000000   
-    #      000     000     000   000  000  000  0000  000   000       000  
-    # 0000000      000     000   000  000  000   000   0000000   0000000   
-    
-    it 'strings', ->
-        
-        rgs = Syntax.ranges 'a="\'X\'"'
-        log rgs
-        expect(rgs).to.deep.include 
-            start: 3
-            match: "'X'"
-            value: 'string double'
-
-        rgs = Syntax.ranges 'a=\'"X"\''
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '"X"'
-            value: 'string single'
-
-        rgs = Syntax.ranges 'a=`\'"X"\'`'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '\'"X"\''
-            value: 'string backtick'
-            
-        rgs = Syntax.ranges 'a="";b=" ";c="X"'
-        for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: '"'
-                value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'X'
-            value: 'string double'
-                
-        rgs = Syntax.ranges "a='';b=' ';c='Y'"
-        for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: "'"
-                value: 'string single punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'Y'
-            value: 'string single'
-                
-        rgs = Syntax.ranges "a=``;b=` `;c=`Z`"
-        for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: "`"
-                value: 'string backtick punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'Z'
-            value: 'string backtick'
-                
     # 00000000   000   000  000   000   0000000  000000000  000   000   0000000   000000000  000   0000000   000   000  
     # 000   000  000   000  0000  000  000          000     000   000  000   000     000     000  000   000  0000  000  
     # 00000000   000   000  000 0 000  000          000     000   000  000000000     000     000  000   000  000 0 000  

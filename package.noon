@@ -12,5 +12,6 @@ bugs
 dependencies
                 kxk  https://github.com/monsterkodi/kxk.git
 devDependencies
+                mocha   ^5.2.0
                 assert  ^1.4.1
                 chai    ^4.1.2
