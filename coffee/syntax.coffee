@@ -338,9 +338,6 @@ class Syntax
                     setValue -1, 'property punctuation'
                     return setClass 'property'
                             
-                if char == '(' 
-                    return setClass 'function call' # cpp (
-                    
                 if first(obj.words).startsWith('U') and first(obj.rgs)?.value == 'macro'
                     if word.startsWith 'Blueprint'
                         return setClass 'macro punctuation'
@@ -348,7 +345,7 @@ class Syntax
                         return setClass 'macro punctuation'
                     if word.toLowerCase() in ['config', 'transient', 'editdefaultsonly', 'visibleanywhere', 'nontransactional', 'interp', 'globalconfig']
                         return setClass 'macro'
-                                                    
+                                    
             # 000   000  000   000  00     00  0000000    00000000  00000000   
             # 0000  000  000   000  000   000  000   000  000       000   000  
             # 000 0 000  000   000  000000000  0000000    0000000   0000000    
@@ -382,19 +379,29 @@ class Syntax
             if obj.dotlang
                 
                 if obj.last in ['.', ':']
-                    if getValue(-2) in ['text', 'module', 'member']
+                    if getValue(-2) in ['text', 'module', 'member', 'keyword']
                         setValue -2, 'obj' if getValue(-2) == 'text'
-                        setValue -1, 'obj punctuation'
-                        return setClass 'property'
+                        setValue -1, 'property punctuation'
+                        if char == '(' 
+                            return setClass 'function call'
+                        else
+                            return setClass 'property'
                             
                 if obj.last.endsWith '.'
                     if getValue(-2) == 'property'
                         setValue -1, 'property punctuation'
-                        return setClass 'property'
+                        if char == '(' 
+                            return setClass 'function call'
+                        else
+                            return setClass 'property'
                     else
                         if obj.last.length > 1 and obj.last[obj.last.length-2] in [')', ']']
                             setValue -1, 'property punctuation'
                             return setClass 'property'
+                     
+            if obj.cpplang or obj.js
+                if char == '(' 
+                    return setClass 'function call' # cpp & js (
                             
             return setClass 'text'
         null
@@ -471,7 +478,7 @@ class Syntax
                         setValue -1, 'keyword punctuation'
                     value = 'keyword punctuation'
             when '/'
-                if obj.coffee 
+                if obj.jslang
                     if not obj.escp
                         if obj.regexp?
                             for index in [obj.rgs.length-1..0]

@@ -14,6 +14,9 @@ chai   = require 'chai'
 expect = chai.expect
 chai.should()
 
+inc = (rgs, start, match, value) -> expect(rgs).to.deep.include     start:start, match:match, value:value
+nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start, match:match, value:value
+    
 describe 'syntax', ->
     
     # 00000000   00000000   0000000   00000000  000   000  00000000   
@@ -25,74 +28,31 @@ describe 'syntax', ->
     it 'regexp', ->
         
         rgs = Syntax.ranges "r=/a/", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: '/'
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: 'a'
-            value: 'regexp text'
-        expect(rgs).to.deep.include 
-            start: 4
-            match: '/'
-            value: 'regexp punctuation'
+        inc rgs, 2, '/', 'regexp punctuation'
+        inc rgs, 3, 'a', 'regexp text'
+        inc rgs, 4, '/', 'regexp punctuation'
     
         rgs = Syntax.ranges 'a / b - c / d', 'coffee'
-        expect(rgs).to.not.deep.include 
-            start: 2
-            match: '/'
-            value: 'regexp punctuation'
+        nut rgs, 2, '/', 'regexp punctuation'
 
         rgs = Syntax.ranges 'f a/b, c/d', 'coffee'
-        expect(rgs).to.not.deep.include 
-            start: 3
-            match: '/'
-            value: 'regexp punctuation'
+        nut rgs, 3, '/', 'regexp punctuation'
             
         rgs = Syntax.ranges "/(a|.*|\s\d\w\S\W$|^\s+)/", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: '/'
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: 'a'
-            value: 'regexp text'
+        inc rgs, 0, '/', 'regexp punctuation'
+        inc rgs, 2, 'a', 'regexp text'
             
         rgs = Syntax.ranges "/^#include/", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: '/'
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: "#"
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: "include"
-            value: 'regexp text'
+        inc rgs, 0, '/',       'regexp punctuation'
+        inc rgs, 2, "#",       'regexp punctuation'
+        inc rgs, 3, "include", 'regexp text'
 
         rgs = Syntax.ranges "/\\'hello\\'/ ", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: '/'
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 1
-            match: "\\"
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: "'"
-            value: 'regexp punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: "hello"
-            value: 'regexp text'
+        inc rgs, 0, '/',       'regexp punctuation'
+        inc rgs, 1, "\\",      'regexp punctuation'
+        inc rgs, 2, "'",       'regexp punctuation'
+        inc rgs, 3, "hello",   'regexp text'
             
-        
     # 00000000   00000000   0000000   000   000  000  00000000   00000000  
     # 000   000  000       000   000  000   000  000  000   000  000       
     # 0000000    0000000   000 00 00  000   000  000  0000000    0000000   
@@ -102,10 +62,7 @@ describe 'syntax', ->
     it 'require', ->
         
         rgs = Syntax.ranges "util = require 'util'", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 7
-            match: 'require'
-            value: 'require'
+        inc rgs, 7, 'require', 'require'
     
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000       0000000   000000000  000   0000000   000   000  
     # 000  0000  000     000     000       000   000  000   000  000   000  000      000   000     000     000  000   000  0000  000  
@@ -116,18 +73,9 @@ describe 'syntax', ->
     it 'interpolation', ->    
         
         rgs = Syntax.ranges '"#{666}"', 'coffee'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: '"'
-            value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '666'
-            value: 'number'
-        expect(rgs).to.deep.include 
-            start: 7
-            match: '"'
-            value: 'string double punctuation'
+        inc rgs, 0, '"',   'string double punctuation'
+        inc rgs, 3, '666', 'number'
+        inc rgs, 7, '"',   'string double punctuation'
     
     #  0000000  000000000  00000000   000  000   000   0000000    0000000  
     # 000          000     000   000  000  0000  000  000        000       
@@ -138,111 +86,45 @@ describe 'syntax', ->
     it 'strings', ->
        
         rgs = Syntax.ranges """a="\\"E\\"" """
-        expect(rgs).to.deep.include 
-            start: 2
-            match: '"'
-            value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '\\"E\\"'
-            value: 'string double'
-        expect(rgs).to.deep.include 
-            start: 8
-            match: '"'
-            value: 'string double punctuation'
+        inc rgs, 2, '"',       'string double punctuation'
+        inc rgs, 3, '\\"E\\"', 'string double'
+        inc rgs, 8, '"',       'string double punctuation'
         
         rgs = Syntax.ranges 'a="\'X\'"'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: '"'
-            value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: "'X'"
-            value: 'string double'
-        expect(rgs).to.deep.include 
-            start: 6
-            match: '"'
-            value: 'string double punctuation'
+        inc rgs, 2, '"',   'string double punctuation'
+        inc rgs, 3, "'X'", 'string double'
+        inc rgs, 6, '"',   'string double punctuation'
 
         rgs = Syntax.ranges 'a=\'"X"\''
-        expect(rgs).to.deep.include 
-            start: 2
-            match: "'"
-            value: 'string single punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '"X"'
-            value: 'string single'
-        expect(rgs).to.deep.include 
-            start: 6
-            match: "'"
-            value: 'string single punctuation'
+        inc rgs, 2, "'",   'string single punctuation'
+        inc rgs, 3, '"X"', 'string single'
+        inc rgs, 6, "'",   'string single punctuation'
 
         rgs = Syntax.ranges 'a=`"X"`'
-        expect(rgs).to.deep.include 
-            start: 2
-            match: "`"
-            value: 'string backtick punctuation'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: '"X"'
-            value: 'string backtick'
-        expect(rgs).to.deep.include 
-            start: 6
-            match: "`"
-            value: 'string backtick punctuation'
+        inc rgs, 2, "`",   'string backtick punctuation'
+        inc rgs, 3, '"X"', 'string backtick'
+        inc rgs, 6, "`",   'string backtick punctuation'
             
         rgs = Syntax.ranges 'a="  \'X\'  Y  " '
-        expect(rgs).to.deep.include 
-            start: 2
-            match: '"'
-            value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 5
-            match: "'X'"
-            value: 'string double'
-        expect(rgs).to.deep.include 
-            start: 10
-            match: "Y"
-            value: 'string double'
-        expect(rgs).to.deep.include 
-            start: 13
-            match: '"'
-            value: 'string double punctuation'
+        inc rgs, 2, '"',   'string double punctuation'
+        inc rgs, 5, "'X'", 'string double'
+        inc rgs, 10, "Y",  'string double'
+        inc rgs, 13, '"',  'string double punctuation'
                         
         rgs = Syntax.ranges 'a="";b=" ";c="X"'
         for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: '"'
-                value: 'string double punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'X'
-            value: 'string double'
+            inc rgs, i, '"', 'string double punctuation'
+        inc rgs, 14, 'X', 'string double'
                 
         rgs = Syntax.ranges "a='';b=' ';c='Y'"
         for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: "'"
-                value: 'string single punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'Y'
-            value: 'string single'
+            inc rgs, i, "'", 'string single punctuation'
+        inc rgs, 14, 'Y', 'string single'
                 
         rgs = Syntax.ranges "a=``;b=` `;c=`Z`"
         for i in [2,3,7,9,13,15]
-            expect(rgs).to.deep.include 
-                start: i
-                match: "`"
-                value: 'string backtick punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: 'Z'
-            value: 'string backtick'
+            inc rgs, i, "`", 'string backtick punctuation'
+        inc rgs, 14, 'Z', 'string backtick'
                 
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     000       
@@ -253,28 +135,13 @@ describe 'syntax', ->
     it 'comments', ->
         
         rgs = Syntax.ranges "hello # world", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 6
-            match: "#"
-            value: 'comment punctuation'
-        expect(rgs).to.deep.include
-            start: 8
-            match: "world"
-            value: 'comment'
+        inc rgs, 6, "#",    'comment punctuation'
+        inc rgs, 8, "world", 'comment'
 
         rgs = Syntax.ranges "   # bla blub", 'noon'
-        expect(rgs).to.deep.include 
-            start: 3
-            match: "#"
-            value: 'comment punctuation'
-        expect(rgs).to.deep.include
-            start: 5
-            match: "bla"
-            value: 'comment'
-        expect(rgs).to.deep.include
-            start: 9
-            match: "blub"
-            value: 'comment'
+        inc rgs, 3, "#",    'comment punctuation'
+        inc rgs, 5, "bla",   'comment'
+        inc rgs, 9, "blub",  'comment'
             
     it 'no comment', ->
         
@@ -291,36 +158,15 @@ describe 'syntax', ->
     it 'html', ->
         
         rgs = Syntax.ranges "</div>", 'html' 
-        expect(rgs).to.deep.include
-            start: 0
-            match: "<"
-            value: 'keyword punctuation'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "/"
-            value: 'keyword punctuation'
-        expect(rgs).to.deep.include
-            start: 2
-            match: "div"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 5
-            match: ">"
-            value: 'keyword punctuation'
+        inc rgs, 0, "<",    'keyword punctuation'
+        inc rgs, 1, "/",    'keyword punctuation'
+        inc rgs, 2, "div",  'keyword'
+        inc rgs, 5, ">",    'keyword punctuation'
 
         rgs = Syntax.ranges "<div>", 'html' 
-        expect(rgs).to.deep.include
-            start: 0
-            match: "<"
-            value: 'keyword punctuation'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "div"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 4
-            match: ">"
-            value: 'keyword punctuation'
+        inc rgs, 0, "<",    'keyword punctuation'
+        inc rgs, 1, "div",  'keyword'
+        inc rgs, 4, ">",    'keyword punctuation'
             
     #  0000000  00000000   00000000         0000000    00000000  00000000  000  000   000  00000000  
     # 000       000   000  000   000        000   000  000       000       000  0000  000  000       
@@ -331,50 +177,23 @@ describe 'syntax', ->
     it 'cpp define', ->
         
         rgs = Syntax.ranges "#include", 'cpp'      
-        expect(rgs).to.deep.include
-            start: 0
-            match: "#"
-            value: 'define punctuation'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "include"
-            value: 'define'
+        inc rgs, 0, "#",        'define punctuation'
+        inc rgs, 1, "include",  'define'
 
         rgs = Syntax.ranges "#if", 'cpp'            
-        expect(rgs).to.deep.include
-            start: 0
-            match: "#"
-            value: 'define punctuation'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "if"
-            value: 'define'
+        inc rgs, 0, "#",        'define punctuation'
+        inc rgs, 1, "if",       'define'
 
         rgs = Syntax.ranges "#  if", 'cpp'            
-        expect(rgs).to.deep.include
-            start: 0
-            match: "#"
-            value: 'define punctuation'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "if"
-            value: 'define'
+        inc rgs, 0, "#",        'define punctuation'
+        inc rgs, 3, "if",       'define'
             
     it 'cpp keyword', ->
         
         rgs = Syntax.ranges "if (true) {} else {}", 'cpp'    
-        expect(rgs).to.deep.include
-            start: 0
-            match: "if"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 4
-            match: "true"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 13
-            match: "else"
-            value: 'keyword'
+        inc rgs, 0, "if",    'keyword'
+        inc rgs, 4, "true",  'keyword'
+        inc rgs, 13, "else", 'keyword'
             
     #  0000000  00000000   00000000         00000000  000       0000000    0000000   000000000  
     # 000       000   000  000   000        000       000      000   000  000   000     000     
@@ -385,30 +204,15 @@ describe 'syntax', ->
     it 'cpp float', ->
 
         rgs = Syntax.ranges "'abc"            
-        expect(rgs).to.deep.include
-            start: 1
-            match: "abc"
-            value: 'string single'
+        inc rgs, 1, "abc", 'string single'
         
         rgs = Syntax.ranges "1.0f", 'cpp'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "1"
-            value: 'number float'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "."
-            value: 'number float punctuation'
-        expect(rgs).to.deep.include
-            start: 2
-            match: "0f"
-            value: 'number float'
+        inc rgs, 0, "1",  'number float'
+        inc rgs, 1, ".",  'number float punctuation'
+        inc rgs, 2, "0f", 'number float'
 
         rgs = Syntax.ranges "0.0000f", 'cpp'
-        expect(rgs).to.deep.include
-            start: 2
-            match: "0000f"
-            value: 'number float'
+        inc rgs, 2, "0000f", 'number float'
             
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -418,193 +222,83 @@ describe 'syntax', ->
     
     it 'coffee', ->
         
+        rgs = Syntax.ranges "mthd:  (arg)    => @member memarg", 'coffee'
+        inc rgs, 0, 'mthd', 'method'
+        inc rgs, 4, ':',    'method punctuation'
+        
         rgs = Syntax.ranges "@height/2 + @height/6", 'coffee'
-        expect(rgs).to.deep.include
-            start: 8
-            match: "2"
-            value: 'number'
+        inc rgs, 8, "2", 'number'
         
         rgs = Syntax.ranges "a and b", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "a"
-            value: 'text'
-        expect(rgs).to.deep.include
-            start: 2
-            match: "and"
-            value: 'keyword'
+        inc rgs, 0, "a", 'text'
+        inc rgs, 2, "and", 'keyword'
 
         rgs = Syntax.ranges "if a then b", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "if"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "a"
-            value: 'text'
-        expect(rgs).to.deep.include
-            start: 5
-            match: "then"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 10
-            match: "b"
-            value: 'text'
+        inc rgs, 0, "if", 'keyword'
+        inc rgs, 3, "a", 'text'
+        inc rgs, 5, "then", 'keyword'
+        inc rgs, 10, "b", 'text'
             
         rgs = Syntax.ranges "f 'a'", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "f"
-            value: 'function call'
+        inc rgs, 0, "f", 'function call'
 
         rgs = Syntax.ranges "ff 'b'", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "ff"
-            value: 'function call'
+        inc rgs, 0, "ff", 'function call'
 
         rgs = Syntax.ranges "fff 1", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "fff"
-            value: 'function call'
+        inc rgs, 0, "fff", 'function call'
 
         rgs = Syntax.ranges "ffff -1", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "ffff"
-            value: 'function call'
+        inc rgs, 0, "ffff", 'function call'
 
         rgs = Syntax.ranges "f [1]", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "f"
-            value: 'function call'
+        inc rgs, 0, "f", 'function call'
             
         rgs = Syntax.ranges "fffff {1}", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "fffff"
-            value: 'function call'
+        inc rgs, 0, "fffff", 'function call'
 
         rgs = Syntax.ranges "switch a", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "switch"
-            value: 'keyword'
+        inc rgs, 0, "switch", 'keyword'
             
         rgs = Syntax.ranges "pos: (item, p) -> ", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "pos"
-            value: 'method'
-        expect(rgs).to.deep.include
-            start: 3
-            match: ":"
-            value: 'method punctuation'
+        inc rgs, 0, "pos", 'method'
+        inc rgs, 3, ":", 'method punctuation'
 
         rgs = Syntax.ranges "pos= (item, p) -> ", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "pos"
-            value: 'function'
+        inc rgs, 0, "pos", 'function'
             
         rgs = Syntax.ranges " a: =>", 'coffee'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "a"
-            value: 'method'
-        expect(rgs).to.deep.include
-            start: 2
-            match: ":"
-            value: 'method punctuation'
-        expect(rgs).to.deep.include
-            start: 4
-            match: "="
-            value: 'function tail bound'
-        expect(rgs).to.deep.include
-            start: 5
-            match: ">"
-            value: 'function head bound'
+        inc rgs, 1, "a", 'method'
+        inc rgs, 2, ":", 'method punctuation'
+        inc rgs, 4, "=", 'function tail bound'
+        inc rgs, 5, ">", 'function head bound'
         
         rgs = Syntax.ranges " a: ->", 'coffee'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "a"
-            value: 'method'
-        expect(rgs).to.deep.include
-            start: 2
-            match: ":"
-            value: 'method punctuation'
-        expect(rgs).to.deep.include
-            start: 4
-            match: "-"
-            value: 'function tail'
-        expect(rgs).to.deep.include
-            start: 5
-            match: ">"
-            value: 'function head'
+        inc rgs, 1, "a", 'method'
+        inc rgs, 2, ":", 'method punctuation'
+        inc rgs, 4, "-", 'function tail'
+        inc rgs, 5, ">", 'function head'
             
         rgs = Syntax.ranges " a: b", 'coffee'
-        expect(rgs).to.deep.include
-            start: 1
-            match: "a"
-            value: 'dictionary key'
-        expect(rgs).to.deep.include
-            start: 2
-            match: ":"
-            value: 'dictionary punctuation'
+        inc rgs, 1, "a", 'dictionary key'
+        inc rgs, 2, ":", 'dictionary punctuation'
         
         rgs = Syntax.ranges "obj.value = obj.another.value", 'coffee'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: "obj"
-            value: 'obj'
-        expect(rgs).to.deep.include 
-            start: 4
-            match: "value"
-            value: 'property'
-        expect(rgs).to.deep.include 
-            start: 12
-            match: "obj"
-            value: 'obj'
-        expect(rgs).to.deep.include 
-            start: 16
-            match: "another"
-            value: 'property'
-        expect(rgs).to.deep.include 
-            start: 24
-            match: "value"
-            value: 'property'
+        inc rgs, 0,  "obj",    'obj'
+        inc rgs, 4,  "value",  'property'
+        inc rgs, 12, "obj",    'obj'
+        inc rgs, 16, "another",'property'
+        inc rgs, 24, "value",  'property'
             
         rgs = Syntax.ranges "if someObject.someProp", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "if"
-            value: 'keyword'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "someObject"
-            value: 'obj'
-        expect(rgs).to.deep.include 
-            start: 13
-            match: "."
-            value: 'obj punctuation'
-        expect(rgs).to.deep.include 
-            start: 14
-            match: "someProp"
-            value: 'property'
+        inc rgs, 0, "if", 'keyword'
+        inc rgs, 3, "someObject", 'obj'
+        inc rgs, 13, ".", 'property punctuation'
+        inc rgs, 14, "someProp", 'property'
             
         rgs = Syntax.ranges "a(b).length", 'coffee'
-        expect(rgs).to.deep.include
-            start: 0
-            match: "a"
-            value: 'function call'
-        expect(rgs).to.deep.include
-            start: 5
-            match: "length"
-            value: 'property'
+        inc rgs, 0, "a", 'function call'
+        inc rgs, 5, "length", 'property'
     
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
@@ -615,50 +309,23 @@ describe 'syntax', ->
     it 'numbers', ->
         
         rgs = Syntax.ranges "a 6670"
-        expect(rgs).to.deep.include 
-            start: 2
-            match: "6670"
-            value: 'number'
+        inc rgs, 2, "6670", 'number'
 
         rgs = Syntax.ranges "0x667AC"
-        expect(rgs).to.deep.include
-            start: 0
-            match: "0x667AC"
-            value: 'number hex'
+        inc rgs, 0, "0x667AC", 'number hex'
 
         rgs = Syntax.ranges "66.700"
-        expect(rgs).to.deep.include
-            start: 0
-            match: "66"
-            value: 'number float'
-        expect(rgs).to.deep.include
-            start: 2
-            match: "."
-            value: 'number float punctuation'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "700"
-            value: 'number float'
+        inc rgs, 0, "66",  'number float'
+        inc rgs, 2, ".",   'number float punctuation'
+        inc rgs, 3, "700", 'number float'
 
         rgs = Syntax.ranges "77.800 -100"
-        expect(rgs).to.deep.include
-            start: 0
-            match: "77"
-            value: 'number float'
-        expect(rgs).to.deep.include
-            start: 8
-            match: "100"
-            value: 'number'
+        inc rgs, 0, "77",  'number float'
+        inc rgs, 8, "100", 'number'
 
         rgs = Syntax.ranges "(8.9,100.2)"
-        expect(rgs).to.deep.include
-            start: 3
-            match: "9"
-            value: 'number float'
-        expect(rgs).to.deep.include
-            start: 9
-            match: "2"
-            value: 'number float'
+        inc rgs, 3, "9", 'number float'
+        inc rgs, 9, "2", 'number float'
             
     #  0000000  00000000  00     00  000   000  00000000  00000000   
     # 000       000       000   000  000   000  000       000   000  
@@ -669,46 +336,19 @@ describe 'syntax', ->
     it 'semver', ->    
         
         rgs = Syntax.ranges "66.70.0"
-        expect(rgs).to.deep.include
-            start: 0
-            match: "66"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "70"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 6
-            match: "0"
-            value: 'semver'
+        inc rgs, 0, "66", 'semver'
+        inc rgs, 3, "70", 'semver'
+        inc rgs, 6, "0",  'semver'
 
         rgs = Syntax.ranges "^0.7.1"
-        expect(rgs).to.deep.include
-            start: 1
-            match: "0"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "7"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 5
-            match: "1"
-            value: 'semver'
+        inc rgs, 1, "0", 'semver'
+        inc rgs, 3, "7", 'semver'
+        inc rgs, 5, "1", 'semver'
             
         rgs = Syntax.ranges "^1.0.0-alpha.12"
-        expect(rgs).to.deep.include
-            start: 1
-            match: "1"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 3
-            match: "0"
-            value: 'semver'
-        expect(rgs).to.deep.include
-            start: 5
-            match: "0"
-            value: 'semver'
+        inc rgs, 1, "1", 'semver'
+        inc rgs, 3, "0", 'semver'
+        inc rgs, 5, "0", 'semver'
                             
     # 00000000   000   000  000   000   0000000  000000000  000   000   0000000   000000000  000   0000000   000   000  
     # 000   000  000   000  0000  000  000          000     000   000  000   000     000     000  000   000  0000  000  
@@ -719,20 +359,8 @@ describe 'syntax', ->
     it 'punctuation', ->
         
         rgs = Syntax.ranges '/some\\path/file.txt:10'
-        expect(rgs).to.deep.include 
-            start: 0
-            match: '/'
-            value: 'punctuation'
-        expect(rgs).to.deep.include 
-            start: 5
-            match: '\\'
-            value: 'punctuation'
-        expect(rgs).to.deep.include 
-            start: 15
-            match: '.'
-            value: 'punctuation'
-        expect(rgs).to.deep.include 
-            start: 19
-            match: ':'
-            value: 'punctuation'
+        inc rgs, 0,  '/',  'punctuation'
+        inc rgs, 5,  '\\', 'punctuation'
+        inc rgs, 15, '.',  'punctuation'
+        inc rgs, 19, ':',  'punctuation'
             
