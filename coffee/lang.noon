@@ -16,6 +16,7 @@ coffee js
         new
         try
         catch
+        class
         return
         switch
         break
@@ -34,7 +35,7 @@ coffee js
         pos
         elem
         stopevent
-
+        
     module
         childp
         matchr

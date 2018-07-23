@@ -247,6 +247,18 @@ describe 'syntax', ->
     
     it 'coffee', ->
         
+        rgs = Syntax.ranges "getValue = (back=-1) -> ", 'coffee'
+        inc rgs, 0,  'getValue', 'function'
+        nut rgs, 12, 'back',     'function'
+        inc rgs, 21, '-', 'function tail punctuation'
+        inc rgs, 22, '>', 'function head punctuation'
+        
+        rgs = Syntax.ranges "class Macro extends Command", 'coffee'
+        inc rgs, 0,  'class',   'keyword'
+        inc rgs, 6,  'Macro',   'class'
+        inc rgs, 12, 'extends', 'keyword'
+        inc rgs, 20, 'Command', 'class'
+        
         rgs = Syntax.ranges "exist?.prop", 'coffee'
         inc rgs, 7, 'prop', 'property'
         

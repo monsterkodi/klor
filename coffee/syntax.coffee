@@ -64,8 +64,6 @@ class Syntax
                             for word in words
                                 Syntax.lang[ext][word] = value
                                             
-        # log 'Syntax', str(Syntax.mtch)
-    
     # 00000000    0000000   000   000   0000000   00000000   0000000  
     # 000   000  000   000  0000  000  000        000       000       
     # 0000000    000000000  000 0 000  000  0000  0000000   0000000   
@@ -101,11 +99,7 @@ class Syntax
         obj.dotlang  = true if obj.cpplang or obj.jslang
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
-        # log '------------ ranges:', obj.ext, text
-        
         for char in text
-            
-            # log "char: '#{char}'"
             
             if obj.char == '\\'
                 if obj.escp 
@@ -231,13 +225,7 @@ class Syntax
                 when ':'
                     if obj.dictlang
                         return setClass 'dictionary key'
-                
-            if obj.coffee
-                if getValue(-1)?.indexOf('punctuation') < 0
-                    if word not in ['else', 'then', 'and', 'or', 'in']
-                        if last(obj.rgs).value not in ['keyword', 'function head', 'require', 'number']
-                            setValue -1, 'function call' # coffee endWord -1 no punctuation and word != 'else ...'
-                
+                                
             # 000       0000000   000   000   0000000   
             # 000      000   000  0000  000  000        
             # 000      000000000  000 0 000  000  0000  
@@ -258,6 +246,20 @@ class Syntax
                                 return setClass matchValue
                 else 
                     return setClass wordValue
+
+            #  0000000   0000000   00000000  00000000  00000000  00000000  
+            # 000       000   000  000       000       000       000       
+            # 000       000   000  000000    000000    0000000   0000000   
+            # 000       000   000  000       000       000       000       
+            #  0000000   0000000   000       000       00000000  00000000  
+            
+            if obj.coffee
+                if Syntax.getMatch(obj, -1) in ['class', 'extends']
+                    return setClass 'class'
+                if getValue(-1)?.indexOf('punctuation') < 0
+                    if word not in ['else', 'then', 'and', 'or', 'in']
+                        if last(obj.rgs).value not in ['keyword', 'function head', 'require', 'number']
+                            setValue -1, 'function call' # coffee endWord -1 no punctuation and word != 'else ...'
                     
             # 000   000  00000000  000   000  
             # 000   000  000        000 000   
@@ -402,11 +404,11 @@ class Syntax
             if obj.dotlang
                 
                 if obj.last in ['.', ':']
-                    if getValue(-2) in ['text', 'module', 'member', 'keyword']
+                    if getValue(-2) in ['text', 'module', 'class', 'member', 'keyword']
                         setValue -2, 'obj' if getValue(-2) == 'text'
                         setValue -1, 'property punctuation'
                         if char == '(' 
-                            return setClass 'function call' # cpp .word (
+                            return setClass 'function call' # dotlang .word (
                         else
                             return setClass 'property'
                             
@@ -416,7 +418,7 @@ class Syntax
                         
                         setValue -1, 'property punctuation'
                         if char == '(' 
-                            return setClass 'function call' # cpp .property (
+                            return setClass 'function call' # dotlang .property (
                         else
                             return setClass 'property'
 
@@ -450,7 +452,7 @@ class Syntax
         
         if obj.coffee
             
-            if obj.turd.length == 1 and obj.turd == '('
+            if obj.turd == '('
                 Syntax.setValue obj, -2, 'function call' # coffee call (
                 
             else if obj.turd.length > 1 and obj.turd[obj.turd.length-2] == ' ' # obj.turd.trim().length == 1
@@ -504,7 +506,8 @@ class Syntax
                     for [turd, val] in [['->', ''], ['=>', ' bound']]
                         if obj.turd.endsWith turd
                             Syntax.substitute obj, -3, ['dictionary key', 'dictionary punctuation'], ['method', 'method punctuation']
-                            Syntax.replace    obj, -3, [{word:true}, {match:'='}], [{value:'function'}]
+                            Syntax.surround   obj, -1, start:'(', add:'argument', end:')'
+                            Syntax.replace    obj, -3, [{word:true, ignore:'argument'}, {match:'='}], [{value:'function'}]
                             setValue -1, 'function tail' + val + ' punctuation'
                             value = 'function head' + val + ' punctuation'
                 else if obj.xmllang
@@ -749,6 +752,15 @@ class Syntax
                 if obj.rgs[obj.rgs.length+back-1]?.match == '@'
                     obj.rgs[obj.rgs.length+back-1].value = value + ' punctuation'
     
+    @surround: (obj, back, range) ->
+        
+        for endIndex in [obj.rgs.length-1+back..0]
+            if range.end == obj.rgs[endIndex].match
+                for startIndex in [endIndex-1..0]
+                    if range.start == obj.rgs[startIndex].match
+                        for addIndex in [startIndex+1...endIndex]
+                            obj.rgs[addIndex].value = range.add + ' ' + obj.rgs[addIndex].value
+                    
     #  0000000  000   000  0000000     0000000  000000000  000  000000000  000   000  000000000  00000000  
     # 000       000   000  000   000  000          000     000     000     000   000     000     000       
     # 0000000   000   000  0000000    0000000      000     000     000     000   000     000     0000000   
@@ -783,19 +795,25 @@ class Syntax
         advance = ->
             if obj.rgs.length + back-1 >= 0
                 Syntax.replace obj, back-1, oldObjs, newObjs
-        
+
         for index in [0...oldObjs.length]
             backObj = obj.rgs[obj.rgs.length+back+index]
             if not backObj
                 log 'dafuk?', str obj
                 log 'dafuk?', obj.rgs.length+back+index, obj.rgs.length, back, index
                 return
-            for key in Object.keys oldObjs[index]
-                if key == 'word'
-                    if backObj.value.indexOf('punctuation') >= 0
-                        return advance()
-                else if oldObjs[index][key] != backObj[key]
+            if oldObjs[index].ignore
+                if backObj.value.indexOf(oldObjs[index].ignore) >= 0
                     return advance()
+            for key in Object.keys oldObjs[index]
+                switch key 
+                    when 'word'
+                        if backObj.value.indexOf('punctuation') >= 0
+                            return advance()
+                    when 'ignore' then
+                    else 
+                        if oldObjs[index][key] != backObj[key]
+                            return advance()
                     
         for index in [0...newObjs.length]
             backObj = obj.rgs[obj.rgs.length+back+index]
