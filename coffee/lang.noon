@@ -491,9 +491,6 @@ iss
         property
             start   {#
             end     }
-        namespace
-            start   [
-            end     ]
         number hex
             start   {{
             end     }
@@ -516,3 +513,15 @@ iss
         wizardimagefile
         wizardsmallimagefile
     
+# 000  000   000  000  
+# 000  0000  000  000  
+# 000  000 0 000  000  
+# 000  000  0000  000  
+# 000  000   000  000  
+
+iss ini
+
+    match
+        namespace
+            start   [
+            end     ]
