@@ -751,16 +751,7 @@ class Syntax
             if obj.coffee and obj.rgs[obj.rgs.length+back-1]?
                 if obj.rgs[obj.rgs.length+back-1]?.match == '@'
                     obj.rgs[obj.rgs.length+back-1].value = value + ' punctuation'
-    
-    @surround: (obj, back, range) ->
-        
-        for endIndex in [obj.rgs.length-1+back..0]
-            if range.end == obj.rgs[endIndex].match
-                for startIndex in [endIndex-1..0]
-                    if range.start == obj.rgs[startIndex].match
-                        for addIndex in [startIndex+1...endIndex]
-                            obj.rgs[addIndex].value = range.add + ' ' + obj.rgs[addIndex].value
-                    
+                        
     #  0000000  000   000  0000000     0000000  000000000  000  000000000  000   000  000000000  00000000  
     # 000       000   000  000   000  000          000     000     000     000   000     000     000       
     # 0000000   000   000  0000000    0000000      000     000     000     000   000     000     0000000   
@@ -840,5 +831,20 @@ class Syntax
                 Syntax.setValue obj, -1, mtch.value
                 return mtch.value + ' punctuation'
         null
-                
+       
+    #  0000000  000   000  00000000   00000000    0000000   000   000  000   000  0000000    
+    # 000       000   000  000   000  000   000  000   000  000   000  0000  000  000   000  
+    # 0000000   000   000  0000000    0000000    000   000  000   000  000 0 000  000   000  
+    #      000  000   000  000   000  000   000  000   000  000   000  000  0000  000   000  
+    # 0000000    0000000   000   000  000   000   0000000    0000000   000   000  0000000    
+    
+    @surround: (obj, back, range) ->
+        
+        for endIndex in [obj.rgs.length-1+back..1]
+            if range.end == obj.rgs[endIndex].match
+                for startIndex in [endIndex-1..0]
+                    if range.start == obj.rgs[startIndex].match
+                        for addIndex in [startIndex+1...endIndex]
+                            obj.rgs[addIndex].value = range.add + ' ' + obj.rgs[addIndex].value
+        
 module.exports = Syntax

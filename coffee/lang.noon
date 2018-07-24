@@ -525,3 +525,7 @@ iss ini
         namespace
             start   [
             end     ]
+            add     namespace
+            
+    keyword            
+        true
