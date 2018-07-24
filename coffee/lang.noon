@@ -525,7 +525,34 @@ iss ini
         namespace
             start   [
             end     ]
-            add     namespace
-            
     keyword            
         true
+        
+md
+    match
+        markdown h1
+            fill   |#|
+        markdown h2
+            fill   |##|
+        markdown h3
+            fill   |###|
+        markdown h4
+            fill   |####|
+        markdown h5
+            fill   |#####|
+        markdown li1
+            fill   |-|
+        markdown li2
+            fill   |    -|
+        markdown li3
+            fill   |        -|
+        markdown bold
+            start   **
+            end     **
+        markdown italic
+            start   *
+            end     *
+        markdown code
+            start   `
+            end     `
+            

@@ -12,10 +12,7 @@ log = console.log
 
 class Syntax
 
-    @lang           = null
-    @noComment      = ['txt', 'md', 'html', 'htm', 'xml']
-    @hashComment    = ['coffee', 'sh', 'yml', 'yaml', 'noon']
-    @noSlashComment = Syntax.noComment.concat Syntax.hashComment
+    @lang = null
     
     # 000  000   000  000  000000000  
     # 000  0000  000  000     000     
@@ -32,6 +29,7 @@ class Syntax
         Syntax.lang = {}
         Syntax.info = {}
         Syntax.mtch = {}
+        Syntax.fill = {}
         
         for extNames,valueWords of data
             for ext in extNames.split /\s/
@@ -42,11 +40,15 @@ class Syntax
                         Syntax.info[ext] ?= {}
                         Syntax.info[ext][value] = words
                     else if value == 'match'
-                        Syntax.mtch[ext] ?= {}
-                        for value,startEnd of words
-                            Syntax.mtch[ext][startEnd.end] ?= []
-                            startEnd.value = value
-                            Syntax.mtch[ext][startEnd.end].push startEnd
+                        for value,mtchInfo of words
+                            if mtchInfo.fill
+                                Syntax.fill[ext] ?= {}
+                                Syntax.fill[ext][mtchInfo.fill] = value
+                            else
+                                Syntax.mtch[ext] ?= {}
+                                Syntax.mtch[ext][mtchInfo.end] ?= []
+                                mtchInfo.value = value
+                                Syntax.mtch[ext][mtchInfo.end].push mtchInfo
                     else
                         if not _.isArray words
                             for word,info of words
@@ -63,7 +65,7 @@ class Syntax
                         else
                             for word in words
                                 Syntax.lang[ext][word] = value
-                                            
+                                
     # 00000000    0000000   000   000   0000000   00000000   0000000  
     # 000   000  000   000  0000  000  000        000       000       
     # 0000000    000000000  000 0 000  000  0000  0000000   0000000   
@@ -91,6 +93,7 @@ class Syntax
         obj.styl     = true if obj.ext == 'styl'
         obj.css      = true if obj.ext == 'css'
         obj.iss      = true if obj.ext == 'iss'
+        obj.md       = true if obj.ext == 'md'
         obj.html     = true if obj.ext in ['html', 'htm']
         obj.plist    = true if obj.ext == 'plist'
         obj.jslang   = true if obj.coffee or obj.js
@@ -189,7 +192,7 @@ class Syntax
             when ' ', '\t'
                 if obj.regexp? and not obj.escp
                     delete obj.regexp # abort regexp on first unescaped space
-        
+                        
         if valid obj.word
             
             word = obj.word
@@ -221,6 +224,9 @@ class Syntax
                     
                 null
             
+            if obj.fill
+                return setClass obj.fill
+                
             switch char
                 when ':'
                     if obj.dictlang
@@ -476,6 +482,10 @@ class Syntax
         if valid obj.turd
             obj.last = obj.turd
             obj.turd = ''
+        
+            if empty(obj.fill) and Syntax.fill[obj.ext]?[_.trimEnd obj.last]?
+                
+                obj.fill = Syntax.fill[obj.ext]?[_.trimEnd obj.last]
             
         obj.word += obj.char
         
@@ -528,9 +538,11 @@ class Syntax
         
         if Syntax.mtch[obj.ext]?[obj.turd]?
             
-            if matchValue = Syntax.match obj, Syntax.mtch[obj.ext][obj.turd]
+            if matchValue = Syntax.doMatch obj, Syntax.mtch[obj.ext][obj.turd]
                 value = matchValue
-                            
+                
+        if obj.fill then value = obj.fill + ' ' + value
+                
         obj.rgs.push
             start: obj.index
             match: obj.char
@@ -732,7 +744,8 @@ class Syntax
     @endLine: (obj) ->
         
         if obj.string
-            obj.rgs.push obj.string
+            if obj.jslang
+                obj.rgs.push obj.string
         else if obj.comment
             obj.rgs.push obj.comment
         null
@@ -817,7 +830,7 @@ class Syntax
     # 000 0 000  000   000     000     000       000   000  
     # 000   000  000   000     000      0000000  000   000  
     
-    @match: (obj, mtchs) ->
+    @doMatch: (obj, mtchs) ->
         
         for mtch in mtchs
             startMatches = true
@@ -828,10 +841,11 @@ class Syntax
             if startMatches
                 for index in [0...mtch.start.length]
                     Syntax.setValue obj, -2-index, mtch.value + ' punctuation'
+                log '@doMatch', mtch.value
                 Syntax.setValue obj, -1, mtch.value
                 return mtch.value + ' punctuation'
         null
-       
+               
     #  0000000  000   000  00000000   00000000    0000000   000   000  000   000  0000000    
     # 000       000   000  000   000  000   000  000   000  000   000  0000  000  000   000  
     # 0000000   000   000  0000000    0000000    000   000  000   000  000 0 000  000   000  
@@ -840,10 +854,17 @@ class Syntax
     
     @surround: (obj, back, range) ->
         
-        for endIndex in [obj.rgs.length-1+back..1]
-            if range.end == obj.rgs[endIndex].match
+        return if obj.rgs.length-1+back <= 1
+        for endIndex in [obj.rgs.length-1+back..0]
+            if endIndex >= obj.rgs.length or endIndex < 0
+                log 'dafuk?', endIndex, obj.rgs.length, back
+                return
+            if not obj.rgs[endIndex]?
+                log 'dafuk2?', endIndex, obj.rgs.length, back
+                return
+            if range.end == obj.rgs[endIndex]?.match
                 for startIndex in [endIndex-1..0]
-                    if range.start == obj.rgs[startIndex].match
+                    if range.start == obj.rgs[startIndex]?.match
                         for addIndex in [startIndex+1...endIndex]
                             obj.rgs[addIndex].value = range.add + ' ' + obj.rgs[addIndex].value
         
