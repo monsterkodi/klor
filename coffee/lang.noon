@@ -530,29 +530,33 @@ iss ini
         
 md
     match
-        markdown h1
+        h1
             fill   |#|
-        markdown h2
+        h2
             fill   |##|
-        markdown h3
+        h3
             fill   |###|
-        markdown h4
+        h4
             fill   |####|
-        markdown h5
+        h5
             fill   |#####|
-        markdown li1
+        li1
             fill   |-|
-        markdown li2
+            turd   li1 marker
+        li2
             fill   |    -|
-        markdown li3
+            turd   li2 marker
+        li3
             fill   |        -|
-        markdown bold
+            turd   li3 marker
+        bold
             start   **
             end     **
-        markdown italic
+        italic
             start   *
             end     *
-        markdown code
+            single  true
+        code
             start   `
             end     `
             

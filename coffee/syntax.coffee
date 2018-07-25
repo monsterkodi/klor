@@ -43,12 +43,13 @@ class Syntax
                         for value,mtchInfo of words
                             if mtchInfo.fill
                                 Syntax.fill[ext] ?= {}
-                                Syntax.fill[ext][mtchInfo.fill] = value
+                                mtchInfo.value = value
+                                Syntax.fill[ext][mtchInfo.fill] = mtchInfo
                             else
                                 Syntax.mtch[ext] ?= {}
-                                Syntax.mtch[ext][mtchInfo.end] ?= []
+                                Syntax.mtch[ext][last mtchInfo.end] ?= []
                                 mtchInfo.value = value
-                                Syntax.mtch[ext][mtchInfo.end].push mtchInfo
+                                Syntax.mtch[ext][last mtchInfo.end].push mtchInfo
                     else
                         if not _.isArray words
                             for word,info of words
@@ -65,6 +66,8 @@ class Syntax
                         else
                             for word in words
                                 Syntax.lang[ext][word] = value
+                                
+        # log str Syntax.mtch
                                 
     # 00000000    0000000   000   000   0000000   00000000   0000000  
     # 000   000  000   000  0000  000  000        000       000       
@@ -122,8 +125,8 @@ class Syntax
                     value: "#{obj.interpolation} punctuation"
                                 
                 obj.string =
-                    value:  obj.interpolation
                     start:  obj.index+1
+                    value:  obj.interpolation
                     match:  ''
                 obj.index++
                 continue
@@ -190,6 +193,7 @@ class Syntax
 
         switch char
             when ' ', '\t'
+                Syntax.doTurd obj
                 if obj.regexp? and not obj.escp
                     delete obj.regexp # abort regexp on first unescaped space
                         
@@ -224,8 +228,8 @@ class Syntax
                     
                 null
             
-            if obj.fill
-                return setClass obj.fill
+            if valid obj.fill
+                return setClass obj.fill.value
                 
             switch char
                 when ':'
@@ -480,17 +484,27 @@ class Syntax
     @doWord: (obj) ->
         
         if valid obj.turd
+            
+            Syntax.doTurd obj
+            
             obj.last = obj.turd
             obj.turd = ''
-        
-            if empty(obj.fill) and Syntax.fill[obj.ext]?[_.trimEnd obj.last]?
-                
-                obj.fill = Syntax.fill[obj.ext]?[_.trimEnd obj.last]
-            
+                    
         obj.word += obj.char
         
         null
 
+    @doTurd: (obj) ->
+        
+        if empty(obj.fill) and Syntax.fill[obj.ext]?[_.trimEnd obj.turd]?
+            
+            obj.fill = Syntax.fill[obj.ext]?[_.trimEnd obj.turd]
+            for index in [0...obj.turd.trim().length]
+                if obj.fill.turd
+                    Syntax.setValue obj, -1-index, obj.fill.turd
+                else
+                    Syntax.setValue obj, -1-index, obj.fill.value + ' ' + 'punctuation'
+        
     # 00000000   000   000  000   000   0000000  000000000  
     # 000   000  000   000  0000  000  000          000     
     # 00000000   000   000  000 0 000  000          000     
@@ -536,12 +550,11 @@ class Syntax
                         else
                             obj.regexp = obj.index
         
-        if Syntax.mtch[obj.ext]?[obj.turd]?
-            
-            if matchValue = Syntax.doMatch obj, Syntax.mtch[obj.ext][obj.turd]
+        if mtch = Syntax.mtch[obj.ext]?[obj.char]
+            if matchValue = Syntax.doMatch obj, mtch
                 value = matchValue
                 
-        if obj.fill then value = obj.fill + ' ' + value
+        if obj.fill then value = obj.fill.value + ' ' + value
                 
         obj.rgs.push
             start: obj.index
@@ -726,9 +739,9 @@ class Syntax
                 else
                     obj.rgs.push strOrCmt if valid strOrCmt.match
                     obj[key] = 
-                        value: strOrCmt.value
                         start: obj.index+1
                         match: ''
+                        value: strOrCmt.value
             else 
 
                 strOrCmt.match += obj.char
@@ -744,7 +757,7 @@ class Syntax
     @endLine: (obj) ->
         
         if obj.string
-            if obj.jslang
+            if obj.jslang or obj.cpplang
                 obj.rgs.push obj.string
         else if obj.comment
             obj.rgs.push obj.comment
@@ -756,15 +769,25 @@ class Syntax
     #    000     000   000  000      000   000  000       
     #     0      000   000  0000000   0000000   00000000  
     
-    @getMatch: (obj, back)        -> obj.rgs[obj.rgs.length+back]?.match         
-    @getValue: (obj, back)        -> obj.rgs[obj.rgs.length+back]?.value         
+    @getMatch: (obj, back)        -> if back < 0 then obj.rgs[obj.rgs.length+back]?.match else obj.rgs[back]?.match
+    @getValue: (obj, back)        -> if back < 0 then obj.rgs[obj.rgs.length+back]?.value else obj.rgs[back]?.value     
     @setValue: (obj, back, value) -> 
-        if obj.rgs.length+back < obj.rgs.length and obj.rgs.length+back >= 0
-            obj.rgs[obj.rgs.length+back].value = value
-            if obj.coffee and obj.rgs[obj.rgs.length+back-1]?
-                if obj.rgs[obj.rgs.length+back-1]?.match == '@'
-                    obj.rgs[obj.rgs.length+back-1].value = value + ' punctuation'
-                        
+        if back < 0
+            back = obj.rgs.length+back
+        if back < obj.rgs.length and back >= 0
+            obj.rgs[back].value = value
+            if obj.coffee and obj.rgs[back-1]?
+                if obj.rgs[back-1]?.match == '@'
+                    obj.rgs[back-1].value = value + ' punctuation'
+
+    @addValue: (obj, back, value) -> 
+        if back < 0
+            back = obj.rgs.length+back
+        if back < obj.rgs.length and back >= 0
+            for val in value.split /\s+/
+                if val not in obj.rgs[back].value.split /\s+/
+                    obj.rgs[back].value = val + ' ' + obj.rgs[back].value
+                    
     #  0000000  000   000  0000000     0000000  000000000  000  000000000  000   000  000000000  00000000  
     # 000       000   000  000   000  000          000     000     000     000   000     000     000       
     # 0000000   000   000  0000000    0000000      000     000     000     000   000     000     0000000   
@@ -831,18 +854,41 @@ class Syntax
     # 000   000  000   000     000      0000000  000   000  
     
     @doMatch: (obj, mtchs) ->
-        
         for mtch in mtchs
-            startMatches = true
-            for index in [0...mtch.start.length]
-                if Syntax.getMatch(obj, -2-index) != mtch.start[mtch.start.length-1-index]
-                    startMatches = false
+            
+            if mtch.single 
+                if obj.text[obj.index+1] == mtch.end
+                    continue
+                if last(obj.rgs)?.match == mtch.end
+                    continue
+            
+            if obj.rgs.length-mtch.end.length-mtch.start.length < 0
+                continue 
+               
+            endMatches = true
+            for endIndex in [1...mtch.end.length]
+                if obj.rgs[obj.rgs.length-endIndex].match != mtch.end[mtch.end.length-endIndex]
+                    endMatches = false
                     break
-            if startMatches
+            if not endMatches
+                continue 
+                
+            for startIndex in [obj.rgs.length-mtch.start.length-mtch.end.length..0]
+                startMatches = true
                 for index in [0...mtch.start.length]
-                    Syntax.setValue obj, -2-index, mtch.value + ' punctuation'
-                log '@doMatch', mtch.value
-                Syntax.setValue obj, -1, mtch.value
+                    if Syntax.getMatch(obj, startIndex+index) != mtch.start[index]
+                        startMatches = false
+                        break
+                break if startMatches
+                
+            if startIndex >= 0
+                for index in [startIndex...startIndex+mtch.start.length]
+                    Syntax.addValue obj, index, mtch.value + ' punctuation'
+                for index in [startIndex+mtch.start.length...obj.rgs.length-mtch.end.length+1]
+                    Syntax.addValue obj, index, mtch.value
+                for index in [obj.rgs.length-mtch.end.length+1...obj.rgs.length]
+                    Syntax.addValue obj, index, mtch.value + ' punctuation'
+                
                 return mtch.value + ' punctuation'
         null
                

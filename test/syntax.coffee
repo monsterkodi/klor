@@ -19,6 +19,51 @@ nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start,
     
 describe 'syntax', ->
     
+    # 00     00  0000000    
+    # 000   000  000   000  
+    # 000000000  000   000  
+    # 000 0 000  000   000  
+    # 000   000  0000000    
+    
+    it 'md', ->
+        
+        rgs = Syntax.ranges "**bold**", 'md'
+        inc rgs, 0, '*',      'bold punctuation'
+        inc rgs, 1, '*',      'bold punctuation'
+        inc rgs, 2, 'bold',   'bold text'
+        inc rgs, 6, '*',      'bold punctuation'
+        inc rgs, 7, '*',      'bold punctuation'
+        
+        rgs = Syntax.ranges "    - **bold**", 'md'
+        inc rgs, 4, '-',    'li2 marker'
+        inc rgs, 8, 'bold', 'bold li2'
+        
+        rgs = Syntax.ranges "    - **", 'md'
+        inc rgs, 4, '-',    'li2 marker'
+        inc rgs, 6, '*',    'li2 punctuation'
+        inc rgs, 7, '*',    'li2 punctuation'
+        
+        rgs = Syntax.ranges "*`italic code`*", 'md'
+        inc rgs, 0, '*',      'italic punctuation'
+        inc rgs, 2, 'italic', 'italic string backtick'
+        inc rgs, 9, 'code',   'italic string backtick'
+        inc rgs, 14, '*',     'italic punctuation'
+        
+        rgs = Syntax.ranges "*it lic*", 'md'
+        inc rgs, 0, '*',      'italic punctuation'
+        inc rgs, 1, 'it',     'italic text'
+        inc rgs, 4, 'lic',    'italic text'
+        inc rgs, 7, '*',      'italic punctuation'
+        
+        rgs = Syntax.ranges "*italic*", 'md'
+        inc rgs, 0, '*',      'italic punctuation'
+        inc rgs, 1, 'italic', 'italic text'
+        inc rgs, 7, '*',      'italic punctuation'
+        
+        rgs = Syntax.ranges "- li", 'md'
+        inc rgs, 0, '-',  'li1 marker'
+        inc rgs, 2, 'li', 'li1'
+    
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
     # 0000000    0000000   000  0000  0000000     00000    00000000   
@@ -203,7 +248,7 @@ describe 'syntax', ->
     
     it 'cpp float', ->
 
-        rgs = Syntax.ranges "'abc"            
+        rgs = Syntax.ranges "'abc", 'cpp'
         inc rgs, 1, "abc", 'string single'
         
         rgs = Syntax.ranges "1.0f", 'cpp'
@@ -225,7 +270,7 @@ describe 'syntax', ->
         rgs = Syntax.ranges "a={#key}", 'iss'
         inc rgs, 2, '{',   'property punctuation'
         inc rgs, 3, "#",   'property punctuation'
-        inc rgs, 4, 'key', 'property'
+        inc rgs, 4, 'key', 'property text'
         inc rgs, 7, "}",   'property punctuation'
         
     #       000   0000000  
