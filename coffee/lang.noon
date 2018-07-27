@@ -135,7 +135,7 @@ noon
 # 000       000        000      
 #  0000000  000        000      
 
-cpp hpp cxx c h
+cpp hpp cxx c h cs
 
     define or keyword  
         t-1 
@@ -215,11 +215,6 @@ cpp hpp cxx c h
         override
         static
 
-    # template                    
-        # TMap
-        # TArray
-        # TSubclassOf  
-
     nil
         err
         null
@@ -233,7 +228,7 @@ cpp hpp cxx c h
 #  000      000           000       000   000  000 0 000  000 0 000  000       000  0000     000     
 # 000      000             0000000   0000000   000   000  000   000  00000000  000   000     000     
       
-cpp hpp cxx c h js styl
+cpp hpp cxx c h js styl cs
 
     comment
         tail    //
@@ -296,6 +291,50 @@ html htm
     doctype
         t-1 
             <!  keyword
+        doctype
+        
+pug
+    keyword
+        a
+        b
+        p
+        ul
+        li
+        br
+        tr
+        th
+        td
+        dt
+        hr
+        h1
+        h2
+        h3
+        h4
+        h5
+        div
+        nav
+        img
+        pre
+        map
+        area
+        html
+        head
+        meta
+        body 
+        span
+        link
+        input
+        button
+        section 
+        header
+        footer
+        script
+        style
+        table
+        title
+        blockquote
+        center
+        canvas
         doctype
 
 #  0000000  000   000   0000000   
@@ -475,6 +514,39 @@ sh bash
     module
         getopts
         
+# 00000000  000   0000000  000   000  
+# 000       000  000       000   000  
+# 000000    000  0000000   000000000  
+# 000       000       000  000   000  
+# 000       000  0000000   000   000  
+
+fish
+
+    comment
+        line    #
+
+    keyword
+        if
+        else
+        end
+        then
+        and
+        env
+        printf
+        echo
+        exit
+        while
+        case
+        for
+        in
+        set
+        alias
+        test
+        function
+        source
+        return
+        set_color
+        
 # 000   0000000   0000000  
 # 000  000       000       
 # 000  0000000   0000000   
@@ -528,6 +600,12 @@ iss ini
     keyword            
         true
         
+# 00     00  0000000    
+# 000   000  000   000  
+# 000000000  000   000  
+# 000 0 000  000   000  
+# 000   000  0000000    
+
 md
     match
         h1

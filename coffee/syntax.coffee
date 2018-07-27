@@ -100,7 +100,7 @@ class Syntax
         obj.html     = true if obj.ext in ['html', 'htm']
         obj.plist    = true if obj.ext == 'plist'
         obj.jslang   = true if obj.coffee or obj.js
-        obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx']
+        obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs']
         obj.dictlang = true if obj.jslang or obj.iss or obj.ext in ['json', 'yaml', 'yml']
         obj.dotlang  = true if obj.cpplang or obj.jslang
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
