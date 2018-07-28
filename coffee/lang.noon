@@ -394,14 +394,14 @@ html htm svg
         onmouseover
         onmouseout
 
-#  0000000  000000000  000   000  000      
-# 000          000      000 000   000      
-# 0000000      000       00000    000      
-#      000     000        000     000      
-# 0000000      000        000     0000000  
+#  0000000  000000000  000   000  000          000   0000000   0000000   0000000  
+# 000          000      000 000   000         000   000       000       000       
+# 0000000      000       00000    000        000    000       0000000   0000000   
+#      000     000        000     000       000     000            000       000  
+# 0000000      000        000     0000000  000       0000000  0000000   0000000   
 
-styl
-    keyword
+styl css
+    keyword html
         a
         b
         p
@@ -417,6 +417,7 @@ styl
         h3
         h4
         h5
+        h6
         div
         nav
         img
@@ -442,6 +443,206 @@ styl
         center
         canvas
         
+    member
+        absolute
+        antialiased
+        all
+        auto
+        block
+        bold
+        border-box
+        bottom
+        column
+        default
+        dotted
+        drag
+        ease-in
+        ease-in-out
+        fadein
+        forwards
+        hidden
+        initial
+        inline-block
+        inline-flex
+        inline-grid
+        inset
+        italic
+        justify
+        left
+        larger
+        smaller
+        middle
+        move
+        ew-resize
+        ns-resize
+        no-drag
+        no-repeat
+        nowrap
+        pointer
+        relative
+        right
+        round
+        row
+        scroll
+        scaley
+        scalex
+        translate
+        translatex
+        translatey
+        translatez
+        translate3d
+        solid
+        static
+        text
+        to
+        top
+        transparent
+        underline
+        uppercase
+        vertical-lr
+        visible
+        -webkit-grab
+        
+    keyword property
+        after
+        align
+        animation 
+        animation-fill-mode
+        animation-timing-function
+        animation-iteration-count 
+        app
+        area
+        background
+        background-size
+        background-color
+        background-image
+        background-repeat
+        background-position
+        background-blend-mode
+        before
+        blend
+        border
+        border-width
+        border-style
+        border-color
+        border-radius
+        border-top
+        border-left
+        border-right
+        border-bottom
+        border-top-style
+        border-left-style
+        border-right-style
+        border-bottom-style
+        border-top-color
+        border-left-color
+        border-right-color
+        border-bottom-color
+        border-bottom-left-radius
+        border-bottom-right-radius
+        border-top-left-radius
+        border-top-right-radius
+        box-sizing
+        box-shadow
+        caret-color
+        clip
+        color
+        column
+        content
+        cursor
+        decoration
+        delay
+        direction
+        display
+        duration
+        fill
+        filter
+        flex
+        flex-grow
+        flex-shrink
+        flex-direction
+        float
+        flow
+        font
+        font-family
+        font-size
+        font-weight
+        font-style
+        function
+        grid
+        height
+        line-height
+        list-style
+        margin
+        margin-top
+        margin-left
+        margin-right
+        margin-bottom
+        max-height
+        max-width
+        min-height
+        min-width
+        mode
+        opacity
+        origin
+        outline
+        outline-width
+        overflow
+        overflow-x
+        overflow-y
+        padding
+        padding-top
+        padding-left
+        padding-right
+        padding-bottom
+        pointer-events
+        position
+        radius
+        region   
+        repeat
+        resize
+        select
+        selection
+        size
+        sizing
+        start
+        stroke
+        stroke-width
+        stroke-linecap
+        stroke-linejoin
+        stroke-dasharray
+        stroke-dashoffset
+        style
+        text-align
+        text-decoration
+        text-transform
+        text-shadow
+        timing
+        transform
+        transform-origin
+        transition
+        type
+        vertical-align
+        white-space
+        writing-mode
+        -webkit-app-region
+        -webkit-user-select
+        -webkit-scrollbar
+        -webkit-scrollbar-thumb
+        -webkit-scrollbar-track
+        -webkit-scrollbar-corner
+        -webkit-transition
+        -webkit-transition-property
+        -webkit-transition-duration
+        -webkit-transition-timing-function
+        -webkit-font-smoothing
+        width
+        word
+        x
+        y
+        z-index
+        zoom
+        
     function
         rgb
         rgba
@@ -453,13 +654,31 @@ styl
             !   nil
         important
         
-    property
+    property special
         t-1     
             :    property
         not
         hover
+        focus
         active
+        first-child
         last-child
+        nth-child
+        
+    color property
+        red
+        green
+        blue
+        yellow
+        magenta
+        cyan
+        black
+        gray
+        white
+        orange
+        
+    nil
+        none
                 
 # 00000000   000      000   0000000  000000000  
 # 000   000  000      000  000          000     

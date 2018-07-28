@@ -95,10 +95,12 @@ class Syntax
         obj.xml      = true if obj.ext == 'xml'
         obj.styl     = true if obj.ext == 'styl'
         obj.css      = true if obj.ext == 'css'
+        obj.styl     = true if obj.ext == 'styl'
         obj.iss      = true if obj.ext == 'iss'
         obj.md       = true if obj.ext == 'md'
         obj.html     = true if obj.ext in ['html', 'htm']
         obj.plist    = true if obj.ext == 'plist'
+        obj.csslang  = true if obj.css or obj.styl
         obj.jslang   = true if obj.coffee or obj.js
         obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs']
         obj.dictlang = true if obj.jslang or obj.iss or obj.ext in ['json', 'yaml', 'yml']
@@ -277,11 +279,15 @@ class Syntax
             # 000   000  000        000 000   
             # 000   000  00000000  000   000  
     
-            if /^(0x|#)[a-fA-F\d][a-fA-F\d][a-fA-F\d]+$/.test word
-                if word[0] == '0'
-                    setValue -2, 'number hex punctuation'
+            if /^0x[a-fA-F\d][a-fA-F\d][a-fA-F\d]+$/.test word
+                setValue -2, 'number hex punctuation'
                 setValue -1, 'number hex punctuation'
                 return setClass 'number hex'
+                
+            if Syntax.getMatch(obj, -1) == "#"
+                if /^[a-fA-F\d]+$/.test word
+                    setValue -1, 'number hex punctuation'
+                    return setClass 'number hex'
                     
             # 000   000   0000000    0000000   000   000  
             # 0000  000  000   000  000   000  0000  000  
@@ -301,23 +307,7 @@ class Syntax
                             
                 if obj.last == ' ' and last(obj.rgs)?.value != 'text'
                     return setClass last(obj.rgs)?.value
-                 
-            #  0000000  000000000  000   000  000      
-            # 000          000      000 000   000      
-            # 0000000      000       00000    000      
-            #      000     000        000     000      
-            # 0000000      000        000     0000000  
-            
-            if obj.styl or obj.css
-                
-                if obj.last.endsWith '.'
-                    setValue -1, 'class punctuation'
-                    return setClass 'class'
-                    
-                if obj.last.endsWith "#"
-                    setValue -1, 'cssid punctuation'
-                    return setClass 'cssid'
-                                        
+                                                         
             #  0000000  00000000   00000000   
             # 000       000   000  000   000  
             # 000       00000000   00000000   
@@ -444,7 +434,30 @@ class Syntax
                                 setValue -2, 'operator punctuation'
                                 setValue -1, 'property punctuation'
                                 return setClass 'property'
-                     
+
+            #  0000000  000000000  000   000  000      
+            # 000          000      000 000   000      
+            # 0000000      000       00000    000      
+            #      000     000        000     000      
+            # 0000000      000        000     0000000  
+            
+            if obj.csslang
+
+                if word.endsWith 's'
+                    if /\d+s/.test word
+                        return setClass 'number'
+                        
+                if word.slice(word.length-2) in ['px', 'em', 'ex', 'ch']
+                    return setClass 'number'
+                    
+                if obj.last.endsWith '.'
+                    setValue -1, 'class punctuation'
+                    return setClass 'class'
+                    
+                if obj.last.endsWith "#"
+                    setValue -1, 'cssid punctuation'
+                    return setClass 'cssid'
+                                
             if obj.cpplang or obj.js
                 if char == '(' 
                     return setClass 'function call' # cpp & js (
