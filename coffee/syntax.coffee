@@ -95,6 +95,7 @@ class Syntax
         obj.xml      = true if obj.ext == 'xml'
         obj.styl     = true if obj.ext == 'styl'
         obj.css      = true if obj.ext == 'css'
+        obj.pug      = true if obj.ext == 'pug'
         obj.styl     = true if obj.ext == 'styl'
         obj.iss      = true if obj.ext == 'iss'
         obj.md       = true if obj.ext == 'md'
@@ -104,6 +105,7 @@ class Syntax
         obj.jslang   = true if obj.coffee or obj.js
         obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs']
         obj.dictlang = true if obj.jslang or obj.iss or obj.ext in ['json', 'yaml', 'yml']
+        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug
         obj.dotlang  = true if obj.cpplang or obj.jslang
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
@@ -157,7 +159,7 @@ class Syntax
                         
                     when '-'
                         
-                        if obj.noon or obj.styl or obj.css or obj.iss
+                        if obj.dashlang
                             Syntax.doWord obj
                         else
                             Syntax.doPunct obj
@@ -450,6 +452,8 @@ class Syntax
                 if word.slice(word.length-2) in ['px', 'em', 'ex', 'ch']
                     return setClass 'number'
                     
+            if obj.csslang or obj.pug
+                
                 if obj.last.endsWith '.'
                     setValue -1, 'class punctuation'
                     return setClass 'class'

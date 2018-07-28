@@ -343,7 +343,7 @@ pug
 #      000     000     000   000  
 # 0000000       0       0000000   
 
-html htm svg  
+html htm svg pug
 
     comment
         start   <!--
@@ -443,7 +443,7 @@ styl css
         center
         canvas
         
-    member
+    argument
         absolute
         antialiased
         all
@@ -503,7 +503,7 @@ styl css
         visible
         -webkit-grab
         
-    keyword property
+    keyword
         after
         align
         animation 
