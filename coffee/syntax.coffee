@@ -12,6 +12,7 @@ log = console.log
 
 class Syntax
 
+    @exts = [] 
     @lang = null
     
     # 000  000   000  000  000000000  
@@ -35,6 +36,9 @@ class Syntax
         
         for extNames,valueWords of data
             for ext in extNames.split /\s/
+            
+                Syntax.exts.push(ext) if ext not in Syntax.exts
+            
                 Syntax.lang[ext] ?= {}
                 for value,words of valueWords
                     
@@ -117,7 +121,7 @@ class Syntax
                 obj[obj.ext] = true
                 
         obj.dictlang = true if obj.jslang or obj.iss or obj.log or obj.json or obj.yaml
-        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug or obj.sh
+        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug
         obj.dotlang  = true if obj.cpplang or obj.jslang or obj.log
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
@@ -160,7 +164,7 @@ class Syntax
                     
                     when "'", '"', '`'
                         
-                        if not obj.escp and (char != "'" or obj.jslang)
+                        if not obj.escp and (char != "'" or obj.jslang or obj.pug)
                             Syntax.startString obj
                         else
                             Syntax.doPunct obj
@@ -259,14 +263,19 @@ class Syntax
             # 000      000   000  000  0000  000   000  
             # 0000000  000   000  000   000   0000000   
             
-            
-            if turdInfo = Syntax.turd[obj.ext]?[obj.last]
-                setValue -turdInfo.match.length-1, turdInfo['w-1']
-                for index in [0...turdInfo.match.length]
-                    setValue -index-1, turdInfo.turd
-                return setClass turdInfo['w-0']
+            if Syntax.turd[obj.ext]
+                lastTurd = last obj.last.split /\s+/
+                if turdInfo = Syntax.turd[obj.ext][lastTurd]
+                    if turdInfo.spaced != true or obj.last[obj.last.length-lastTurd.length-1] == ' '
+                        if turdInfo['w-1']
+                            setValue -turdInfo.match.length-1, turdInfo['w-1']
+                        for index in [0...turdInfo.match.length]
+                            setValue -index-1, turdInfo.turd
+                        if turdInfo['w-0']
+                            return setClass turdInfo['w-0']
             
             lcword = word.toLowerCase()
+            
             if wordInfo = Syntax.word[obj.ext]?[lcword]
                 
                 if obj.last in Object.keys wordInfo['t-1']
@@ -334,6 +343,12 @@ class Syntax
                             
                 if obj.last == ' ' and last(obj.rgs)?.value != 'text'
                     return setClass last(obj.rgs)?.value
+                    
+            else if obj.sh
+                
+                if obj.words.length > 1 and getMatch(-1) == '-' and getValue(-2) == 'argument'
+                    setClass -1, 'argument punctuation'
+                    return setClass 'argument'
                                                          
             #  0000000  00000000   00000000   
             # 000       000   000  000   000  
@@ -944,6 +959,11 @@ class Syntax
                     
             else
                 Syntax.addValue obj, -1, mtch.value
+                index = -2
+                while Syntax.getMatch(obj, index) == '-'
+                    Syntax.setValue obj, index, mtch.value + ' punctuation'
+                    Syntax.addValue obj, index-1, mtch.value
+                    index -= 2
                 return mtch.value + ' punctuation'
         null
                

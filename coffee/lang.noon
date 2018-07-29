@@ -473,6 +473,7 @@ styl css
         smaller
         middle
         move
+        normal
         ew-resize
         ns-resize
         no-drag
@@ -706,6 +707,16 @@ plist
 sh bash
     comment
         line    #
+
+    match
+        --
+            turd    argument punctuation
+            w-0     argument
+            spaced  true
+        -
+            turd    argument punctuation
+            w-0     argument
+            spaced  true
         
     keyword
         cd 
@@ -875,11 +886,11 @@ log iss ini md noon sh
         net
         de
     match
-        property
+        dir
             end     /
             single  true
             spaced  false
-        cssid
+        dir win
             end     \
             single  true
             spaced  false
@@ -917,6 +928,11 @@ log iss ini md noon sh
                     |.|  punctuation
             word    ext
         gif
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        git
             w-1     file
             t-1     
                     |.|  punctuation

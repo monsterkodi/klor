@@ -19,6 +19,21 @@ nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start,
     
 describe 'syntax', ->
     
+    it 'sh', ->
+        
+        rgs = Syntax.ranges "dir/path-with-dashes/file.txt", 'sh'
+        inc rgs, 0, 'dir', 'dir text'
+        inc rgs, 4, 'path', 'dir text'
+        inc rgs, 9, 'with', 'dir text'
+        inc rgs, 14, 'dashes', 'dir text'
+        
+        rgs = Syntax.ranges "prg --arg1 -arg2", 'sh'
+        inc rgs, 4, '-', 'argument punctuation'
+        inc rgs, 5, '-', 'argument punctuation'
+        inc rgs, 6, 'arg1', 'argument'
+        inc rgs, 11, '-', 'argument punctuation'
+        inc rgs, 12, 'arg2', 'argument'
+    
     # 000       0000000    0000000   
     # 000      000   000  000        
     # 000      000   000  000  0000  
@@ -45,8 +60,8 @@ describe 'syntax', ->
         inc rgs, 0, 'key',   'text'
         
         rgs = Syntax.ranges "/some/path", 'log'
-        inc rgs, 1, 'some',   'property text'
-        inc rgs, 5, '/',      'property punctuation'
+        inc rgs, 1, 'some',   'dir text'
+        inc rgs, 5, '/',      'dir punctuation'
         
         rgs = Syntax.ranges "key: value", 'log'
         inc rgs, 0, 'key',    'dictionary key'
