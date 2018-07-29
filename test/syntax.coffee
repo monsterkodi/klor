@@ -19,6 +19,25 @@ nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start,
     
 describe 'syntax', ->
     
+    # 000       0000000    0000000   
+    # 000      000   000  000        
+    # 000      000   000  000  0000  
+    # 000      000   000  000   000  
+    # 0000000   0000000    0000000   
+    
+    it 'log', ->
+
+        rgs = Syntax.ranges "key /", 'log'
+        inc rgs, 0, 'key',   'text'
+        
+        rgs = Syntax.ranges "/some/path", 'log'
+        inc rgs, 1, 'some',   'property text'
+        inc rgs, 5, '/',      'property punctuation'
+        
+        rgs = Syntax.ranges "key: value", 'log'
+        inc rgs, 0, 'key',    'dictionary key'
+        inc rgs, 3, ':',      'dictionary punctuation'
+
     # 00     00  0000000    
     # 000   000  000   000  
     # 000000000  000   000  
@@ -140,7 +159,7 @@ describe 'syntax', ->
         inc rgs, 3, "'X'", 'string double'
         inc rgs, 6, '"',   'string double punctuation'
 
-        rgs = Syntax.ranges 'a=\'"X"\''
+        rgs = Syntax.ranges 'a=\'"X"\'', 'coffee'
         inc rgs, 2, "'",   'string single punctuation'
         inc rgs, 3, '"X"', 'string single'
         inc rgs, 6, "'",   'string single punctuation'
@@ -161,7 +180,7 @@ describe 'syntax', ->
             inc rgs, i, '"', 'string double punctuation'
         inc rgs, 14, 'X', 'string double'
                 
-        rgs = Syntax.ranges "a='';b=' ';c='Y'"
+        rgs = Syntax.ranges "a='';b=' ';c='Y'", 'coffee'
         for i in [2,3,7,9,13,15]
             inc rgs, i, "'", 'string single punctuation'
         inc rgs, 14, 'Y', 'string single'
@@ -248,9 +267,6 @@ describe 'syntax', ->
     
     it 'cpp float', ->
 
-        rgs = Syntax.ranges "'abc", 'cpp'
-        inc rgs, 1, "abc", 'string single'
-        
         rgs = Syntax.ranges "1.0f", 'cpp'
         inc rgs, 0, "1",  'number float'
         inc rgs, 1, ".",  'number float punctuation'

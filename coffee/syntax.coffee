@@ -89,24 +89,26 @@ class Syntax
             index:  0 
             text:   text
             
-        obj.coffee   = true if obj.ext == 'coffee'
-        obj.js       = true if obj.ext == 'js'
-        obj.noon     = true if obj.ext == 'noon'
-        obj.xml      = true if obj.ext == 'xml'
-        obj.styl     = true if obj.ext == 'styl'
-        obj.css      = true if obj.ext == 'css'
-        obj.pug      = true if obj.ext == 'pug'
-        obj.styl     = true if obj.ext == 'styl'
-        obj.iss      = true if obj.ext == 'iss'
-        obj.md       = true if obj.ext == 'md'
-        obj.html     = true if obj.ext in ['html', 'htm']
-        obj.plist    = true if obj.ext == 'plist'
-        obj.csslang  = true if obj.css or obj.styl
-        obj.jslang   = true if obj.coffee or obj.js
-        obj.cpplang  = true if obj.ext in ['cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs']
-        obj.dictlang = true if obj.jslang or obj.iss or obj.ext in ['json', 'yaml', 'yml']
-        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug
-        obj.dotlang  = true if obj.cpplang or obj.jslang
+        switch obj.ext
+            when 'cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs'
+                obj.cpplang  = true
+                obj.cpp      = true
+            when 'coffee', 'js'
+                obj.jslang   = true
+                obj[obj.ext] = true
+            when 'html', 'htm'
+                obj.html     = true
+            when 'yaml', 'yml'
+                obj.yaml     = true
+            when 'css', 'styl'
+                obj.csslang  = true
+                obj[obj.ext] = true
+            else
+                obj[obj.ext] = true
+                
+        obj.dictlang = true if obj.jslang or obj.iss or obj.log or obj.json or obj.yaml
+        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug or obj.sh
+        obj.dotlang  = true if obj.cpplang or obj.jslang or obj.log
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
         for char in text
@@ -148,7 +150,7 @@ class Syntax
                     
                     when "'", '"', '`'
                         
-                        if not obj.escp
+                        if not obj.escp and (char != "'" or obj.jslang)
                             Syntax.startString obj
                         else
                             Syntax.doPunct obj
@@ -482,7 +484,7 @@ class Syntax
             if obj.turd == '('
                 Syntax.setValue obj, -2, 'function call' # coffee call (
                 
-            else if obj.turd.length > 1 and obj.turd[obj.turd.length-2] == ' ' # obj.turd.trim().length == 1
+            else if obj.turd.length > 1 and obj.turd[obj.turd.length-2] == ' '
                 if last(obj.turd) in '@+-\'"([{'
                     if last(obj.turd) in '+-'
                         if obj.text[obj.index+1] == ' '
@@ -513,10 +515,10 @@ class Syntax
 
     @doTurd: (obj) ->
         
-        if empty(obj.fill) and Syntax.fill[obj.ext]?[_.trimEnd obj.turd]?
+        if empty(obj.fill) and empty(obj.words) and Syntax.fill[obj.ext]?[obj.turd]?
             
-            obj.fill = Syntax.fill[obj.ext]?[_.trimEnd obj.turd]
-            for index in [0...obj.turd.trim().length]
+            obj.fill = Syntax.fill[obj.ext]?[obj.turd]
+            for index in [0...obj.turd.length]
                 if obj.fill.turd
                     Syntax.setValue obj, -1-index, obj.fill.turd
                 else
@@ -551,7 +553,7 @@ class Syntax
                             Syntax.replace    obj, -3, [{word:true, ignore:'argument'}, {match:'='}], [{value:'function'}]
                             setValue -1, 'function tail' + val + ' punctuation'
                             value = 'function head' + val + ' punctuation'
-                else if obj.xmllang
+                else if obj.xmllang or obj.md
                     if obj.turd.endsWith '/>'
                         setValue -1, 'keyword punctuation'
                     value = 'keyword punctuation'
@@ -871,7 +873,10 @@ class Syntax
     # 000   000  000   000     000      0000000  000   000  
     
     @doMatch: (obj, mtchs) ->
+        
         for mtch in mtchs
+            
+            startLength = mtch.start?.length ? 0
             
             if mtch.single 
                 if obj.text[obj.index+1] == mtch.end
@@ -879,7 +884,7 @@ class Syntax
                 if last(obj.rgs)?.match == mtch.end
                     continue
             
-            if obj.rgs.length-mtch.end.length-mtch.start.length < 0
+            if obj.rgs.length-mtch.end.length-startLength < 0
                 continue 
                
             endMatches = true
@@ -890,22 +895,32 @@ class Syntax
             if not endMatches
                 continue 
                 
-            for startIndex in [obj.rgs.length-mtch.start.length-mtch.end.length..0]
-                startMatches = true
-                for index in [0...mtch.start.length]
-                    if Syntax.getMatch(obj, startIndex+index) != mtch.start[index]
-                        startMatches = false
-                        break
-                break if startMatches
+            if mtch.spaced == false
+                if obj.turd.indexOf(' ') >= 0
+                    continue
                 
-            if startIndex >= 0
-                for index in [startIndex...startIndex+mtch.start.length]
-                    Syntax.addValue obj, index, mtch.value + ' punctuation'
-                for index in [startIndex+mtch.start.length...obj.rgs.length-mtch.end.length+1]
-                    Syntax.addValue obj, index, mtch.value
-                for index in [obj.rgs.length-mtch.end.length+1...obj.rgs.length]
-                    Syntax.addValue obj, index, mtch.value + ' punctuation'
+            if mtch.start
                 
+                for startIndex in [obj.rgs.length-startLength-mtch.end.length..0]
+                    startMatches = true
+                    for index in [0...startLength]
+                        if Syntax.getMatch(obj, startIndex+index) != mtch.start[index]
+                            startMatches = false
+                            break
+                    break if startMatches
+                    
+                if startIndex >= 0
+                    for index in [startIndex...startIndex+startLength]
+                        Syntax.addValue obj, index, mtch.value + ' punctuation'
+                    for index in [startIndex+startLength...obj.rgs.length-mtch.end.length+1]
+                        Syntax.addValue obj, index, mtch.value
+                    for index in [obj.rgs.length-mtch.end.length+1...obj.rgs.length]
+                        Syntax.addValue obj, index, mtch.value + ' punctuation'
+                    
+                    return mtch.value + ' punctuation'
+                    
+            else
+                Syntax.addValue obj, -1, mtch.value
                 return mtch.value + ' punctuation'
         null
                

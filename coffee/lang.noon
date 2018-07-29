@@ -241,7 +241,7 @@ cpp hpp cxx c h js styl cs
 # 000   000     000     000 0 000  000      
 # 000   000     000     000   000  0000000  
 
-html htm
+html htm md
 
     keyword
         t-1 
@@ -810,7 +810,7 @@ iss
 # 000  000  0000  000  
 # 000  000   000  000  
 
-iss ini
+iss ini md
 
     match
         namespace
@@ -828,23 +828,27 @@ iss ini
 md
     match
         h1
-            fill   |#|
+            fill   |# |
         h2
-            fill   |##|
+            fill   |## |
         h3
-            fill   |###|
+            fill   |### |
         h4
-            fill   |####|
+            fill   |#### |
         h5
-            fill   |#####|
+            fill   |##### |
         li1
-            fill   |-|
+            fill   |- |
             turd   li1 marker
+        li1 star
+            fill   |* |
+            turd   li1 marker
+            value  li1
         li2
-            fill   |    -|
+            fill   |    - |
             turd   li2 marker
         li3
-            fill   |        -|
+            fill   |        - |
             turd   li3 marker
         bold
             start   **
@@ -856,4 +860,21 @@ md
         code
             start   `
             end     `
+
+# 00000000    0000000   000000000  000   000    
+# 000   000  000   000     000     000   000    
+# 00000000   000000000     000     000000000    
+# 000        000   000     000     000   000    
+# 000        000   000     000     000   000    
+            
+log iss ini md noon sh
+    match
+        property
+            end     /
+            single  true
+            spaced  false
+        cssid
+            end     \
+            single  true
+            spaced  false
             
