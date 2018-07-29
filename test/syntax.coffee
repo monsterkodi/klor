@@ -27,6 +27,20 @@ describe 'syntax', ->
     
     it 'log', ->
 
+        rgs = Syntax.ranges "http://domain.com", 'log'
+        inc rgs, 0, 'http', 'url protocol'
+        inc rgs, 4, ':', 'url punctuation'
+        inc rgs, 5, '/', 'url punctuation'
+        inc rgs, 6, '/', 'url punctuation'
+        inc rgs, 7, 'domain', 'url domain'
+        inc rgs, 13, '.', 'url tld punctuation'
+        inc rgs, 14, 'com', 'url tld'
+        
+        rgs = Syntax.ranges "file.coffee", 'log'
+        inc rgs, 0, 'file', 'coffee file'
+        inc rgs, 4, '.', 'coffee punctuation'
+        inc rgs, 5, 'coffee', 'coffee ext'
+        
         rgs = Syntax.ranges "key /", 'log'
         inc rgs, 0, 'key',   'text'
         

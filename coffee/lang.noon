@@ -868,6 +868,12 @@ md
 # 000        000   000     000     000   000    
             
 log iss ini md noon sh
+    tld
+        t-1
+                |.|     url tld
+        com
+        net
+        de
     match
         property
             end     /
@@ -877,4 +883,123 @@ log iss ini md noon sh
             end     \
             single  true
             spaced  false
+        ://
+            w-1     url protocol
+            turd    url punctuation
+            w-0     url domain
+        @
+            w-1     mail name
+            turd    mail punctuation
+            w-0     mail domain
+        txt
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        md
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        png
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        bmp
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        jpg
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        gif
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        ico
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        icns
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        tiff
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        pug
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        styl
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        svg
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        coffee
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        sh
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        js
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        css
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        json
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        html
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        cpp
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        h
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        py
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        noon
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+            
             

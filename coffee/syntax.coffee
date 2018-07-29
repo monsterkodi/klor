@@ -30,6 +30,8 @@ class Syntax
         Syntax.info = {}
         Syntax.mtch = {}
         Syntax.fill = {}
+        Syntax.word = {}
+        Syntax.turd = {}
         
         for extNames,valueWords of data
             for ext in extNames.split /\s/
@@ -45,11 +47,19 @@ class Syntax
                                 Syntax.fill[ext] ?= {}
                                 mtchInfo.value = value
                                 Syntax.fill[ext][mtchInfo.fill] = mtchInfo
-                            else
+                            else if mtchInfo.end
                                 Syntax.mtch[ext] ?= {}
                                 Syntax.mtch[ext][last mtchInfo.end] ?= []
                                 mtchInfo.value = value
                                 Syntax.mtch[ext][last mtchInfo.end].push mtchInfo
+                            else if mtchInfo.turd
+                                Syntax.turd[ext] ?= {}
+                                mtchInfo.match = value
+                                Syntax.turd[ext][value] = mtchInfo
+                            else
+                                Syntax.word[ext] ?= {}
+                                mtchInfo.value = value
+                                Syntax.word[ext][value] = mtchInfo
                     else
                         if not _.isArray words
                             for word,info of words
@@ -211,6 +221,7 @@ class Syntax
             obj.word = ''
 
             getValue = (back=-1)     -> Syntax.getValue obj, back 
+            getMatch = (back=-1)     -> Syntax.getMatch obj, back
             setValue = (back, value) -> Syntax.setValue obj, back, value  
             
             setClass = (clss) ->
@@ -233,7 +244,7 @@ class Syntax
                     value: clss
                     
                 null
-            
+                            
             if valid obj.fill
                 return setClass obj.fill.value
                 
@@ -248,10 +259,22 @@ class Syntax
             # 000      000   000  000  0000  000   000  
             # 0000000  000   000  000   000   0000000   
             
+            
+            if turdInfo = Syntax.turd[obj.ext]?[obj.last]
+                setValue -turdInfo.match.length-1, turdInfo['w-1']
+                for index in [0...turdInfo.match.length]
+                    setValue -index-1, turdInfo.turd
+                return setClass turdInfo['w-0']
+            
             lcword = word.toLowerCase()
-            if Syntax.lang[obj.ext]?[lcword]?
+            if wordInfo = Syntax.word[obj.ext]?[lcword]
                 
-                wordValue = Syntax.lang[obj.ext][lcword]
+                if obj.last in Object.keys wordInfo['t-1']
+                    setValue -2, wordInfo.value + ' ' + wordInfo['w-1']
+                    setValue -1, wordInfo.value + ' ' + wordInfo['t-1'][obj.last]
+                    return setClass wordInfo.value + ' ' + wordInfo.word
+            
+            if wordValue = Syntax.lang[obj.ext]?[lcword]
                 
                 if Syntax.info[obj.ext]?[wordValue]?
                     for valueInfo in Syntax.info[obj.ext][wordValue]
@@ -262,7 +285,7 @@ class Syntax
                                 return setClass matchValue
                 else 
                     return setClass wordValue
-
+                    
             #  0000000   0000000   00000000  00000000  00000000  00000000  
             # 000       000   000  000       000       000       000       
             # 000       000   000  000000    000000    0000000   0000000   
@@ -270,7 +293,7 @@ class Syntax
             #  0000000   0000000   000       000       00000000  00000000  
             
             if obj.coffee
-                if Syntax.getMatch(obj, -1) in ['class', 'extends']
+                if getMatch(-1) in ['class', 'extends']
                     return setClass 'class'
                 if getValue(-1)?.indexOf('punctuation') < 0
                     if word not in ['else', 'then', 'and', 'or', 'in']
@@ -288,7 +311,7 @@ class Syntax
                 setValue -1, 'number hex punctuation'
                 return setClass 'number hex'
                 
-            if Syntax.getMatch(obj, -1) == "#"
+            if getMatch(-1) == "#"
                 if /^[a-fA-F\d]+$/.test word
                     setValue -1, 'number hex punctuation'
                     return setClass 'number hex'
