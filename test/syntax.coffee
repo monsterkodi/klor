@@ -19,6 +19,23 @@ nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start,
     
 describe 'syntax', ->
     
+    it 'noon', ->
+        
+        rgs = Syntax.ranges "    property  value", 'noon'
+        inc rgs, 4, 'property', 'property'
+        inc rgs, 14, 'value', 'text'
+
+        rgs = Syntax.ranges "    prop.erty  value", 'noon'
+        inc rgs, 4, 'prop', 'property'
+        inc rgs, 8, '.', 'property punctuation'
+        inc rgs, 9, 'erty', 'property'
+        
+    #  0000000  000   000  
+    # 000       000   000  
+    # 0000000   000000000  
+    #      000  000   000  
+    # 0000000   000   000  
+    
     it 'sh', ->
         
         rgs = Syntax.ranges "dir/path-with-dashes/file.txt", 'sh'

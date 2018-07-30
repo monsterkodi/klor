@@ -121,7 +121,7 @@ class Syntax
                 obj[obj.ext] = true
                 
         obj.dictlang = true if obj.jslang or obj.iss or obj.log or obj.json or obj.yaml
-        obj.dashlang = true if obj.noon or obj.csslang or obj.iss or obj.pug
+        obj.dashlang = true if obj.csslang or obj.iss or obj.pug # obj.noon or 
         obj.dotlang  = true if obj.cpplang or obj.jslang or obj.log
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
@@ -216,6 +216,13 @@ class Syntax
                 Syntax.doTurd obj
                 if obj.regexp? and not obj.escp
                     delete obj.regexp # abort regexp on first unescaped space
+                    
+                if obj.noon
+                    if obj.turd.endsWith '  '
+                        if first(obj.rgs)?.start > 0
+                            for index in [0...obj.rgs.length]
+                                Syntax.substitute obj, -index-1, ['text'], ['property']
+                                Syntax.substitute obj, -index-1, ['punctuation'], ['property punctuation']
                         
         if valid obj.word
             
@@ -336,13 +343,6 @@ class Syntax
                 if obj.words.length == 1 
                     if empty obj.last
                         return setClass 'class'
-                else if obj.words.length == 2
-                    if obj.last.startsWith '  '
-                        if first(obj.rgs).start > 0
-                            Syntax.substitute obj, -1, ['text'], ['property']
-                            
-                if obj.last == ' ' and last(obj.rgs)?.value != 'text'
-                    return setClass last(obj.rgs)?.value
                     
             else if obj.sh
                 
@@ -605,7 +605,7 @@ class Syntax
                                 obj.rgs[index].value = 'regexp ' + obj.rgs[index].value
                             value = 'regexp punctuation'
                         else
-                            obj.regexp = obj.index
+                            obj.regexp = obj.index                            
         
         if mtch = Syntax.mtch[obj.ext]?[obj.char]
             if matchValue = Syntax.doMatch obj, mtch
