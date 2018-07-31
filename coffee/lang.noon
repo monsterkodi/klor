@@ -4,7 +4,7 @@
 # 000       000   000  000       000       000       000             000   000       000  
 #  0000000   0000000   000       000       00000000  00000000         0000000   0000000   
 
-coffee js
+coffee js ts
     
     keyword
         if
@@ -102,16 +102,34 @@ coffee
 # 000   000       000  
 #  0000000   0000000   
 
-js
+js ts
     keyword
+        as
+        of
+        any
+        let
         var
         case
         this
+        from
         const
+        async
+        await
         static
+        import
         
     keyword function
         function
+        
+ts
+    keyword type
+        string
+        boolean
+        interface
+        export 
+        declare 
+        type
+        void
 
 #       000   0000000   0000000   000   000        000   000   0000000    0000000   000   000  
 #       000  000       000   000  0000  000        0000  000  000   000  000   000  0000  000  
@@ -229,7 +247,7 @@ cpp hpp cxx c h cs
 #  000      000           000       000   000  000 0 000  000 0 000  000       000  0000     000     
 # 000      000             0000000   0000000   000   000  000   000  00000000  000   000     000     
       
-cpp hpp cxx c h js styl cs
+cpp hpp cxx c h js styl cs sass scss ts
 
     comment
         tail    //
@@ -401,7 +419,7 @@ html htm svg pug
 #      000     000        000     000       000     000            000       000  
 # 0000000      000        000     0000000  000       0000000  0000000   0000000   
 
-styl css
+styl css scss sass
     keyword html
         a
         b

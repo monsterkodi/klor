@@ -107,14 +107,14 @@ class Syntax
             when 'cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs'
                 obj.cpplang  = true
                 obj.cpp      = true
-            when 'coffee', 'js'
+            when 'coffee', 'js', 'ts'
                 obj.jslang   = true
                 obj[obj.ext] = true
             when 'html', 'htm'
                 obj.html     = true
             when 'yaml', 'yml'
                 obj.yaml     = true
-            when 'css', 'styl'
+            when 'css', 'styl', 'scss', 'sass'
                 obj.csslang  = true
                 obj[obj.ext] = true
             else
