@@ -117,6 +117,7 @@ js ts
         await
         static
         import
+        delete
         
     keyword function
         function
@@ -131,6 +132,11 @@ ts
     keyword type
         public
         private
+        protected
+        abstract
+        get
+        set
+        number
         string
         boolean
         interface
