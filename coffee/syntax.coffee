@@ -263,6 +263,9 @@ class Syntax
                 when ':'
                     if obj.dictlang
                         return setClass 'dictionary key'
+                when '='
+                    if obj.ini
+                        return setClass 'property'
                                 
             # 000       0000000   000   000   0000000   
             # 000      000   000  0000  000  000        
