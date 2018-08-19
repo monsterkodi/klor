@@ -10,7 +10,7 @@ repository
 bugs
                 url  https://github.com/monsterkodi/kork/issues
 dependencies
-                kxk  https://github.com/monsterkodi/kxk.git
+                kxk  ../kxk
 devDependencies
                 mocha   ^5.2.0
                 assert  ^1.4.1
