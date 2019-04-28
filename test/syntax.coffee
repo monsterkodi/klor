@@ -448,7 +448,19 @@ describe 'syntax', ->
         rgs = Syntax.ranges "a(b).length", 'coffee'
         inc rgs, 0, "a", 'function call'
         inc rgs, 5, "length", 'property'
-    
+
+    it 'koffee', ->
+        
+        rgs = Syntax.ranges "a(b).length", 'koffee'
+        inc rgs, 0, "a", 'function call'
+        inc rgs, 5, "length", 'property'
+
+        rgs = Syntax.ranges " @: ->", 'koffee'
+        inc rgs, 1, "@", 'method'
+        inc rgs, 2, ":", 'method punctuation'
+        inc rgs, 4, "-", 'function tail punctuation'
+        inc rgs, 5, ">", 'function head punctuation'
+        
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
     # 000 0 000  000   000  000000000  0000000    0000000   0000000    0000000   

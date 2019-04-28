@@ -107,9 +107,10 @@ class Syntax
             when 'cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs'
                 obj.cpplang  = true
                 obj.cpp      = true
-            when 'coffee', 'js', 'ts'
+            when 'coffee', 'koffee', 'js', 'ts'
                 obj.jslang   = true
                 obj[obj.ext] = true
+                obj.coffee   = true if obj.ext is 'koffee'
             when 'html', 'htm'
                 obj.html     = true
             when 'yaml', 'yml'
@@ -314,7 +315,7 @@ class Syntax
             if obj.coffee
                 if getMatch(-1) in ['class', 'extends']
                     return setClass 'class'
-                if getValue(-1)?.indexOf('punctuation') < 0
+                if getValue(-1)?.indexOf?('punctuation') < 0
                     if word not in ['else', 'then', 'and', 'or', 'in']
                         if last(obj.rgs).value not in ['keyword', 'function head', 'require', 'number']
                             setValue -1, 'function call' # coffee endWord -1 no punctuation and word != 'else ...'
@@ -585,6 +586,10 @@ class Syntax
                 if obj.dictlang and obj.turd.length == 1
                     if last(obj.rgs)?.value == 'dictionary key'
                         value = 'dictionary punctuation'
+                else
+                    if obj.coffee # koffee constructor shortcut
+                        setValue -1, 'method'
+                        value = 'method punctuation'
             when '>'
                 if obj.jslang
                     for [turd, val] in [['->', ''], ['=>', ' bound']]
@@ -890,12 +895,12 @@ class Syntax
                 log 'dafuk?', obj.rgs.length+back+index, obj.rgs.length, back, index
                 return
             if oldObjs[index].ignore
-                if backObj.value.indexOf(oldObjs[index].ignore) >= 0
+                if backObj.value?.indexOf?(oldObjs[index].ignore) >= 0
                     return advance()
             for key in Object.keys oldObjs[index]
                 switch key 
                     when 'word'
-                        if backObj.value.indexOf('punctuation') >= 0
+                        if backObj.value?.indexOf?('punctuation') >= 0
                             return advance()
                     when 'ignore' then
                     else 

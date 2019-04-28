@@ -4,7 +4,7 @@
 # 000       000   000  000       000       000       000             000   000       000  
 #  0000000   0000000   000       000       00000000  00000000         0000000   0000000   
 
-coffee js ts
+coffee koffee js ts
     
     keyword
         if
@@ -76,7 +76,7 @@ coffee js ts
 # 000       000   000  000       000       000       000       
 #  0000000   0000000   000       000       00000000  00000000  
 
-coffee
+coffee koffee
        
     comment
         tail    #
@@ -1002,7 +1002,12 @@ log iss ini md noon sh
             t-1     
                     |.|  punctuation
             word    ext
-        coffee
+        coffee 
+            w-1     file
+            t-1     
+                    |.|  punctuation
+            word    ext
+        koffee 
             w-1     file
             t-1     
                     |.|  punctuation
