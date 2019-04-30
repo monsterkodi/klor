@@ -289,7 +289,7 @@ class Syntax
             
             if wordInfo = Syntax.word[obj.ext]?[lcword]
                 
-                if obj.last in Object.keys wordInfo['t-1']
+                if wordInfo['t-1']? and obj.last in Object.keys wordInfo['t-1']
                     setValue -2, wordInfo.value + ' ' + wordInfo['w-1']
                     setValue -1, wordInfo.value + ' ' + wordInfo['t-1'][obj.last]
                     return setClass wordInfo.value + ' ' + wordInfo.word
