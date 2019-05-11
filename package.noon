@@ -1,4 +1,4 @@
-name            kork
+name            klor
 version         0.13.0
 description     syntax highlighting
 keywords
@@ -10,9 +10,9 @@ author          monsterkodi
 license         Unlicense
 repository
                 type  git
-                url   git+https://github.com/monsterkodi/kork.git
+                url   git+https://github.com/monsterkodi/klor.git
 bugs
-                url  https://github.com/monsterkodi/kork/issues
+                url  https://github.com/monsterkodi/klor/issues
 scripts
                 test  ./node_modules/.bin/mocha -c --require coffeescript/register ./test/syntax.coffee
 dependencies
