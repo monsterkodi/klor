@@ -390,7 +390,7 @@ describe 'syntax', ->
             
         rgs = Syntax.ranges "f 'a'", 'coffee'
         inc rgs, 0, "f", 'function call'
-
+        
         rgs = Syntax.ranges "ff 'b'", 'coffee'
         inc rgs, 0, "ff", 'function call'
 
@@ -449,17 +449,28 @@ describe 'syntax', ->
         inc rgs, 0, "a", 'function call'
         inc rgs, 5, "length", 'property'
 
+        rgs = Syntax.ranges "1 'a'", 'coffee'
+        inc rgs, 0, "1", 'number'
+        
     it 'koffee', ->
         
-        rgs = Syntax.ranges "a(b).length", 'koffee'
-        inc rgs, 0, "a", 'function call'
-        inc rgs, 5, "length", 'property'
-
         rgs = Syntax.ranges " @: ->", 'koffee'
         inc rgs, 1, "@", 'method'
         inc rgs, 2, ":", 'method punctuation'
         inc rgs, 4, "-", 'function tail punctuation'
         inc rgs, 5, ">", 'function head punctuation'
+
+        rgs = Syntax.ranges "▸if ▸then ▸elif ▸else", 'koffee'
+        inc rgs, 0,  "▸if",   'keyword'
+        inc rgs, 4,  "▸then", 'keyword'
+        inc rgs, 10, "▸elif", 'keyword'
+        inc rgs, 16, "▸else", 'keyword'
+
+        rgs = Syntax.ranges "[1 'x' a:1 c:d]", 'koffee'
+        inc rgs, 1,  "1",   'number'
+        inc rgs, 4,  "x",   'string single'
+        inc rgs, 7,  "a",   'dictionary key'
+        inc rgs, 11, "c",   'dictionary key'
         
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       

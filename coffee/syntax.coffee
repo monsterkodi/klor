@@ -6,7 +6,7 @@
 0000000      000     000   000     000     000   000  000   000
 ###
 
-{ slash, first, valid, empty, last, noon, str, error, log, $, _ } = require '../../kxk'
+{ noon, slash, first, valid, empty, last, error, _ } = require '../../kxk'
 
 log = console.log
 
@@ -533,8 +533,8 @@ class Syntax
                             return # bail out if next character is a space (cheater!)
                     val = Syntax.getValue obj, -2
                     if valid(val) and val not in ['keyword', 'function head', 'require']
-                        if val.indexOf('punctuation') < 0
-                            Syntax.setValue obj, -2, 'function call' # coffee call @+-\'"([{
+                        if val.indexOf('punctuation') < 0 and obj.rgs[-2].value not in ['number']
+                            Syntax.setValue obj, -2, "function call" # coffee call @+-\'"([{
                                     
     # 000   000   0000000   00000000   0000000    
     # 000 0 000  000   000  000   000  000   000  
