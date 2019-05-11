@@ -1,6 +1,10 @@
 name            kork
-version         0.12.0
+version         0.13.0
 description     syntax highlighting
+keywords
+                syntax
+                highlighting
+                coffeescript
 main            js/syntax.js
 author          monsterkodi
 license         Unlicense
