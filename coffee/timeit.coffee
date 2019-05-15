@@ -3,6 +3,8 @@
 
 ▸profile '-----' 
     syntax = require './syntax'
+    ▸profile 'init' 
+        syntax.init()
 
 ▸profile 'load'
     
@@ -13,6 +15,7 @@
     ▸profile 'split'
         lines = text.split '\n'
     
+
 ▸profile 'spaced'
     
     word = (w) -> syntax.lang.koffee[w] ? 'text'
@@ -82,4 +85,3 @@ log kstr spaced
 
 # ▸dbg ranges1
 # ▸dbg ranges2
-# ▸dbg syntax.lang.koffee
