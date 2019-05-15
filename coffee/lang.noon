@@ -26,16 +26,11 @@ coffee koffee js ts
         typeof
         __dirname
         __filename
-        first
-        last
         valid
         empty
         clamp
-        watch
-        str
-        pos
-        elem
-        stopevent
+        kstr
+        kpos
         
     module
         n-1  .

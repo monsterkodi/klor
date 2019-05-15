@@ -6,9 +6,16 @@
 0000000      000     000   000     000     000   000  000   000
 ###
 
-{ noon, slash, first, valid, empty, last, error, _ } = require '../../kxk'
+{ noon, slash, first, valid, empty, last, kerror, _ } = require '../../kxk'
 
-log = console.log
+▸doc 'syntax'
+
+    ```coffeescript
+   Syntax.ranges textline, ext
+   ```
+   
+   textline should **not** contain newlines. 
+   optimized to run fast on shorter inputs.
 
 class Syntax
 
@@ -25,7 +32,7 @@ class Syntax
         
         return if Syntax.lang != null
         
-        data = noon.load slash.join __dirname, '..', 'coffee', 'lang.noon'
+        data = noon.load slash.join __dirname, '..''coffee''lang.noon'
         
         Syntax.lang = {}
         Syntax.info = {}
@@ -104,18 +111,18 @@ class Syntax
             text:   text
             
         switch obj.ext
-            when 'cpp', 'hpp', 'c', 'h', 'cc', 'cxx', 'cs'
+            when 'cpp' 'hpp' 'c' 'h' 'cc' 'cxx' 'cs'
                 obj.cpplang  = true
                 obj.cpp      = true
-            when 'coffee', 'koffee', 'js', 'ts'
+            when 'coffee' 'koffee' 'js' 'ts'
                 obj.jslang   = true
                 obj[obj.ext] = true
                 obj.coffee   = true if obj.ext is 'koffee'
-            when 'html', 'htm'
+            when 'html' 'htm'
                 obj.html     = true
-            when 'yaml', 'yml'
+            when 'yaml' 'yml'
                 obj.yaml     = true
-            when 'css', 'styl', 'scss', 'sass'
+            when 'css' 'styl' 'scss' 'sass'
                 obj.csslang  = true
                 obj[obj.ext] = true
             else
@@ -163,14 +170,14 @@ class Syntax
             else
                 switch char
                     
-                    when "'", '"', '`'
+                    when "'" '"' '`'
                         
                         if not obj.escp and (char != "'" or obj.jslang or obj.pug)
                             Syntax.startString obj
                         else
                             Syntax.doPunct obj
                         
-                    when '+', '*', '<', '>', '=', '^', '~', '@', '$', '&', '%', '#', '/', '\\', ':', '.', ';', ',', '!', '?', '|', '{', '}', '(', ')', '[', ']'
+                    when '+' '*' '<' '>' '=' '^' '~' '@' '$' '&' '%' '#' '/' '\\' ':' '.' ';' ',' '!' '?' '|' '{' '}' '(' ')' '[' ']'
                         
                         Syntax.doPunct obj
                         
@@ -181,7 +188,7 @@ class Syntax
                         else
                             Syntax.doPunct obj
                                 
-                    when ' ', '\t' 
+                    when ' ' '\t' 
                         
                         Syntax.endWord obj
                         
@@ -189,7 +196,7 @@ class Syntax
                         
                         Syntax.doWord obj
                         
-                if char not in [' ', '\t']
+                if char not in [' ' '\t']
                     Syntax.coffeeCall obj
                     
             obj.index++
@@ -313,11 +320,11 @@ class Syntax
             #  0000000   0000000   000       000       00000000  00000000  
             
             if obj.coffee
-                if getMatch(-1) in ['class', 'extends']
+                if getMatch(-1) in ['class' 'extends']
                     return setClass 'class'
                 if getValue(-1)?.indexOf?('punctuation') < 0
-                    if word not in ['else', 'then', 'and', 'or', 'in']
-                        if last(obj.rgs).value not in ['keyword', 'function head', 'require', 'number']
+                    if word not in ['else' 'then' 'and' 'or' 'in']
+                        if last(obj.rgs).value not in ['keyword' 'function head' 'require' 'number']
                             setValue -1, 'function call' # coffee endWord -1 no punctuation and word != 'else ...'
                     
             # 000   000  00000000  000   000  
@@ -412,9 +419,9 @@ class Syntax
                 if first(obj.words).startsWith('U') and first(obj.rgs)?.value == 'macro'
                     if word.startsWith 'Blueprint'
                         return setClass 'macro punctuation'
-                    if word.toLowerCase() in ['meta', 'displayname', 'category', 'worldcontext', 'editanywhere']
+                    if word.toLowerCase() in ['meta' 'displayname' 'category' 'worldcontext' 'editanywhere']
                         return setClass 'macro punctuation'
-                    if word.toLowerCase() in ['config', 'transient', 'editdefaultsonly', 'visibleanywhere', 'nontransactional', 'interp', 'globalconfig']
+                    if word.toLowerCase() in ['config' 'transient' 'editdefaultsonly' 'visibleanywhere' 'nontransactional' 'interp' 'globalconfig']
                         return setClass 'macro'
                                     
             # 000   000  000   000  00     00  0000000    00000000  00000000   
@@ -449,8 +456,8 @@ class Syntax
                               
             if obj.dotlang
                 
-                if obj.last in ['.', ':']
-                    if getValue(-2) in ['text', 'module', 'class', 'member', 'keyword']
+                if obj.last in ['.' ':']
+                    if getValue(-2) in ['text' 'module' 'class' 'member' 'keyword']
                         setValue -2, 'obj' if getValue(-2) == 'text'
                         setValue -1, 'property punctuation'
                         if char == '(' 
@@ -470,7 +477,7 @@ class Syntax
 
                     if obj.last.length > 1 
                         
-                        if obj.last[obj.last.length-2] in [')', ']']
+                        if obj.last[obj.last.length-2] in [')' ']']
                             setValue -1, 'property punctuation'
                             return setClass 'property'
                         
@@ -493,7 +500,7 @@ class Syntax
                     if /\d+s/.test word
                         return setClass 'number'
                         
-                if word.slice(word.length-2) in ['px', 'em', 'ex', 'ch']
+                if word.slice(word.length-2) in ['px' 'em' 'ex' 'ch']
                     return setClass 'number'
                     
             if obj.csslang or obj.pug
@@ -728,7 +735,7 @@ class Syntax
             when '`' then 'string backtick'
             
         if not stringType
-            error "no string char '#{obj.char}'"
+            kerror "no string char '#{obj.char}'"
             return
             
         obj.rgs.push
@@ -890,10 +897,7 @@ class Syntax
 
         for index in [0...oldObjs.length]
             backObj = obj.rgs[obj.rgs.length+back+index]
-            if not backObj
-                log 'dafuk?', str obj
-                log 'dafuk?', obj.rgs.length+back+index, obj.rgs.length, back, index
-                return
+            ▸assert backObj
             if oldObjs[index].ignore
                 if backObj.value?.indexOf?(oldObjs[index].ignore) >= 0
                     return advance()
@@ -986,10 +990,8 @@ class Syntax
         return if obj.rgs.length-1+back <= 1
         for endIndex in [obj.rgs.length-1+back..0]
             if endIndex >= obj.rgs.length or endIndex < 0
-                log 'dafuk?', endIndex, obj.rgs.length, back
                 return
             if not obj.rgs[endIndex]?
-                log 'dafuk2?', endIndex, obj.rgs.length, back
                 return
             if range.end == obj.rgs[endIndex]?.match
                 for startIndex in [endIndex-1..0]

@@ -21,7 +21,8 @@
     "test": "./node_modules/.bin/mocha -c --require coffeescript/register ./test/syntax.coffee"
   },
   "dependencies": {
-    "kxk": "^0.277.0"
+    "kxk": "^0.281.0",
+    "pretty-time": "^1.1.0"
   },
   "devDependencies": {
     "coffeescript": "^1.12.7",
