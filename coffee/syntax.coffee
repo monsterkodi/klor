@@ -96,19 +96,22 @@ class Syntax
     # 000   000  000   000  000  0000  000   000  000            000  
     # 000   000  000   000  000   000   0000000   00000000  0000000   
     
+    @makeObj: (text, ext) ->
+        
+        ext:    ext ? 'txt' 
+        rgs:    []   # list of ranges (result)
+        words:  []   # encountered words
+        word:   ''   # currently parsed word
+        turd:   ''   # currently parsed stuff inbetween words 
+        last:   ''   # the turd before the current/last-completed word
+        index:  0 
+        text:   text
+    
     @ranges: (text, ext) ->
         
         Syntax.init()
         
-        obj =
-            ext:    ext ? 'txt' 
-            rgs:    []   # list of ranges (result)
-            words:  []   # encountered words
-            word:   ''   # currently parsed word
-            turd:   ''   # currently parsed stuff inbetween words 
-            last:   ''   # the turd before the current/last-completed word
-            index:  0 
-            text:   text
+        obj = Syntax.makeObj text, ext
             
         switch obj.ext
             when 'cpp' 'hpp' 'c' 'h' 'cc' 'cxx' 'cs'

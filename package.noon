@@ -1,5 +1,5 @@
 name            klor
-version         0.14.0
+version         0.15.0
 description     syntax highlighting
 keywords
                 syntax
@@ -14,12 +14,12 @@ repository
 bugs
                 url  https://github.com/monsterkodi/klor/issues
 scripts
-                test  ./node_modules/.bin/mocha -c --require coffeescript/register ./test/syntax.coffee
+                test  ./node_modules/.bin/mocha -c --require koffee/js/register ./test/syntax.coffee
 dependencies
-                kxk           ^0.281.0
+                kxk           ^0.283.0
                 pretty-time   ^1.1.0
 devDependencies
                 assert  ^2.0.0
                 chai    ^4.2.0
-                koffee  ^0.42.0
+                koffee  ^0.43.0
                 mocha   ^6.1.4

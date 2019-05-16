@@ -1,13 +1,13 @@
 
-{ slash, kstr, klog, noon } = require 'kxk'
+{ slash, kstr, klog, noon, chai } = require 'kxk'
 
 ▸profile '-----' 
-    syntax = require './syntax'
-    syntax.init()
+    Syntax = require './syntax'
+    Syntax.init()
 
-    # text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
+    # text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 15-17ms
     # text = slash.readText "#{__dirname}/../../koffee/test.koffee"
-    text = slash.readText "#{__dirname}/test.coffee"
+    text = slash.readText "#{__dirname}/test.coffee" # 310us
 
     lines = text.split '\n'
     
@@ -19,18 +19,19 @@
 
 blocks = (lines, ext='koffee') ->
     
-    word = (w) -> syntax.lang[ext][w] ? 'text'
-
+    word = (w) -> Syntax.lang[ext][w] ? 'text'
+    
     lineno = 0
-    spaced = lines.map (l) -> 
+    lines.map (text) -> 
         
-        lineinfo = []
-        lineinfo.characters = 0
-        lineinfo.index  = lineno++
-        lineinfo.number = lineno
-        lineinfo.ext    = ext
-        
-        chunks = l.split /\s/
+        lineinfo = 
+            chunks: []
+            chars:  0
+            index:  lineno++
+            number: lineno
+            ext:    ext
+
+        chunks = text.split /\s/
         
         if chunks.length == 1 and chunks[0] == ''
             return lineinfo # empty line
@@ -51,21 +52,26 @@ blocks = (lines, ext='koffee') ->
                     if m.index > 0
                         wl = m.index-(c-sc)
                         w = s[c-sc...m.index]
-                        lineinfo.push string:w, column:c, length:wl, value:word w 
+                        lineinfo.chunks.push string:w, column:c, length:wl, value:word w 
                         c += wl
-                    pl = m[0].length
-                    lineinfo.push string:m[0], column:c, length:pl, value:'punct'
+                    punct = m[0]
+                    pl = punct.length
+                    lineinfo.chunks.push string:m[0], column:c, length:pl, value:'punct'
+                    
+                    # if mtch = Syntax.turd[lineinfo.ext]?[punct]
+                        # log 'match!', punct, mtch
+                    
                     c += pl
                 
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
                     w = s[l-rl..]  # text   of remainder 
-                    lineinfo.push string:w, column:c, length:rl, value:word w
+                    lineinfo.chunks.push string:w, column:c, length:rl, value:word w
                     c += rl
                     
-        if lineinfo.length
-            last = lineinfo[-1]
-            lineinfo.characters = last.column + last.length
+        if lineinfo.chunks.length
+            last = lineinfo.chunks[-1]
+            lineinfo.chars = last.column + last.length
         lineinfo
 
 ▸profile 'blocks'
@@ -74,7 +80,37 @@ blocks = (lines, ext='koffee') ->
         
 ▸profile 'syntax1'
 
-    ranges = lines.map (l) -> syntax.ranges l, 'coffee'
+    ranges = lines.map (l) -> Syntax.ranges l, 'koffee'
 
-▸dbg spaced[...]
+# ▸dbg spaced[...]
 # ▸dbg ranges[...]
+# ▸dbg Syntax.turd.koffee
+# ▸dbg Syntax.mtch['coffee']
+# ▸dbg Syntax.fill.koffee
+# ▸dbg Syntax.word.koffee
+# ▸dbg Syntax.lang.koffee
+# ▸dbg Syntax.info.koffee
+
+▸test 'minimal'
+                
+    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'1', value:'text'} ]]
+    blocks(['a']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'a', value:'text'} ]]
+    blocks(['.']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'.', value:'punct'} ]]
+
+    blocks(['1.a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
+                 {column:0  length:1 string:'1'     value:'text'} 
+                 {column:1  length:1 string:'.'     value:'punct'} 
+                 {column:2  length:1 string:'a'     value:'text'} 
+                 ]]
+    blocks(['++a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
+                 {column:0  length:2 string:'++'    value:'punct'} 
+                 {column:2  length:1 string:'a'     value:'text'} 
+                 ]]
+    blocks(["▸doc 'hello'"]).should.eql [ext:'koffee' chars:12 index:0 number:1 chunks:[ 
+                 {column:0  length:1 string:'▸'     value:'punct'} 
+                 {column:1  length:3 string:'doc'   value:'text'} 
+                 {column:5  length:1 string:"'"     value:'punct'} 
+                 {column:6  length:5 string:"hello" value:'text'} 
+                 {column:11 length:1 string:"'"     value:'punct'} 
+                 ]]
+    
