@@ -1,0 +1,9 @@
+// koffee 0.42.0
+''
+
+log(function(a) {
+    return 2 + 2;
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIuIiwic291cmNlcyI6WyIiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOztBQVdBLEdBQUEsQ0FBSSxTQUFDLENBQUQ7V0FBTyxDQUFBLEdBQUU7QUFBVCxDQUFKIiwic291cmNlc0NvbnRlbnQiOlsi4pa4ZG9jICdoZWxsbydcbiAgICAjIyB3b3JsZFxuICAgIGBgYGNvZmZlZXNjcmlwdFxuICAgICAgICBmID0gPT4gMSsxXG4gICAgICAgIH4+ZG9jXG4gICAgICAgICAgICBpbnRlcm5hbFxuICAgIGBgYFxuICAgIHRleHRcbmxvZyAoYSkgLT4gMisyIl19
+//# sourceURL=../coffee/test.coffee
