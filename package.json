@@ -27,7 +27,7 @@
   "devDependencies": {
     "coffeescript": "^1.12.7",
     "mocha": "^6.1.4",
-    "assert": "^1.5.0",
+    "assert": "^2.0.0",
     "chai": "^4.2.0"
   }
 }

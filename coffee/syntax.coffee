@@ -118,6 +118,7 @@ class Syntax
                 obj.jslang   = true
                 obj[obj.ext] = true
                 obj.coffee   = true if obj.ext is 'koffee'
+                obj.js       = true if obj.ext is 'ts'
             when 'html' 'htm'
                 obj.html     = true
             when 'yaml' 'yml'
@@ -129,7 +130,7 @@ class Syntax
                 obj[obj.ext] = true
                 
         obj.dictlang = true if obj.jslang or obj.iss or obj.log or obj.json or obj.yaml
-        obj.dashlang = true if obj.csslang or obj.iss or obj.pug # obj.noon or 
+        obj.dashlang = true if obj.csslang or obj.iss or obj.pug
         obj.dotlang  = true if obj.cpplang or obj.jslang or obj.log
         obj.xmllang  = true if obj.xml or obj.html or obj.plist
         
@@ -564,7 +565,7 @@ class Syntax
 
     @doTurd: (obj) ->
         
-        if empty(obj.fill) and empty(obj.words) and Syntax.fill[obj.ext]?[obj.turd]?
+        if not obj.fill and obj.words.length==0 and Syntax.fill[obj.ext]?[obj.turd]?
             
             obj.fill = Syntax.fill[obj.ext]?[obj.turd]
             for index in [0...obj.turd.length]
