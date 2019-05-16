@@ -1,5 +1,5 @@
 
-{ slash, kstr, noon } = require 'kxk'
+{ slash, kstr, klog, noon } = require 'kxk'
 
 ▸profile '-----' 
     syntax = require './syntax'
@@ -10,7 +10,8 @@
     
     ▸profile 'read' 
         # text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
-        text = slash.readText "#{__dirname}/../../koffee/test.koffee"
+        # text = slash.readText "#{__dirname}/../../koffee/test.koffee"
+        text = slash.readText "#{__dirname}/test.coffee"
     
     ▸profile 'split'
         lines = text.split '\n'
@@ -22,42 +23,42 @@
 
     lineno = 0
     spaced = lines.map (l) -> 
+        
         lineinfo = []
         lineinfo.c = 0
         lineinfo.i = lineno++
         lineinfo.n = lineno
+        
         chunks = l.split /\s/
-        # ▸dbg chunks
+        
         if chunks.length == 1 and chunks[0] == ''
             return lineinfo # empty line
+            
         c = 0
-        p = true
         for s in chunks
             if s == ''
                 c++
-                p = true
             else
-                if p == false then c++
-                p = false
+                if c then c++
                 l = s.length
                 sc = c
+                
                 # seperate by punctuation
                 
                 re = /\W+/gi
                 while m = re.exec s
-                    # log m#[0]
                     if m.index > 0
-                        wl = m.index - c
-                        w = s[c...m.index]
+                        wl = m.index-(c-sc)
+                        w = s[c-sc...m.index]
                         lineinfo.push s:w, c:c, l:wl, v:word w 
                         c += wl
                     pl = m[0].length
                     lineinfo.push s:m[0], c:c, l:pl, v:'punct'
                     c += pl
                 
-                if c < sc + l
-                    rl = sc+l-c
-                    w = s[l-rl..]
+                if c < sc+l        # check for remaining non-punct
+                    rl = sc+l-c    # length of remainder
+                    w = s[l-rl..]  # text   of remainder 
                     lineinfo.push s:w, c:c, l:rl, v:word w
                     c += rl
                     
@@ -70,18 +71,5 @@
 
     ranges = lines.map (l) -> syntax.ranges l, 'coffee'
 
-# ▸profile 'syntax2'
-
-    # ranges2 = syntax.ranges text, 'coffee'
-    
-# log lines2[0..10], lines[0..10]
-# log lines2[-10..], lines[-10..]
-  
-log kstr spaced
-# ▸dbg {lines, spaced}
-# ▸dbg spaced[..2]
-# ▸dbg spaced[..2]
-# ▸dbg ranges[..20]
-
-# ▸dbg ranges1
-# ▸dbg ranges2
+▸dbg spaced[...]
+# ▸dbg ranges[...]
