@@ -277,7 +277,7 @@ cpp hpp cxx c h cs
 #  000      000           000       000   000  000 0 000  000 0 000  000       000  0000     000     
 # 000      000             0000000   0000000   000   000  000   000  00000000  000   000     000     
       
-cpp hpp cxx c h js styl cs sass scss ts
+cpp hpp cxx c h js styl css sass scss ts
 
     comment
         tail    //

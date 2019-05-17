@@ -6,7 +6,7 @@
 0000000      000     000   000     000     000   000  000   000
 ###
 
-{ noon, slash, first, valid, empty, last, kerror, _ } = require '../../kxk'
+{ noon, slash, first, valid, empty, last, klog, kerror, _ } = require '../../kxk'
 
 ▸doc 'syntax'
 

@@ -14,31 +14,36 @@
     text = slash.readText "#{__dirname}/test.coffee" # 500us
 
     lines = text.split '\n'
-    
-# 0000000    000       0000000    0000000  000   000   0000000  
-# 000   000  000      000   000  000       000  000   000       
-# 0000000    000      000   000  000       0000000    0000000   
-# 000   000  000      000   000  000       000  000        000  
-# 0000000    0000000   0000000    0000000  000   000  0000000   
-
-blocks = (lines, ext='koffee') ->
-    
-    blocksFrom chunked lines, ext
-    
-#  0000000  000   000  000   000  000   000  000   000   0000000  
-# 000       000   000  000   000  0000  000  000  000   000       
-# 000       000000000  000   000  000 0 000  0000000    0000000   
-# 000       000   000  000   000  000  0000  000  000        000  
-#  0000000  000   000   0000000   000   000  000   000  0000000   
+        
+#  0000000  000   000  000   000  000   000  000   000  00000000  0000000    
+# 000       000   000  000   000  0000  000  000  000   000       000   000  
+# 000       000000000  000   000  000 0 000  0000000    0000000   000   000  
+# 000       000   000  000   000  000  0000  000  000   000       000   000  
+#  0000000  000   000   0000000   000   000  000   000  00000000  0000000    
 
 chunked = (lines, ext) ->    
+
+    ▸doc 'chunked *lines*, *ext*'
+                        
+        **returns** array of
+            
+            chunks: [
+                        string: s
+                        value:  s
+                        column: n
+                        length: n
+                    ]
+            ext:    s
+            chars:  n
+            index:  n
+            number: n+1
     
     word = (w) -> Syntax.lang[ext][w] ? 'text'
     
     lineno = 0
     lines.map (text) -> 
         
-        lineinfo = 
+        line = 
             chunks: []
             chars:  0
             index:  lineno++
@@ -48,14 +53,14 @@ chunked = (lines, ext) ->
         chunks = text.split /\s/
         
         if chunks.length == 1 and chunks[0] == ''
-            return lineinfo # empty line
+            return line # empty line
             
         c = 0
         for s in chunks
             if s == ''
                 c++
             else
-                if c then c++
+                if line.chunks.length then c++
                 l = s.length
                 sc = c
                 
@@ -66,37 +71,45 @@ chunked = (lines, ext) ->
                     if m.index > 0
                         wl = m.index-(c-sc)
                         w = s[c-sc...m.index]
-                        lineinfo.chunks.push string:w, column:c, length:wl, value:word w 
+                        line.chunks.push string:w, column:c, length:wl, value:word w 
                         c += wl
                     punct = m[0]
                     pl = punct.length
-                    lineinfo.chunks.push string:m[0], column:c, length:pl, value:'punct'
+                    line.chunks.push string:m[0], column:c, length:pl, value:'punct'
                                         
                     c += pl
                 
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
                     w = s[l-rl..]  # text   of remainder 
-                    lineinfo.chunks.push string:w, column:c, length:rl, value:word w
+                    line.chunks.push string:w, column:c, length:rl, value:word w
                     c += rl
                     
-        if lineinfo.chunks.length
-            last = lineinfo.chunks[-1]
-            lineinfo.chars = last.column + last.length
+        if line.chunks.length
+            last = line.chunks[-1]
+            line.chars = last.column + last.length
             
-        lineinfo
+        line
 
-# 000      000  000   000  00000000   0000000  
-# 000      000  0000  000  000       000       
-# 000      000  000 0 000  0000000   0000000   
-# 000      000  000  0000  000            000  
-# 0000000  000  000   000  00000000  0000000   
+# 0000000    000       0000000    0000000  000   000  00000000  0000000    
+# 000   000  000      000   000  000       000  000   000       000   000  
+# 0000000    000      000   000  000       0000000    0000000   000   000  
+# 000   000  000      000   000  000       000  000   000       000   000  
+# 0000000    0000000   0000000    0000000  000   000  00000000  0000000    
 
-blocksFrom = (chunkedLines) ->
+blocked = (lines) ->
     
+    ▸doc 'blocked *lines*'
+        
+        *lines*:  array of chunked lines
+        
+        **returns** lines with 
+        - 'ext' switched in some lines
+        - 'value' changed in chunks that match turd pattern, e.g. ▸doc
+            
     extStack = []
     
-    for line in chunkedLines
+    for line in lines
         
         if extStack.length
             top = extStack[-1]
@@ -123,17 +136,77 @@ blocksFrom = (chunkedLines) ->
                         
                 if mtch = Syntax.swtch[line.ext]?[chunk.string]
                     extStack.push switch:mtch, start:line
-                    
-    chunkedLines
+    lines
+
+# 0000000    000       0000000    0000000  000   000   0000000  
+# 000   000  000      000   000  000       000  000   000       
+# 0000000    000      000   000  000       0000000    0000000   
+# 000   000  000      000   000  000       000  000        000  
+# 0000000    0000000   0000000    0000000  000   000  0000000   
+
+blocks = (lines, ext='koffee') ->
+    
+    ▸doc 'blocks *lines*, *ext*'
+
+        *lines*:  array of strings
         
+        *ext*:
+        - koffee coffee js ts 
+        - styl css sass scss 
+        - pug html htm svg 
+        - cpp hpp cxx c h 
+        - bash fish sh 
+        - noon json
+        - md plist 
+        - iss ini
+        - txt log 
+
+        **returns** the result of
+        ```coffeescript
+        blocked chunked lines, ext
+        ```
+        
+    blocked chunked lines, ext
+    
+# 00000000    0000000   000   000   0000000   00000000  0000000    
+# 000   000  000   000  0000  000  000        000       000   000  
+# 0000000    000000000  000 0 000  000  0000  0000000   000   000  
+# 000   000  000   000  000  0000  000   000  000       000   000  
+# 000   000  000   000  000   000   0000000   00000000  0000000    
+
+ranged = (lines) ->
+    
+    ▸doc 'ranged *lines*'
+        
+        *lines*:  array of chunked lines
+        
+        **returns** array of
+
+            start: n
+            match: s
+            value: s
+        
+    rngs = []
+    for line in lines
+        for chunk in line.chunks
+            range =
+                start: chunk.column
+                match: chunk.string
+                value: chunk.value.replace 'punct', 'punctuation'
+            rngs.push range
+    rngs
+    
 ▸profile 'blocks'
 
-    spaced = blocks lines
-#         
-# ▸profile 'syntax1'
+    spaced = ranged blocks lines
 
+# klog spaced
+# ▸profile 'syntax1'
     # ranges = lines.map (l) -> Syntax.ranges l, 'koffee'
 
+module.exports =
+    ranges: (textline, ext) -> ranged blocks [textline], ext
+    
 # 000000000  00000000   0000000  000000000  
 #    000     000       000          000     
 #    000     0000000   0000000      000     
@@ -164,7 +237,25 @@ blocksFrom = (chunkedLines) ->
                   {column:6  length:5 string:"hello" value:'text'} 
                   {column:11 length:1 string:"'"     value:'punct'} 
                   ]]
-                 
+                  
+▸test 'space'
+
+    b = blocks ["x"]
+    b[0].chunks[0].should.include.property 'column' 0
+
+    b = blocks [" xx"]
+    b[0].chunks[0].should.include.property 'column' 1
+    
+    b = blocks ["    xxx"]
+    b[0].chunks[0].should.include.property 'column' 4
+
+    b = blocks ["    x 1  , "]
+    b[0].chunks[0].should.include.property 'column' 4
+    b[0].chunks[1].should.include.property 'column' 6
+    b[0].chunks[2].should.include.property 'column' 9
+
+▸test 'switches'
+    
     b = blocks """
         ▸doc 'hello'
             x    
@@ -191,16 +282,16 @@ blocksFrom = (chunkedLines) ->
     b[5].should.include.property 'ext' 'md'
     b[6].should.include.property 'ext' 'koffee'
 
-    b = blocks """
-        ▸doc 'hello'
-            x  
-            ```coffeescript
-                1+1
-                ▸doc 'again'
-                    some **docs**
-            ```
-            y
-        1""".split '\n'
+    b = blocks """                    
+        ▸doc 'hello'                  
+            x                         
+            ```coffeescript           
+                1+1                   
+                ▸doc 'again'          
+                    some **docs**     
+            ```                       
+            y                         
+        1""".split '\n'               
     b[0].should.include.property 'ext' 'koffee'
     b[1].should.include.property 'ext' 'md'
     b[2].should.include.property 'ext' 'md'
