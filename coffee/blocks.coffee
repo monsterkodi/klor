@@ -75,13 +75,11 @@ chunked = (lines, ext) ->
                         line.chunks.push column:c, length:wl, string:w, value:word w 
                         c += wl
                         
-                    punct = m[0]
-                    if punct.length > 1
-                        line.chunks.push column:c++, length:1, string:punct[0], turd:punct, value:'punct'
-                        for pc in punct[1..]
-                            line.chunks.push column:c++, length:1, string:pc, value:'punct'
-                    else
-                        line.chunks.push column:c++, length:1, string:punct, value:'punct'
+                    turd = punct = m[0]
+                    for pc in punct[...-1]
+                        line.chunks.push column:c++, length:1, string:pc, turd:turd, value:'punct'
+                        turd = turd[1..]
+                    line.chunks.push column:c++, length:1, string:punct[-1], value:'punct'
                                         
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
@@ -139,35 +137,62 @@ blocked = (lines) ->
             return line.chunks.length - chunkIndex + 1
         0
 
+    noonComment = -> 
+        
+        return 0 if stack.length > 1
+        
+        if chunk.string == "#" and chunkIndex == 0 # the only difference. merge with hashComment?
+            chunk.value += ' comment'
+            if chunkIndex < line.chunks.length-1
+                for c in line.chunks[chunkIndex+1..]
+                    c.value = 'comment'
+            return line.chunks.length - chunkIndex + 1
+        0
+        
     slashComment = -> 0
                 
     dashArrow = ->
-        
-        if chunk.string == '>' and chunkIndex > 0
+
+        if chunk.turd == '->'
             
-            prev = line.chunks[chunkIndex-1]
-            
-            if prev.string == '-'
-                prev.value += ' function tail'
-                chunk.value += ' function head'
-                return 1
+            chunk.value += ' function tail'
+            line.chunks[chunkIndex+1].value += ' function head'
+            return 2
                 
-            if prev.string == '=' 
-                prev.value += ' function bound tail'
-                chunk.value += ' function bound head'
-                return 1
+        if chunk.turd == '=>'
+            
+            chunk.value += ' function bound tail'
+            line.chunks[chunkIndex+1].value += ' function bound head'
+            return 2
         0
                 
     regexp = ->
         
+        # check stack top
         if chunk.string == '/'
-            chunk.value += ' regexp'
-            return 1
+            
+            if chunkIndex 
+                prev = line.chunks[chunkIndex-1]
+                next = line.chunks[chunkIndex+1]
+                if not prev.value.startsWith 'punct'
+                    if (prev.column + prev.length < chunk.column) and next?.column > chunk.column+1
+                        return 0
+                    if (prev.column + prev.length == chunk.column) and next?.column == chunk.column+1
+                        return 0
+            
+            count = 0
+            for c in line.chunks[chunkIndex+1..]
+                count++
+                if c.string == '/'
+                    for rc in line.chunks[chunkIndex..chunkIndex+count]
+                        rc.value += ' regexp'
+                    return count
         0
     
     handlers = 
         koffee: punct: [ hashComment,  dashArrow, regexp ]
         coffee: punct: [ hashComment,  dashArrow, regexp ]
+        noon:   punct: [ noonComment                     ]
         js:     punct: [ slashComment, dashArrow, regexp ]
         ts:     punct: [ slashComment, dashArrow, regexp ]
         md:     {}
@@ -192,7 +217,8 @@ blocked = (lines) ->
                 if mtch = Syntax.turd[line.ext]?[chunk.string] # ▸ doc
                     chunk.value += ' ' + mtch.turd if mtch.turd
                     line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
-                                    
+                              
+                popped = false
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
                         popExt()                # end of extension block reached that is terminated by turd
@@ -327,8 +353,8 @@ module.exports =
                 ]]
     blocks(['f=->1']).should.eql [ext:'koffee' chars:5 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:'f' value:'text'} 
-                {column:1 length:1 string:'=' value:'punct' turd:'=->' } 
-                {column:2 length:1 string:'-' value:'punct function tail'} 
+                {column:1 length:1 string:'=' value:'punct'               turd:'=->' } 
+                {column:2 length:1 string:'-' value:'punct function tail' turd:'->'} 
                 {column:3 length:1 string:'>' value:'punct function head'} 
                 {column:4 length:1 string:'1' value:'text'} 
                 ]]
