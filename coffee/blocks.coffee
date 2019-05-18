@@ -9,7 +9,7 @@
         koffee: '▸':    to: 'md'     w0:'doc'          indent: 1
         md:     '```':  to: 'koffee' w0:'coffeescript' end:    '```'
 
-    text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 22ms
+    text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 30ms
     # text = slash.readText "#{__dirname}/../../koffee/test.koffee"
     # text = slash.readText "#{__dirname}/test.coffee" # 500us
 
@@ -193,20 +193,20 @@ blocked = (lines) ->
             beforeIndex = chunkIndex
             if chunk.value == 'punct'
                                         
-                if mtch = Syntax.turd[line.ext]?[chunk.string]
+                if mtch = Syntax.turd[line.ext]?[chunk.string] # ▸ doc
                     chunk.value += ' ' + mtch.turd if mtch.turd
                     line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
                                     
                 if extStack.length
                     top = extStack[-1]
-                    if top.switch.end == chunk.string
+                    if top.switch.end? and top.switch.end == chunk.turd
                         extStack.pop()
                         line.pop = true
                         line.ext = top.start.ext
                         popped = true
                        
                 if not popped
-                    if mtch = Syntax.swtch[line.ext]?[chunk.turd]
+                    if mtch = Syntax.swtch[line.ext]?[chunk.turd ? chunk.string]
                         extStack.push switch:mtch, start:line
                 
                 for hnd in handl.punct ? []
@@ -283,7 +283,6 @@ ranged = (lines) ->
     
     
 ▸profile 'blocks'
-
     spaced = blocks lines
 
 ▸profile 'syntax1'
