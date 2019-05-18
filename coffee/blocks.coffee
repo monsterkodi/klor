@@ -9,11 +9,11 @@
         koffee: '▸':    to: 'md'     w0:'doc'          indent: 1
         md:     '```':  to: 'koffee' w0:'coffeescript' end:    '```'
 
-    text = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 30ms
-    # text = slash.readText "#{__dirname}/../../koffee/test.koffee"
-    # text = slash.readText "#{__dirname}/test.coffee" # 500us
+    text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 6-11ms
+    text1 = slash.readText "#{__dirname}/test.coffee" # 50-120μs
 
-    lines = text.split '\n'
+    lines0 = text0.split '\n'
+    lines1 = text1.split '\n'
         
 #  0000000  000   000  000   000  000   000  000   000  00000000  0000000    
 # 000       000   000  000   000  0000  000  000  000   000       000   000  
@@ -275,17 +275,24 @@ ranged = (lines) ->
                 value: chunk.value.replace 'punct', 'punctuation'
             rngs.push range
     rngs
+
+for i in [0..3]
+    blocks lines0
+    # blocks lines1
+    # lines0.map (l) -> Syntax.ranges l, 'koffee'
     
+for i in [0..15]
     
-▸profile 'blocks'
-    spaced = blocks lines
-
-▸profile 'syntax1'
-    ranges = lines.map (l) -> Syntax.ranges l, 'koffee'
-
-# klog spaced
-# klog ranges
-
+    ▸profile 'lines0'
+        blocks lines0
+    # ▸profile 'syntax0'
+        # lines0.map (l) -> Syntax.ranges l, 'koffee'
+        
+    # ▸profile 'lines1'
+        # blocks lines1
+    # ▸profile 'syntax1'
+        # lines1.map (l) -> Syntax.ranges l, 'koffee'
+        
 module.exports =
     ranges: (textline, ext) -> ranged blocks [textline], ext
     
