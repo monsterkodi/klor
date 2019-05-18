@@ -111,16 +111,22 @@ blocked = (lines) ->
         - 'ext' switched in some lines
         - 'value' changed in chunks that match language patterns
           
-    extStack = []
-    
-    stacks     = []
+    extStack   = []
+    extTop     = null
     handl      = []
-    stack      = null
+    stack      = []
     ext        = null
     chunk      = null
     line       = null
     chunkIndex = null
-           
+
+    popExt = ->
+        stack = extTop.stack
+        # line.pop = true
+        line.ext = extTop.start.ext
+        extStack.pop()               
+        extTop = extStack[-1]
+    
     hashComment = -> 
         
         return 0 if stack.length > 1
@@ -167,25 +173,15 @@ blocked = (lines) ->
         md:     {}
                         
     for line in lines
-
-        if extStack.length
-            top = extStack[-1]
-            if top.switch.indent and line.chunks[0]?.column <= top.start.chunks[0].column
-                extStack.pop()
-                line.pop = true
-                line.ext = top.start.ext
+           
+        if extTop
+            if extTop.switch.indent and line.chunks[0]?.column <= extTop.start.chunks[0].column
+                popExt()                        # end of extension block reached that is terminated by indentation
             else
-                line.ext = top.switch.to
+                line.ext = extTop.switch.to     # make sure the current line ext matches the topmost from stack
                 
-        if ext != line.ext
-            ext = line.ext
-            if stacks.length and line.pop
-                stack = stacks.pop
-            else
-                stacks.push stack if stack
-                stack = [ ext:ext ]
-                
-            handl = handlers[ext]
+        if ext != line.ext                      # either at start of file or we switched extension
+            handl = handlers[ext = line.ext]    # install new handlers
         
         chunkIndex = 0
         while chunkIndex < line.chunks.length
@@ -197,17 +193,15 @@ blocked = (lines) ->
                     chunk.value += ' ' + mtch.turd if mtch.turd
                     line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
                                     
-                if extStack.length
-                    top = extStack[-1]
-                    if top.switch.end? and top.switch.end == chunk.turd
-                        extStack.pop()
-                        line.pop = true
-                        line.ext = top.start.ext
+                if extTop
+                    if extTop.switch.end? and extTop.switch.end == chunk.turd
+                        popExt()                # end of extension block reached that is terminated by turd
                         popped = true
                        
                 if not popped
                     if mtch = Syntax.swtch[line.ext]?[chunk.turd ? chunk.string]
-                        extStack.push switch:mtch, start:line
+                        # push a new extension onto the stack, ext will change on start of next line
+                        extStack.push extTop = switch:mtch, start:line, stack:stack
                 
                 for hnd in handl.punct ? []
                     if advance = hnd()
@@ -218,6 +212,7 @@ blocked = (lines) ->
                     if advance = hnd()
                         chunkIndex += advance
                         break
+                        
             if chunkIndex == beforeIndex
                 chunkIndex++
     lines
