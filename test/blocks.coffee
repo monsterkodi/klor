@@ -28,9 +28,9 @@ describe 'syntax', ->
     it 'regexp', ->
         
         rgs = Syntax.ranges "r=/a/", 'coffee'
-        inc rgs, 2, '/', 'regexp punctuation'
-        inc rgs, 3, 'a', 'regexp text'
-        inc rgs, 4, '/', 'regexp punctuation'
+        inc rgs, 2, '/', 'punctuation regexp'
+        inc rgs, 3, 'a', 'text regexp'
+        inc rgs, 4, '/', 'punctuation regexp'
     
         rgs = Syntax.ranges 'a / b - c / d', 'coffee'
         nut rgs, 2, '/', 'regexp punctuation'
