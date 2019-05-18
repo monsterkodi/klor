@@ -68,17 +68,21 @@ chunked = (lines, ext) ->
                 
                 re = /\W+/gi
                 while m = re.exec s
+                    
                     if m.index > 0
                         wl = m.index-(c-sc)
                         w = s[c-sc...m.index]
                         line.chunks.push column:c, length:wl, string:w, value:word w 
                         c += wl
+                        
                     punct = m[0]
-                    pl = punct.length
-                    line.chunks.push column:c, length:pl, string:m[0], value:'punct'
+                    if punct.length > 1
+                        line.chunks.push column:c++, length:1, string:punct[0], turd:punct, value:'punct'
+                        for pc in punct[1..]
+                            line.chunks.push column:c++, length:1, string:pc, value:'punct'
+                    else
+                        line.chunks.push column:c++, length:1, string:punct, value:'punct'
                                         
-                    c += pl
-                
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
                     w = s[l-rl..]  # text   of remainder 
@@ -90,7 +94,7 @@ chunked = (lines, ext) ->
             line.chars = last.column + last.length
             
         line
-
+        
 # 0000000    000       0000000    0000000  000   000  00000000  0000000    
 # 000   000  000      000   000  000       000  000   000       000   000  
 # 0000000    000      000   000  000       0000000    0000000   000   000  
@@ -105,56 +109,10 @@ blocked = (lines) ->
         
         **returns** lines with 
         - 'ext' switched in some lines
-        - 'value' changed in chunks that match turd pattern, e.g. ▸doc
-            
+        - 'value' changed in chunks that match language patterns
+          
     extStack = []
     
-    for line in lines
-        
-        if extStack.length
-            top = extStack[-1]
-            if top.switch.indent and line.chunks[0]?.column <= top.start.chunks[0].column
-                extStack.pop()
-                line.pop = true
-                line.ext = top.start.ext
-            else
-                line.ext = top.switch.to
-        
-        for chunkIndex in [0...line.chunks.length]
-            chunk = line.chunks[chunkIndex]
-            if chunk.value == 'punct' 
-                
-                if mtch = Syntax.turd[line.ext]?[chunk.string]
-                    chunk.value += ' ' + mtch.turd if mtch.turd
-                    line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
-                                    
-                if extStack.length
-                    top = extStack[-1]
-                    if top.switch.end == chunk.string
-                        extStack.pop()
-                        line.pop = true
-                        line.ext = top.start.ext
-                        continue
-                        
-                if mtch = Syntax.swtch[line.ext]?[chunk.string]
-                    extStack.push switch:mtch, start:line
-    lines
-
-# 00     00   0000000   000000000   0000000  000   000  00000000  0000000    
-# 000   000  000   000     000     000       000   000  000       000   000  
-# 000000000  000000000     000     000       000000000  0000000   000   000  
-# 000 0 000  000   000     000     000       000   000  000       000   000  
-# 000   000  000   000     000      0000000  000   000  00000000  0000000    
-
-matched = (lines) ->
-    
-    ▸doc 'matched *lines*'
-        
-        *lines*:  array of blocked lines
-        
-        **returns** lines with 'value' changed in chunks that match language pattern
-    
-        
     stacks     = []
     handl      = []
     stack      = null
@@ -163,17 +121,6 @@ matched = (lines) ->
     line       = null
     chunkIndex = null
            
-    split = ->
-        
-        if chunk.length > 1
-
-            args = [chunkIndex, 1]
-            for c in chunk.string
-                args.push column:chunk.column+args.length-2, length:1, string:c, value:chunk.value
-            [].splice.apply line.chunks, args
-            chunk = line.chunks[chunkIndex]
-        0
-    
     hashComment = -> 
         
         return 0 if stack.length > 1
@@ -213,14 +160,23 @@ matched = (lines) ->
         0
     
     handlers = 
-        koffee: punct: [ split, hashComment,  dashArrow, regexp ]
-        coffee: punct: [ split, hashComment,  dashArrow, regexp ]
-        js:     punct: [ split, slashComment, dashArrow, regexp ]
-        ts:     punct: [ split, slashComment, dashArrow, regexp ]
+        koffee: punct: [ hashComment,  dashArrow, regexp ]
+        coffee: punct: [ hashComment,  dashArrow, regexp ]
+        js:     punct: [ slashComment, dashArrow, regexp ]
+        ts:     punct: [ slashComment, dashArrow, regexp ]
         md:     {}
-    
+                        
     for line in lines
 
+        if extStack.length
+            top = extStack[-1]
+            if top.switch.indent and line.chunks[0]?.column <= top.start.chunks[0].column
+                extStack.pop()
+                line.pop = true
+                line.ext = top.start.ext
+            else
+                line.ext = top.switch.to
+                
         if ext != line.ext
             ext = line.ext
             if stacks.length and line.pop
@@ -236,6 +192,23 @@ matched = (lines) ->
             chunk = line.chunks[chunkIndex]
             beforeIndex = chunkIndex
             if chunk.value == 'punct'
+                                        
+                if mtch = Syntax.turd[line.ext]?[chunk.string]
+                    chunk.value += ' ' + mtch.turd if mtch.turd
+                    line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
+                                    
+                if extStack.length
+                    top = extStack[-1]
+                    if top.switch.end == chunk.string
+                        extStack.pop()
+                        line.pop = true
+                        line.ext = top.start.ext
+                        popped = true
+                       
+                if not popped
+                    if mtch = Syntax.swtch[line.ext]?[chunk.turd]
+                        extStack.push switch:mtch, start:line
+                
                 for hnd in handl.punct ? []
                     if advance = hnd()
                         chunkIndex += advance
@@ -274,10 +247,10 @@ blocks = (lines, ext='koffee') ->
 
         **returns** the result of
         ```coffeescript
-        matched blocked chunked lines, ext
+        blocked chunked lines, ext
         ```
-        
-    matched blocked chunked lines, ext
+
+    blocked chunked lines, ext
     
 # 00000000    0000000   000   000   0000000   00000000  0000000    
 # 000   000  000   000  0000  000  000        000       000   000  
@@ -308,9 +281,9 @@ ranged = (lines) ->
             rngs.push range
     rngs
     
+    
 ▸profile 'blocks'
 
-    # spaced = ranged blocks lines
     spaced = blocks lines
 
 ▸profile 'syntax1'
@@ -331,50 +304,50 @@ module.exports =
 ▸test 'comment'
 
     blocks(["##"]).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
-                {column:0, length:1, string:"#", value:'punct comment'} 
-                {column:1, length:1, string:"#", value:'comment'} 
+                {column:0 length:1 string:"#" value:'punct comment' turd:"##"} 
+                {column:1 length:1 string:"#" value:'comment'} 
                 ]]
 
     blocks([",#a"]).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
-                {column:0, length:1, string:",", value:'punct'} 
-                {column:1, length:1, string:"#", value:'punct comment'} 
-                {column:2, length:1, string:"a", value:'comment'} 
+                {column:0 length:1 string:"," value:'punct' turd: ",#"} 
+                {column:1 length:1 string:"#" value:'punct comment'} 
+                {column:2 length:1 string:"a" value:'comment'} 
                 ]]
                 
 ▸test 'function'
 
     blocks(['->']).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
-                {column:0, length:1, string:'-', value:'punct function tail'} 
-                {column:1, length:1, string:'>', value:'punct function head'} 
+                {column:0 length:1 string:'-' value:'punct function tail' turd: '->'} 
+                {column:1 length:1 string:'>' value:'punct function head'} 
                 ]]
     blocks(['=>']).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
-                {column:0, length:1, string:'=', value:'punct function bound tail'} 
-                {column:1, length:1, string:'>', value:'punct function bound head'} 
+                {column:0 length:1 string:'=' value:'punct function bound tail' turd: '=>'} 
+                {column:1 length:1 string:'>' value:'punct function bound head'} 
                 ]]
     blocks(['f=->1']).should.eql [ext:'koffee' chars:5 index:0 number:1 chunks:[ 
-                {column:0, length:1, string:'f', value:'text'} 
-                {column:1, length:1, string:'=', value:'punct'} 
-                {column:2, length:1, string:'-', value:'punct function tail'} 
-                {column:3, length:1, string:'>', value:'punct function head'} 
-                {column:4, length:1, string:'1', value:'text'} 
+                {column:0 length:1 string:'f' value:'text'} 
+                {column:1 length:1 string:'=' value:'punct' turd:'=->' } 
+                {column:2 length:1 string:'-' value:'punct function tail'} 
+                {column:3 length:1 string:'>' value:'punct function head'} 
+                {column:4 length:1 string:'1' value:'text'} 
                 ]]
                 
 ▸test 'minimal'
                 
-    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'1', value:'text'} ]]
-    blocks(['a']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'a', value:'text'} ]]
-    blocks(['.']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0, length:1, string:'.', value:'punct'} ]]
+    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'1' value:'text'} ]]
+    blocks(['a']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'a' value:'text'} ]]
+    blocks(['.']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'.' value:'punct'} ]]
 
     blocks(['1.a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
-                 {column:0  length:1 string:'1'     value:'text'} 
-                 {column:1  length:1 string:'.'     value:'punct'} 
-                 {column:2  length:1 string:'a'     value:'text'} 
+                 {column:0  length:1 string:'1' value:'text'} 
+                 {column:1  length:1 string:'.' value:'punct'} 
+                 {column:2  length:1 string:'a' value:'text'} 
                  ]]
                  
     blocks(['++a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
-                 {column:0  length:1 string:'+'     value:'punct'} 
-                 {column:1  length:1 string:'+'     value:'punct'} 
-                 {column:2  length:1 string:'a'     value:'text'} 
+                 {column:0  length:1 string:'+' value:'punct', turd:'++'} 
+                 {column:1  length:1 string:'+' value:'punct'} 
+                 {column:2  length:1 string:'a' value:'text'} 
                  ]]
                  
     blocks(["▸doc 'hello'"]).should.eql [ext:'koffee' chars:12 index:0 number:1 chunks:[ 
