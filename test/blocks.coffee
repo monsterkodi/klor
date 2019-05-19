@@ -7,13 +7,10 @@
 ###
 
 Syntax = require '../js/blocks'
-assert = require 'assert'
-chai   = require 'chai'
-expect = chai.expect
-chai.should()
+require('kxk').chai()
 
-inc = (rgs, start, match, value) -> expect(rgs).to.deep.include     start:start, match:match, value:value
-nut = (rgs, start, match, value) -> expect(rgs).to.not.deep.include start:start, match:match, value:value
+inc = (rgs, start, match, value) -> rgs.should.deep.include     start:start, match:match, value:value
+nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, match:match, value:value
     
 describe 'syntax', ->
         
@@ -24,31 +21,31 @@ describe 'syntax', ->
     # 000   000  00000000   0000000   00000000  000   000  000        
     
     it 'regexp', ->
-        
         rgs = Syntax.ranges "r=/a/", 'coffee'
-        inc rgs, 2, '/', 'punctuation regexp'
+        inc rgs, 2, '/', 'punctuation regexp start'
         inc rgs, 3, 'a', 'text regexp'
-        inc rgs, 4, '/', 'punctuation regexp'
+        inc rgs, 4, '/', 'punctuation regexp end'
                 
         rgs = Syntax.ranges "/(a|.*|\s\d\w\S\W$|^\s+)/", 'coffee'
-        inc rgs, 0, '/', 'punctuation regexp'
+        inc rgs, 0, '/', 'punctuation regexp start'
         inc rgs, 2, 'a', 'text regexp'
             
         rgs = Syntax.ranges "/^#include/", 'coffee'
-        inc rgs, 0, '/',       'punctuation regexp'
+        log rgs
+        inc rgs, 0, '/',       'punctuation regexp start'
         inc rgs, 2, "#",       'punctuation regexp'
         inc rgs, 3, "include", 'text regexp'
 
         rgs = Syntax.ranges "/\\'hello\\'/ ", 'coffee'
-        inc rgs, 0, '/',       'punctuation regexp'
+        inc rgs, 0, '/',       'punctuation regexp start'
         inc rgs, 1, "\\",      'punctuation regexp'
         inc rgs, 2, "'",       'punctuation regexp'
         inc rgs, 3, "hello",   'text regexp'
 
         rgs = Syntax.ranges "f a /b - c/gi", 'coffee'
-        inc rgs, 4, '/', 'punctuation regexp'
+        inc rgs, 4, '/', 'punctuation regexp start'
         inc rgs, 5, 'b', 'text regexp'
-        inc rgs, 10, '/', 'punctuation regexp'
+        inc rgs, 10, '/', 'punctuation regexp end'
         
     it 'no regexp', ->
         
@@ -93,7 +90,7 @@ describe 'syntax', ->
         
         rgs = Syntax.ranges "(^\s*#\s*)(.*)$", 'noon'
         for rng in rgs
-            expect(rng).to.not.have.property 'value', 'comment'
+            rng.should.not.have.property 'value', 'comment'
             
     #  0000000  000000000  00000000   000  000   000   0000000    0000000  
     # 000          000     000   000  000  0000  000  000        000       

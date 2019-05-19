@@ -113,6 +113,8 @@ blocked = (lines) ->
     extTop     = null
     handl      = []
     stack      = []
+    topType    = null
+    stackTop   = null
     ext        = null
     chunk      = null
     line       = null
@@ -125,9 +127,16 @@ blocked = (lines) ->
         extStack.pop()               
         extTop = extStack[-1]
     
+    pushStack = (o) -> 
+        stack.push o 
+        stackTop = o
+        topType = o.type
+        
+    popStack = -> stack.pop()
+        
     hashComment = -> 
         
-        return 0 if stack.length > 1
+        return 0 if stackTop
         
         if chunk.string == "#"
             chunk.value += ' comment'
@@ -139,7 +148,7 @@ blocked = (lines) ->
 
     noonComment = -> 
         
-        return 0 if stack.length > 1
+        return 0 if stackTop
         
         if chunk.string == "#" and chunkIndex == 0 # the only difference. merge with hashComment?
             chunk.value += ' comment'
@@ -168,56 +177,73 @@ blocked = (lines) ->
                 
     regexp = ->
         
-        # check stack top!
+        return 0 if topType == 'string'
+
         if chunk.string == '/'
             
+            if topType == 'regexp'
+                chunk.value += ' regexp end'
+                popStack()
+                return 1
+                
             if chunkIndex 
                 prev = line.chunks[chunkIndex-1]
                 next = line.chunks[chunkIndex+1]
                 if not prev.value.startsWith 'punct'
-                    if (prev.column + prev.length < chunk.column) and next?.column > chunk.column+1
-                        return 0
-                    if (prev.column + prev.length == chunk.column) and next?.column == chunk.column+1
-                        return 0
-            
-            count = 0
-            for c in line.chunks[chunkIndex+1..]
-                count++
-                if c.string == '/' # check if escaped!
-                    for rc in line.chunks[chunkIndex..chunkIndex+count]
-                        rc.value += ' regexp'
-                    return count
+                    return 0 if (prev.column+prev.length <  chunk.column) and next?.column >  chunk.column+1
+                    return 0 if (prev.column+prev.length == chunk.column) and next?.column == chunk.column+1
+  
+            pushStack type:'regexp'
+            chunk.value += ' regexp start'
+            return 1
         0
         
     simpleString = ->
         
+        return 0 if topType == 'regexp'
+        
         if chunk.string in ['"' "'" '`']
-            value = switch chunk.string 
-                when '"' then 'double' 
-                when "'" then 'single'
-                when '`' then 'backtick'
-            count = 0
-            escape = 0
-            for c in line.chunks[chunkIndex+1..]
-                count++
-                if c.string == '\\'
-                    escape++
-                if c.string == chunk.string and (escape % 2) != 1
-                    for rc in line.chunks[chunkIndex+1..chunkIndex+count-1]
-                        rc.value = "string #{value}"
-                    line.chunks[chunkIndex].value += " string #{value}"
-                    line.chunks[chunkIndex+count].value += " string #{value}"
-                    return count
-                if c.string != '\\'
-                    escape = 0
+            
+            if line.chunks[chunkIndex-1]?.escape
+                return stacked()
+            
+            type = switch chunk.string 
+                when '"' then 'string double' 
+                when "'" then 'string single'
+                when '`' then 'string backtick'
+            
+            if topType == type
+                chunk.value += ' ' + type
+                popStack()
+                return 1
+            else if stackTop
+                return stacked()
+                
+            pushStack type:type, strong:true
+            chunk.value += ' ' + type
+            return 1
+            
+        if chunk.string == '\\' and topType.startsWith 'string'
+            if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
+                chunk.escape = true
         0
     
+    stacked = ->
+        
+        if stackTop
+            if stackTop.strong
+                chunk.value = topType
+            else
+                chunk.value += ' ' + topType
+            return 1
+        0
+        
     handlers = 
-        koffee: punct: [ hashComment,  simpleString, dashArrow, regexp ]
-        coffee: punct: [ hashComment,  simpleString, dashArrow, regexp ]
-        noon:   punct: [ noonComment                                   ]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp ]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp ]
+        koffee: punct: [ simpleString, hashComment, dashArrow,  regexp, stacked ], word: [stacked]
+        coffee: punct: [ simpleString, hashComment, dashArrow,  regexp, stacked ], word: [stacked]
+        noon:   punct: [ noonComment                                  , stacked ], word: [stacked]
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
         md:     {}
         js:     {}
         iss:    {}
@@ -342,22 +368,23 @@ ranged = (lines) ->
             rngs.push range
     rngs
 
-for i in [0..3]
-    blocks lines0
-    # blocks lines1
-    # lines0.map (l) -> Syntax.ranges l, 'koffee'
-    
-for i in [0..15]
-    
-    ▸profile 'lines0'
+▸if 1
+    for i in [0..3]
         blocks lines0
-    # ▸profile 'syntax0'
+        # blocks lines1
         # lines0.map (l) -> Syntax.ranges l, 'koffee'
         
-    # ▸profile 'lines1'
-        # blocks lines1
-    # ▸profile 'syntax1'
-        # lines1.map (l) -> Syntax.ranges l, 'koffee'
+    for i in [0..15]
+        
+        ▸profile 'lines0'
+            blocks lines0
+        # ▸profile 'syntax0'
+            # lines0.map (l) -> Syntax.ranges l, 'koffee'
+            
+        # ▸profile 'lines1'
+            # blocks lines1
+        # ▸profile 'syntax1'
+            # lines1.map (l) -> Syntax.ranges l, 'koffee'
         
 module.exports =
     ranges: (textline, ext) -> ranged blocks [textline], ext
@@ -422,9 +449,9 @@ module.exports =
     blocks(["▸doc 'hello'"]).should.eql [ext:'koffee' chars:12 index:0 number:1 chunks:[ 
                   {column:0  length:1 string:'▸'     value:'punct meta'} 
                   {column:1  length:3 string:'doc'   value:'meta'} 
-                  {column:5  length:1 string:"'"     value:'punct'} 
-                  {column:6  length:5 string:"hello" value:'text'} 
-                  {column:11 length:1 string:"'"     value:'punct'} 
+                  {column:5  length:1 string:"'"     value:'punct string single'} 
+                  {column:6  length:5 string:"hello" value:'string single'} 
+                  {column:11 length:1 string:"'"     value:'punct string single'} 
                   ]]
                   
 ▸test 'space'
