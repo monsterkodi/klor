@@ -216,7 +216,7 @@ blocked = (lines) ->
                 chunk.value += ' ' + type
                 popStack()
                 return 1
-            else if stackTop
+            else if stackTop and topType != 'interpolation'
                 return stacked()
                 
             pushStack type:type, strong:true
@@ -228,6 +228,23 @@ blocked = (lines) ->
                 chunk.escape = true
         0
     
+    interpolation: ->
+        
+        if topType == 'string double'
+        
+            if chunk.turd.startsWith "#{"
+                pushStack type:'interpolation'
+                chunk.value += ' string interpolation start'
+                return 2
+                
+        else if topType == 'interpolation'
+            
+            if chunk.string == '}'
+                chunk.value += ' string interpolation end'
+                popStack()
+                return 1
+        0
+        
     stacked = ->
         
         if stackTop
@@ -239,8 +256,8 @@ blocked = (lines) ->
         0
         
     handlers = 
-        koffee: punct: [ simpleString, hashComment, dashArrow,  regexp, stacked ], word: [stacked]
-        coffee: punct: [ simpleString, hashComment, dashArrow,  regexp, stacked ], word: [stacked]
+        koffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [stacked]
+        coffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [stacked]
         noon:   punct: [ noonComment                                  , stacked ], word: [stacked]
         js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
         ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
