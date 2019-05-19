@@ -1,4 +1,4 @@
-        
+
 #  0000000   0000000   00000000  00000000  00000000  00000000              000   0000000  
 # 000       000   000  000       000       000       000                   000  000       
 # 000       000   000  000000    000000    0000000   0000000               000  0000000   
@@ -75,10 +75,10 @@ coffee js ts
 
 coffee
       
-    match
-        ▸
-            turd    meta
-            w-0     meta
+    # match
+        # |▸|
+            # turd    meta
+            # w-0     meta
 
     comment
         tail    #
@@ -172,24 +172,6 @@ noon
 
 cpp hpp cxx c h cs
 
-    # define or keyword  
-        # t-1 
-            # |#|     define
-            # ||      keyword
-        # if
-        # else
-        # ifdef
-        # undef
-        # ifndef
-        # define
-        # endif
-    
-    # define
-        # t-1     
-            # |#|     define
-        # include
-        # pragma
-       
     define
         ifdef
         undef
@@ -199,11 +181,6 @@ cpp hpp cxx c h cs
         include
         pragma
         
-    once
-        w-1
-            pragma  define
-        once
-
     keyword
         if
         else
@@ -754,16 +731,6 @@ sh bash
     comment
         line    #
 
-    # match
-        # --
-            # turd    argument punctuation
-            # w-0     argument
-            # spaced  true
-        # -
-            # turd    argument punctuation
-            # w-0     argument
-            # spaced  true
-        
     keyword
         cd 
         rm
@@ -830,18 +797,6 @@ fish
 # 000  0000000   0000000   
 
 iss
-    define
-        t-1 
-            |#|     define
-            ||      keyword
-        define
-    match
-        property
-            start   {#
-            end     }
-        number hex
-            start   {{
-            end     }
     keyword
         appid
         appname

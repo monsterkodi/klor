@@ -6,15 +6,18 @@
 0000000    0000000   0000000    0000000  000   000  0000000     
 ###
 
-{ slash, kstr, klog, noon, chai, _ } = require 'kxk'
+{ slash, kstr, klog, noon, _ } = require 'kxk'
         
 Syntax = require './syntax'
 Syntax.init()
 
 Syntax.swtch = 
-    coffee: '▸':    to: 'md'     w0:'doc'          indent: 1
-    md:     '```':  to: 'coffee' w0:'coffeescript' end:    '```'
-
+    coffee: 
+        doc:          turd:'▸'   to:'md'  indent: 1
+    md:     
+        coffeescript: turd:'```' to:'coffee' end:'```'
+        javascript:   turd:'```' to:'js'     end:'```'
+            
 SPACE  = /\s/
 PUNCT  = /\W+/gi
 NUMBER = /^\d+$/
@@ -211,6 +214,13 @@ blocked = (lines) ->
         return 0 if stackTop and topType != 'interpolation'
         return 0 if chunk.value.startsWith 'keyword'
         
+        if chunk.string == '▸'
+            if next = getChunk 1
+                if next.column == chunk.column+1 and next.value in ['text', 'keyword']
+                    addValue 0, 'meta'
+                    setValue 1, 'meta'
+                    return 1 # give switch a chance
+        
         if prev = getChunk -1
         
             if prev.value.startsWith 'text'
@@ -285,7 +295,7 @@ blocked = (lines) ->
                 when '"' then 'string double' 
                 when "'" then 'string single'
                 when '`' then 'string backtick'
-            
+                
             if topType == type
                 chunk.value += ' ' + type
                 popStack()
@@ -301,7 +311,29 @@ blocked = (lines) ->
             if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
                 chunk.escape = true
         0
-    
+
+    tripleString = -> 
+        
+        return 0 if not chunk.turd or chunk.turd.length < 3
+        return 0 if topType == 'regexp'
+        
+        type = switch chunk.turd[..2]
+            when '"""' then 'string double triple' 
+            when "'''" then 'string single triple'
+            when '```' then 'string backtick triple'
+
+        if type
+            if topType == type
+                popStack()
+            else
+                pushStack type:type, strong:true
+                
+            addValue 0, type
+            addValue 1, type
+            addValue 2, type
+            return 3
+        0
+        
     # 00     00  0000000          00000000   0000000   00000000   00     00   0000000   000000000  
     # 000   000  000   000        000       000   000  000   000  000   000  000   000     000     
     # 000000000  000   000        000000    000   000  0000000    000000000  000000000     000     
@@ -535,24 +567,24 @@ blocked = (lines) ->
     # 000   000  000   000  000   000  0000000    0000000  00000000  000   000  0000000   
     
     handlers = 
-        coffee: punct: [ coffeeFunc,   simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
+        coffee: punct: [ coffeeFunc,   tripleString, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
         noon:   punct: [ noonComment,                                   stacked ], word: [number,           stacked]
-        json:   punct: [ dict,         simpleString,                    stacked ], word: [number, jsFunc,   stacked]
+        json:   punct: [               simpleString, dict,              stacked ], word: [number, jsFunc,   stacked]
         js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
         ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
-        md:     punct: [ formatString, simpleString, xmlPunct,          stacked ], word: [number,           stacked]
+        md:     punct: [ formatString, tripleString, simpleString, xmlPunct, stacked ], word: [number,           stacked]
         iss:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         ini:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number,           stacked]
         cpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
         hpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
         c:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
         h:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
-        sh:     punct: [ simpleString, hashComment,  shPunct,           stacked ], word: [number,           stacked]
+        sh:     punct: [ hashComment,  simpleString, shPunct,           stacked ], word: [number,           stacked]
         cs:     punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         pug:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
-        svg:    punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
-        html:   punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
-        htm:    punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
+        svg:    punct: [               simpleString, xmlPunct,          stacked ], word: [number,           stacked]
+        html:   punct: [               simpleString, xmlPunct,          stacked ], word: [number,           stacked]
+        htm:    punct: [               simpleString, xmlPunct,          stacked ], word: [number,           stacked]
         styl:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         css:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         sass:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
@@ -584,30 +616,29 @@ blocked = (lines) ->
         
         chunkIndex = 0
         while chunkIndex < line.chunks.length
+            
             chunk = line.chunks[chunkIndex]
             beforeIndex = chunkIndex
+            
             if chunk.value == 'punct'
                                         
-                if mtch = Syntax.turd[line.ext]?[chunk.string] # ▸ doc
-                    chunk.value += ' ' + mtch.turd if mtch.turd
-                    line.chunks[chunkIndex+1]?.value = mtch['w-0'] if mtch['w-0']
-                              
-                popped = false
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
                         popExt() # end of extension block reached that is terminated by turd
-                        popped = true
-                       
-                if not popped
-                    if mtch = Syntax.swtch[line.ext]?[chunk.turd ? chunk.string]
-                        # push a new extension onto the stack, ext will change on start of next line
-                        extStack.push extTop = switch:mtch, start:line, stack:stack
-                
+                                       
                 for hnd in handl.punct ? []
                     if advance = hnd()
                         chunkIndex += advance
                         break
             else
+                
+                if mtch = Syntax.swtch[line.ext]?[chunk.string] 
+                    if mtch.turd
+                        turdChunk = getChunk -mtch.turd.length
+                        if mtch.turd == (turdChunk?.turd ? turdChunk?.string)
+                            # push a new extension onto the stack, ext will change on start of next line
+                            extStack.push extTop = switch:mtch, start:line, stack:stack
+                
                 for hnd in handl.word ? []
                     if advance = hnd()
                         chunkIndex += advance
@@ -720,7 +751,7 @@ module.exports =
 
 ▸test 'comment'
 
-    chai()
+    require('kxk').chai()
     
     blocks(["##"]).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:"#" value:'punct comment' turd:"##"} 
@@ -840,4 +871,25 @@ module.exports =
     b[6].should.include.property 'ext' 'md'
     b[7].should.include.property 'ext' 'md'
     b[8].should.include.property 'ext' 'coffee'
+    
+    b = blocks """
+        ▸dooc 'hello'
+            x  
+        """.split '\n'
+    b[0].should.include.property 'ext' 'coffee'
+    b[1].should.include.property 'ext' 'coffee'
+
+    b = blocks """
+        ```coffeescript
+            1+1
+        ```
+        ```javascript
+            1+1;
+        ```
+        """.split('\n'), 'md'
+    b[0].should.include.property 'ext' 'md'
+    b[1].should.include.property 'ext' 'coffee'
+    b[2].should.include.property 'ext' 'md'
+    b[3].should.include.property 'ext' 'md'
+    b[4].should.include.property 'ext' 'js'
     
