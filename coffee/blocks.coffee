@@ -267,45 +267,39 @@ blocked = (lines) ->
         
         if chunk.turd == '**'
             
-            if topType?.endsWith 'bold'
+            type = 'bold'
+            if topType?.endsWith type
                 addValue 0, topType
                 addValue 1, topType
                 popStack()
                 return 2
 
-            type = 'bold'
-            if stackTop?.merge then type = stackTop.type + ' ' + type
-                
-            pushStack type:type, merge:true
+            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
             addValue 0, type
             addValue 1, type
             return 2
             
         if chunk.string == '*'
             
-            if topType?.endsWith 'italic'
+            type = 'italic'
+            if topType?.endsWith type
                 addValue 0, topType
                 popStack()
                 return 1
 
-            type = 'italic'
-            if stackTop?.merge then type = stackTop.type + ' ' + type
-                
-            pushStack type:type, merge:true
+            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
             addValue 0, type
             return 1
           
         if chunk.string == '`'
             
-            if topType?.endsWith 'backtick'
+            type = 'backtick'
+            if topType?.endsWith type
                 addValue 0, topType
                 popStack()
                 return 1
                 
-            type = 'backtick'
-            if stackTop?.merge then type = stackTop.type + ' ' + type
-                
-            pushStack type:type, merge:true
+            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
             addValue 0, type
             return 1
         0
