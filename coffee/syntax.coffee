@@ -598,7 +598,7 @@ class Syntax
                     if last(obj.rgs)?.value == 'dictionary key'
                         value = 'dictionary punctuation'
                 else
-                    if obj.coffee # koffee constructor shortcut
+                    if obj.coffee # koffee constructor shortcut @:
                         setValue -1, 'method'
                         value = 'method punctuation'
             when '>'

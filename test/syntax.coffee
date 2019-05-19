@@ -452,19 +452,13 @@ describe 'syntax', ->
         
     it 'koffee', ->
         
-        rgs = Syntax.ranges " @: ->", 'koffee'
+        rgs = Syntax.ranges " @: ->", 'coffee'
         inc rgs, 1, "@", 'method'
         inc rgs, 2, ":", 'method punctuation'
         inc rgs, 4, "-", 'function tail punctuation'
         inc rgs, 5, ">", 'function head punctuation'
 
-        rgs = Syntax.ranges "▸if ▸then ▸elif ▸else", 'koffee'
-        inc rgs, 0,  "▸if",   'keyword'
-        inc rgs, 4,  "▸then", 'keyword'
-        inc rgs, 10, "▸elif", 'keyword'
-        inc rgs, 16, "▸else", 'keyword'
-
-        rgs = Syntax.ranges "[1 'x' a:1 c:d]", 'koffee'
+        rgs = Syntax.ranges "[1 'x' a:1 c:d]", 'coffee'
         inc rgs, 1,  "1",   'number'
         inc rgs, 4,  "x",   'string single'
         inc rgs, 7,  "a",   'dictionary key'

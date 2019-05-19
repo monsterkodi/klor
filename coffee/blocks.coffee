@@ -1,20 +1,20 @@
+###
+0000000    000       0000000    0000000  000   000   0000000    
+000   000  000      000   000  000       000  000   000         
+0000000    000      000   000  000       0000000    0000000     
+000   000  000      000   000  000       000  000        000    
+0000000    0000000   0000000    0000000  000   000  0000000     
+###
 
 { slash, kstr, klog, noon, chai, _ } = require 'kxk'
-
-▸profile '-----' 
-    Syntax = require './syntax'
-    Syntax.init()
-    
-    Syntax.swtch = 
-        koffee: '▸':    to: 'md'     w0:'doc'          indent: 1
-        md:     '```':  to: 'koffee' w0:'coffeescript' end:    '```'
-
-    text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 6-11ms
-    text1 = slash.readText "#{__dirname}/test.coffee" # 50-120μs
-
-    lines0 = text0.split '\n'
-    lines1 = text1.split '\n'
         
+Syntax = require './syntax'
+Syntax.init()
+
+Syntax.swtch = 
+    coffee: '▸':    to: 'md'     w0:'doc'          indent: 1
+    md:     '```':  to: 'coffee' w0:'coffeescript' end:    '```'
+
 SPACE  = /\s/
 PUNCT  = /\W+/gi
 NUMBER = /^\d+$/
@@ -98,11 +98,13 @@ chunked = (lines, ext) ->
             
         line
         
-# 0000000    000       0000000    0000000  000   000  00000000  0000000    
-# 000   000  000      000   000  000       000  000   000       000   000  
-# 0000000    000      000   000  000       0000000    0000000   000   000  
-# 000   000  000      000   000  000       000  000   000       000   000  
-# 0000000    0000000   0000000    0000000  000   000  00000000  0000000    
+###
+0000000    000       0000000    0000000  000   000  00000000  0000000    
+000   000  000      000   000  000       000  000   000       000   000  
+0000000    000      000   000  000       0000000    0000000   000   000  
+000   000  000      000   000  000       000  000   000       000   000  
+0000000    0000000   0000000    0000000  000   000  00000000  0000000    
+###
 
 blocked = (lines) ->
     
@@ -115,32 +117,15 @@ blocked = (lines) ->
         - 'value' changed in chunks that match language patterns
           
     extStack   = []
-    extTop     = null
-    handl      = []
     stack      = []
-    topType    = null
+    handl      = []
+    extTop     = null
     stackTop   = null
-    ext        = null
-    chunk      = null
+    topType    = ''
+    ext        = ''
     line       = null
-    chunkIndex = null
-
-    popExt = ->
-        stack = extTop.stack
-        # line.pop = true
-        line.ext = extTop.start.ext
-        extStack.pop()               
-        extTop = extStack[-1]
-    
-    pushStack = (o) -> 
-        stack.push o 
-        stackTop = o
-        topType = o.type
-        
-    popStack = -> 
-        stack.pop()
-        stackTop = stack[-1]
-        topType = stackTop?.type
+    chunk      = null
+    chunkIndex = 0
         
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     
@@ -520,6 +505,22 @@ blocked = (lines) ->
                 chunk.value += ' ' + topType
             return 1
         0
+       
+    popExt = ->
+        stack = extTop.stack
+        line.ext = extTop.start.ext
+        extStack.pop()               
+        extTop = extStack[-1]
+    
+    pushStack = (o) -> 
+        stack.push o 
+        stackTop = o
+        topType = o.type
+        
+    popStack = -> 
+        stack.pop()
+        stackTop = stack[-1]
+        topType = stackTop?.type
         
     getChunk  = (d) -> line.chunks[chunkIndex+d]
     setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
@@ -534,29 +535,29 @@ blocked = (lines) ->
     # 000   000  000   000  000   000  0000000    0000000  00000000  000   000  0000000   
     
     handlers = 
-        koffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
-        coffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
-        noon:   punct: [ noonComment                                  , stacked ], word: [number, stacked]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc, stacked]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc, stacked]
-        md:     punct: [ formatString, simpleString, xmlPunct, stacked ], word: [number, stacked]
-        iss:    {}
-        ini:    {}
-        sh:     punct: [ simpleString, hashComment, shPunct, stacked ]
-        cpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
-        hpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
-        c:      punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
-        h:      punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
-        cs:     {}
-        pug:    {}
-        svg:    punct: [ xmlPunct ]
-        html:   punct: [ xmlPunct ]
-        htm:    punct: [ xmlPunct ]
-        styl:   {}   
-        css:    {}   
-        sass:   {}   
-        scss:   {}  
-        log:    {}
+        coffee: punct: [ coffeeFunc,   simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
+        noon:   punct: [ noonComment,                                   stacked ], word: [number,           stacked]
+        json:   punct: [ dict,         simpleString,                    stacked ], word: [number, jsFunc,   stacked]
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
+        md:     punct: [ formatString, simpleString, xmlPunct,          stacked ], word: [number,           stacked]
+        iss:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        ini:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number,           stacked]
+        cpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
+        hpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
+        c:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
+        h:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
+        sh:     punct: [ simpleString, hashComment,  shPunct,           stacked ], word: [number,           stacked]
+        cs:     punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        pug:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        svg:    punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
+        html:   punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
+        htm:    punct: [ xmlPunct,     simpleString,                    stacked ], word: [number,           stacked]
+        styl:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        css:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        sass:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        scss:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        log:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
                         
     # 000      000  000   000  00000000  000       0000000    0000000   00000000   
     # 000      000  0000  000  000       000      000   000  000   000  000   000  
@@ -622,7 +623,7 @@ blocked = (lines) ->
 # 000   000  000      000   000  000       000  000        000  
 # 0000000    0000000   0000000    0000000  000   000  0000000   
 
-blocks = (lines, ext='koffee') ->
+blocks = (lines, ext='coffee') ->
     
     ▸doc 'blocks *lines*, *ext*'
 
@@ -675,23 +676,38 @@ ranged = (lines) ->
             rngs.push range
     rngs
 
-▸if 1
+# 00000000   00000000    0000000   00000000  000  000      00000000  
+# 000   000  000   000  000   000  000       000  000      000       
+# 00000000   0000000    000   000  000000    000  000      0000000   
+# 000        000   000  000   000  000       000  000      000       
+# 000        000   000   0000000   000       000  0000000  00000000  
+
+▸test 'profile'
+    
+    ▸profile '-----'
+        
+        text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 6-11ms
+        text1 = slash.readText "#{__dirname}/test.coffee" # 50-120μs
+    
+        lines0 = text0.split '\n'
+        lines1 = text1.split '\n'
+
     for i in [0..3]
         blocks lines0
         # blocks lines1
-        # lines0.map (l) -> Syntax.ranges l, 'koffee'
+        # lines0.map (l) -> Syntax.ranges l, 'coffee'
         
     for i in [0..15]
         
         ▸profile 'lines0'
             blocks lines0
         # ▸profile 'syntax0'
-            # lines0.map (l) -> Syntax.ranges l, 'koffee'
+            # lines0.map (l) -> Syntax.ranges l, 'coffee'
             
         # ▸profile 'lines1'
             # blocks lines1
         # ▸profile 'syntax1'
-            # lines1.map (l) -> Syntax.ranges l, 'koffee'
+            # lines1.map (l) -> Syntax.ranges l, 'coffee'
         
 module.exports =
     ranges: (textline, ext) -> ranged blocks [textline], ext
@@ -706,12 +722,12 @@ module.exports =
 
     chai()
     
-    blocks(["##"]).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
+    blocks(["##"]).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:"#" value:'punct comment' turd:"##"} 
                 {column:1 length:1 string:"#" value:'comment'} 
                 ]]
 
-    blocks([",#a"]).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
+    blocks([",#a"]).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:"," value:'punct' turd: ",#"} 
                 {column:1 length:1 string:"#" value:'punct comment'} 
                 {column:2 length:1 string:"a" value:'comment'} 
@@ -719,15 +735,15 @@ module.exports =
                 
 ▸test 'function'
 
-    blocks(['->']).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
+    blocks(['->']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:'-' value:'punct function tail' turd: '->'} 
                 {column:1 length:1 string:'>' value:'punct function head'} 
                 ]]
-    blocks(['=>']).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
+    blocks(['=>']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:'=' value:'punct function bound tail' turd: '=>'} 
                 {column:1 length:1 string:'>' value:'punct function bound head'} 
                 ]]
-    blocks(['f=->1']).should.eql [ext:'koffee' chars:5 index:0 number:1 chunks:[ 
+    blocks(['f=->1']).should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:'f' value:'function'} 
                 {column:1 length:1 string:'=' value:'punct'               turd:'=->' } 
                 {column:2 length:1 string:'-' value:'punct function tail' turd:'->'} 
@@ -737,23 +753,23 @@ module.exports =
                 
 ▸test 'minimal'
                 
-    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'1' value:'number'} ]]
-    blocks(['a']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'a' value:'text'} ]]
-    blocks(['.']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'.' value:'punct'} ]]
+    blocks(['1']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'1' value:'number'} ]]
+    blocks(['a']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'a' value:'text'} ]]
+    blocks(['.']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'.' value:'punct'} ]]
 
-    blocks(['1.a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
+    blocks(['1.a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                  {column:0  length:1 string:'1' value:'number'} 
                  {column:1  length:1 string:'.' value:'punct property'} 
                  {column:2  length:1 string:'a' value:'property'} 
                  ]]
                  
-    blocks(['++a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
+    blocks(['++a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                  {column:0  length:1 string:'+' value:'punct', turd:'++'} 
                  {column:1  length:1 string:'+' value:'punct'} 
                  {column:2  length:1 string:'a' value:'text'} 
                  ]]
                  
-    blocks(["▸doc 'hello'"]).should.eql [ext:'koffee' chars:12 index:0 number:1 chunks:[ 
+    blocks(["▸doc 'hello'"]).should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
                   {column:0  length:1 string:'▸'     value:'punct meta'} 
                   {column:1  length:3 string:'doc'   value:'meta'} 
                   {column:5  length:1 string:"'"     value:'punct string single'} 
@@ -784,10 +800,10 @@ module.exports =
             x    
             y
         1""".split '\n'
-    b[0].should.include.property 'ext' 'koffee'
+    b[0].should.include.property 'ext' 'coffee'
     b[1].should.include.property 'ext' 'md'
     b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'koffee'
+    b[3].should.include.property 'ext' 'coffee'
 
     b = blocks """
         ▸doc 'hello'
@@ -797,13 +813,13 @@ module.exports =
             ```
             y
         1""".split '\n'
-    b[0].should.include.property 'ext' 'koffee'
+    b[0].should.include.property 'ext' 'coffee'
     b[1].should.include.property 'ext' 'md'
     b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'koffee'
+    b[3].should.include.property 'ext' 'coffee'
     b[4].should.include.property 'ext' 'md'
     b[5].should.include.property 'ext' 'md'
-    b[6].should.include.property 'ext' 'koffee'
+    b[6].should.include.property 'ext' 'coffee'
 
     b = blocks """                    
         ▸doc 'hello'                  
@@ -815,13 +831,13 @@ module.exports =
             ```                       
             y                         
         1""".split '\n'               
-    b[0].should.include.property 'ext' 'koffee'
+    b[0].should.include.property 'ext' 'coffee'
     b[1].should.include.property 'ext' 'md'
     b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'koffee'
-    b[4].should.include.property 'ext' 'koffee'
+    b[3].should.include.property 'ext' 'coffee'
+    b[4].should.include.property 'ext' 'coffee'
     b[5].should.include.property 'ext' 'md'
     b[6].should.include.property 'ext' 'md'
     b[7].should.include.property 'ext' 'md'
-    b[8].should.include.property 'ext' 'koffee'
+    b[8].should.include.property 'ext' 'coffee'
     
