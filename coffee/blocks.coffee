@@ -15,6 +15,11 @@
     lines0 = text0.split '\n'
     lines1 = text1.split '\n'
         
+SPACE  = /\s/
+PUNCT  = /\W+/gi
+NUMBER = /^\d+$/
+HEXNUM = /^0x[a-fA-F\d]+$/
+
 #  0000000  000   000  000   000  000   000  000   000  00000000  0000000    
 # 000       000   000  000   000  0000  000  000  000   000       000   000  
 # 000       000000000  000   000  000 0 000  0000000    0000000   000   000  
@@ -50,7 +55,7 @@ chunked = (lines, ext) ->
             number: lineno
             ext:    ext
 
-        chunks = text.split /\s/
+        chunks = text.split SPACE
         
         if chunks.length == 1 and chunks[0] == ''
             return line # empty line
@@ -66,8 +71,7 @@ chunked = (lines, ext) ->
                 
                 # seperate by punctuation
                 
-                re = /\W+/gi
-                while m = re.exec s
+                while m = PUNCT.exec s
                     
                     if m.index > 0
                         wl = m.index-(c-sc)
@@ -134,6 +138,12 @@ blocked = (lines) ->
         
     popStack = -> stack.pop()
         
+    #  0000000   0000000   00     00  00     00  00000000  000   000  000000000  
+    # 000       000   000  000   000  000   000  000       0000  000     000     
+    # 000       000   000  000000000  000000000  0000000   000 0 000     000     
+    # 000       000   000  000 0 000  000 0 000  000       000  0000     000     
+    #  0000000   0000000   000   000  000   000  00000000  000   000     000     
+    
     hashComment = -> 
         
         return 0 if stackTop
@@ -160,6 +170,12 @@ blocked = (lines) ->
         
     slashComment = -> 0
                 
+    #  0000000   00000000   00000000    0000000   000   000  
+    # 000   000  000   000  000   000  000   000  000 0 000  
+    # 000000000  0000000    0000000    000   000  000000000  
+    # 000   000  000   000  000   000  000   000  000   000  
+    # 000   000  000   000  000   000   0000000   00     00  
+    
     dashArrow = ->
 
         if chunk.turd == '->'
@@ -175,6 +191,12 @@ blocked = (lines) ->
             return 2
         0
                 
+    # 00000000   00000000   0000000   00000000  000   000  00000000   
+    # 000   000  000       000        000        000 000   000   000  
+    # 0000000    0000000   000  0000  0000000     00000    00000000   
+    # 000   000  000       000   000  000        000 000   000        
+    # 000   000  00000000   0000000   00000000  000   000  000        
+    
     regexp = ->
         
         return 0 if topType == 'string'
@@ -198,6 +220,12 @@ blocked = (lines) ->
             return 1
         0
         
+    #  0000000  000000000  00000000   000  000   000   0000000   
+    # 000          000     000   000  000  0000  000  000        
+    # 0000000      000     0000000    000  000 0 000  000  0000  
+    #      000     000     000   000  000  000  0000  000   000  
+    # 0000000      000     000   000  000  000   000   0000000   
+    
     simpleString = ->
         
         return 0 if topType == 'regexp'
@@ -228,13 +256,20 @@ blocked = (lines) ->
                 chunk.escape = true
         0
     
-    interpolation: ->
+    # 000  000   000  000000000  00000000  00000000   00000000    0000000   000     
+    # 000  0000  000     000     000       000   000  000   000  000   000  000     
+    # 000  000 0 000     000     0000000   0000000    00000000   000   000  000     
+    # 000  000  0000     000     000       000   000  000        000   000  000     
+    # 000  000   000     000     00000000  000   000  000         0000000   0000000 
+    
+    interpolation = ->
         
         if topType == 'string double'
         
-            if chunk.turd.startsWith "#{"
-                pushStack type:'interpolation'
+            if chunk.turd?.startsWith "\#{"
+                pushStack type:'interpolation', weak:true
                 chunk.value += ' string interpolation start'
+                line.chunks[chunkIndex+1].value += ' string interpolation start'
                 return 2
                 
         else if topType == 'interpolation'
@@ -245,9 +280,16 @@ blocked = (lines) ->
                 return 1
         0
         
+    #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
+    # 000          000     000   000  000       000  000   000       000   000  
+    # 0000000      000     000000000  000       0000000    0000000   000   000  
+    #      000     000     000   000  000       000  000   000       000   000  
+    # 0000000      000     000   000   0000000  000   000  00000000  0000000    
+    
     stacked = ->
         
         if stackTop
+            return if stackTop.weak
             if stackTop.strong
                 chunk.value = topType
             else
@@ -255,9 +297,50 @@ blocked = (lines) ->
             return 1
         0
         
+    getChunk = (d) -> line.chunks[chunkIndex+d]
+    setValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
+    addValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value += ' ' + value
+    getValue = (d) -> getChunk(d)?.value
+    getString = (d) -> getChunk(d)?.string
+
+    # 000   000  000   000  00     00  0000000    00000000  00000000   
+    # 0000  000  000   000  000   000  000   000  000       000   000  
+    # 000 0 000  000   000  000000000  0000000    0000000   0000000    
+    # 000  0000  000   000  000 0 000  000   000  000       000   000  
+    # 000   000   0000000   000   000  0000000    00000000  000   000  
+    
+    number = ->
+        
+        if NUMBER.test chunk.string
+            
+            if getString(-1) == '.'
+
+                if getValue(-4) == 'number float' and getValue(-2) == 'number float'
+                    setValue -4, 'semver'
+                    setValue -3, 'punct semver'
+                    setValue -2, 'semver'
+                    setValue -1, 'punct semver'
+                    setValue  0, 'semver'
+                    return 1
+
+                if getValue(-2) == 'number'
+                    setValue -2, 'number float'
+                    addValue -1, 'number float'
+                    setValue  0, 'number float'
+                    return 1
+
+            chunk.value = 'number'
+            return 1
+            
+        if HEXNUM.test chunk.string
+            
+            chunk.value = 'number hex'
+            return 1
+        0
+        
     handlers = 
-        koffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [stacked]
-        coffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [stacked]
+        koffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
+        coffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
         noon:   punct: [ noonComment                                  , stacked ], word: [stacked]
         js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
         ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
@@ -442,17 +525,17 @@ module.exports =
                 {column:1 length:1 string:'=' value:'punct'               turd:'=->' } 
                 {column:2 length:1 string:'-' value:'punct function tail' turd:'->'} 
                 {column:3 length:1 string:'>' value:'punct function head'} 
-                {column:4 length:1 string:'1' value:'text'} 
+                {column:4 length:1 string:'1' value:'number'} 
                 ]]
                 
 ▸test 'minimal'
                 
-    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'1' value:'text'} ]]
+    blocks(['1']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'1' value:'number'} ]]
     blocks(['a']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'a' value:'text'} ]]
     blocks(['.']).should.eql [ext:'koffee' chars:1 index:0 number:1 chunks:[ {column:0 length:1 string:'.' value:'punct'} ]]
 
     blocks(['1.a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
-                 {column:0  length:1 string:'1' value:'text'} 
+                 {column:0  length:1 string:'1' value:'number'} 
                  {column:1  length:1 string:'.' value:'punct'} 
                  {column:2  length:1 string:'a' value:'text'} 
                  ]]

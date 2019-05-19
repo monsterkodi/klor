@@ -31,7 +31,6 @@ describe 'syntax', ->
         inc rgs, 2, 'a', 'text regexp'
             
         rgs = Syntax.ranges "/^#include/", 'coffee'
-        log rgs
         inc rgs, 0, '/',       'punctuation regexp start'
         inc rgs, 2, "#",       'punctuation regexp'
         inc rgs, 3, "include", 'text regexp'
@@ -91,7 +90,59 @@ describe 'syntax', ->
         rgs = Syntax.ranges "(^\s*#\s*)(.*)$", 'noon'
         for rng in rgs
             rng.should.not.have.property 'value', 'comment'
+
+    # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
+    # 0000  000  000   000  000   000  000   000  000       000   000  000       
+    # 000 0 000  000   000  000000000  0000000    0000000   0000000    0000000   
+    # 000  0000  000   000  000 0 000  000   000  000       000   000       000  
+    # 000   000   0000000   000   000  0000000    00000000  000   000  0000000   
+    
+    it 'numbers', ->
+        
+        rgs = Syntax.ranges "a 6670"
+        inc rgs, 2, "6670", 'number'
+
+        rgs = Syntax.ranges "0x667AC"
+        inc rgs, 0, "0x667AC", 'number hex'
+
+        rgs = Syntax.ranges "66.700"
+        inc rgs, 0, "66",  'number float'
+        inc rgs, 2, ".",   'punctuation number float'
+        inc rgs, 3, "700", 'number float'
+
+        rgs = Syntax.ranges "77.800 -100"
+        inc rgs, 0, "77",  'number float'
+        inc rgs, 8, "100", 'number'
+
+        rgs = Syntax.ranges "(8.9,100.2)"
+        inc rgs, 3, "9", 'number float'
+        inc rgs, 9, "2", 'number float'
+         
+    #  0000000  00000000  00     00  000   000  00000000  00000000   
+    # 000       000       000   000  000   000  000       000   000  
+    # 0000000   0000000   000000000   000 000   0000000   0000000    
+    #      000  000       000 0 000     000     000       000   000  
+    # 0000000   00000000  000   000      0      00000000  000   000  
+    
+    it 'semver', ->    
+        
+        rgs = Syntax.ranges "66.70.0"
+        inc rgs, 0, "66", 'semver'
+        inc rgs, 2, ".",  'punctuation semver'
+        inc rgs, 3, "70", 'semver'
+        inc rgs, 5, ".",  'punctuation semver'
+        inc rgs, 6, "0",  'semver'
+
+        rgs = Syntax.ranges "^0.7.1"
+        inc rgs, 1, "0", 'semver'
+        inc rgs, 3, "7", 'semver'
+        inc rgs, 5, "1", 'semver'
             
+        rgs = Syntax.ranges "^1.0.0-alpha.12"
+        inc rgs, 1, "1", 'semver'
+        inc rgs, 3, "0", 'semver'
+        inc rgs, 5, "0", 'semver'
+        
     #  0000000  000000000  00000000   000  000   000   0000000    0000000  
     # 000          000     000   000  000  0000  000  000        000       
     # 0000000      000     0000000    000  000 0 000  000  0000  0000000   
@@ -154,11 +205,16 @@ describe 'syntax', ->
     
     it 'interpolation', ->    
         
+        rgs = Syntax.ranges '"#{xxx}"', 'coffee'
+        inc rgs, 0, '"',   'punctuation string double'
+        inc rgs, 3, 'xxx', 'text'
+        inc rgs, 7, '"',   'punctuation string double'
+
         rgs = Syntax.ranges '"#{666}"', 'coffee'
         inc rgs, 0, '"',   'punctuation string double'
         inc rgs, 3, '666', 'number'
         inc rgs, 7, '"',   'punctuation string double'
-                
+        
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
     # 000       000   000  000000    000000    0000000   0000000   
@@ -284,57 +340,7 @@ describe 'syntax', ->
         inc rgs, 4,  "x",   'string single'
         inc rgs, 7,  "a",   'dictionary key'
         inc rgs, 11, "c",   'dictionary key'
-        
-    # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
-    # 0000  000  000   000  000   000  000   000  000       000   000  000       
-    # 000 0 000  000   000  000000000  0000000    0000000   0000000    0000000   
-    # 000  0000  000   000  000 0 000  000   000  000       000   000       000  
-    # 000   000   0000000   000   000  0000000    00000000  000   000  0000000   
-    
-    it 'numbers', ->
-        
-        rgs = Syntax.ranges "a 6670"
-        inc rgs, 2, "6670", 'number'
-
-        rgs = Syntax.ranges "0x667AC"
-        inc rgs, 0, "0x667AC", 'number hex'
-
-        rgs = Syntax.ranges "66.700"
-        inc rgs, 0, "66",  'number float'
-        inc rgs, 2, ".",   'punctuation number float'
-        inc rgs, 3, "700", 'number float'
-
-        rgs = Syntax.ranges "77.800 -100"
-        inc rgs, 0, "77",  'number float'
-        inc rgs, 8, "100", 'number'
-
-        rgs = Syntax.ranges "(8.9,100.2)"
-        inc rgs, 3, "9", 'number float'
-        inc rgs, 9, "2", 'number float'
-            
-    #  0000000  00000000  00     00  000   000  00000000  00000000   
-    # 000       000       000   000  000   000  000       000   000  
-    # 0000000   0000000   000000000   000 000   0000000   0000000    
-    #      000  000       000 0 000     000     000       000   000  
-    # 0000000   00000000  000   000      0      00000000  000   000  
-    
-    it 'semver', ->    
-        
-        rgs = Syntax.ranges "66.70.0"
-        inc rgs, 0, "66", 'semver'
-        inc rgs, 3, "70", 'semver'
-        inc rgs, 6, "0",  'semver'
-
-        rgs = Syntax.ranges "^0.7.1"
-        inc rgs, 1, "0", 'semver'
-        inc rgs, 3, "7", 'semver'
-        inc rgs, 5, "1", 'semver'
-            
-        rgs = Syntax.ranges "^1.0.0-alpha.12"
-        inc rgs, 1, "1", 'semver'
-        inc rgs, 3, "0", 'semver'
-        inc rgs, 5, "0", 'semver'
-                            
+                    
     # 00000000   000   000  000   000   0000000  000000000  000   000   0000000   000000000  000   0000000   000   000  
     # 000   000  000   000  0000  000  000          000     000   000  000   000     000     000  000   000  0000  000  
     # 00000000   000   000  000 0 000  000          000     000   000  000000000     000     000  000   000  000 0 000  
