@@ -236,6 +236,10 @@ blocked = (lines) ->
         0
         
     jsFunc = ->
+        
+        if chunk.value == 'keyword function'
+            if getString(-1) == '=' and getValue(-2).startsWith 'text'
+                setValue -2, 'function'
         0
         
     dict = ->
@@ -422,9 +426,83 @@ blocked = (lines) ->
             return 1
         0
         
-    xmlPunct = -> 0
-    cppMacro = -> 0
-    float    = -> 0
+    # 00000000  000       0000000    0000000   000000000  
+    # 000       000      000   000  000   000     000     
+    # 000000    000      000   000  000000000     000     
+    # 000       000      000   000  000   000     000     
+    # 000       0000000   0000000   000   000     000     
+    
+    float = ->
+        
+        if FLOAT.test chunk.string
+            if getString(-1) == '.'
+
+                if getValue(-2) == 'number'
+                    setValue -2, 'number float'
+                    addValue -1, 'number float'
+                    setValue  0, 'number float'
+                    return 1
+
+            chunk.value = 'number float'
+            return 1
+        0            
+        
+    # 000   000  00     00  000      
+    #  000 000   000   000  000      
+    #   00000    000000000  000      
+    #  000 000   000 0 000  000      
+    # 000   000  000   000  0000000  
+    
+    xmlPunct = -> 
+        
+        if chunk.turd == '</'
+            addValue 0, 'keyword'
+            addValue 1, 'keyword'
+            return 2
+            
+        if chunk.string in ['<''>']
+            addValue 0, 'keyword'
+            return 1
+            
+        0
+        
+    #  0000000  00000000   00000000   
+    # 000       000   000  000   000  
+    # 000       00000000   00000000   
+    # 000       000        000        
+    #  0000000  000        000        
+    
+    cppMacro = -> 
+        
+        if chunk.string == "#"
+            addValue 0, 'define'
+            setValue 1, 'define'
+            return 2
+        0
+
+    #  0000000  000   000
+    # 000       000   000
+    # 0000000   000000000
+    #      000  000   000
+    # 0000000   000   000
+    
+    shPunct = ->
+        
+        if chunk.string == '/' and getChunk(-1)?.column + getChunk(-1)?.length == chunk.column
+            addValue -1, 'dir'
+            return 1
+        
+        if chunk.turd == '--' and getChunk(2)?.column == chunk.column+2
+            addValue 0, 'argument'
+            addValue 1, 'argument'
+            setValue 2, 'argument'
+            return 3
+            
+        if chunk.string == '-' and getChunk(1)?.column == chunk.column+1
+            addValue 0, 'argument'
+            setValue 1, 'argument'
+            return 2
+        0
         
     #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
     # 000          000     000   000  000       000  000   000       000   000  
@@ -459,12 +537,12 @@ blocked = (lines) ->
         koffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
         coffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
         noon:   punct: [ noonComment                                  , stacked ], word: [number, stacked]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp, jsFunc, stacked ], word: [number, stacked]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, jsFunc, stacked ], word: [number, stacked]
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc, stacked]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc, stacked]
         md:     punct: [ formatString, simpleString, xmlPunct, stacked ], word: [number, stacked]
         iss:    {}
         ini:    {}
-        sh:     {}
+        sh:     punct: [ simpleString, hashComment, shPunct, stacked ]
         cpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
         hpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
         c:      punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
@@ -478,6 +556,7 @@ blocked = (lines) ->
         css:    {}   
         sass:   {}   
         scss:   {}  
+        log:    {}
                         
     # 000      000  000   000  00000000  000       0000000    0000000   00000000   
     # 000      000  0000  000  000       000      000   000  000   000  000   000  
@@ -515,7 +594,7 @@ blocked = (lines) ->
                 popped = false
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
-                        popExt()                # end of extension block reached that is terminated by turd
+                        popExt() # end of extension block reached that is terminated by turd
                         popped = true
                        
                 if not popped

@@ -768,15 +768,15 @@ sh bash
     comment
         line    #
 
-    match
-        --
-            turd    argument punctuation
-            w-0     argument
-            spaced  true
-        -
-            turd    argument punctuation
-            w-0     argument
-            spaced  true
+    # match
+        # --
+            # turd    argument punctuation
+            # w-0     argument
+            # spaced  true
+        # -
+            # turd    argument punctuation
+            # w-0     argument
+            # spaced  true
         
     keyword
         cd 
