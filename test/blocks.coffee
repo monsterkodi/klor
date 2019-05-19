@@ -214,6 +214,56 @@ describe 'syntax', ->
         inc rgs, 0, '"',   'punctuation string double'
         inc rgs, 3, '666', 'number'
         inc rgs, 7, '"',   'punctuation string double'
+
+    # 00     00  0000000    
+    # 000   000  000   000  
+    # 000000000  000   000  
+    # 000 0 000  000   000  
+    # 000   000  0000000    
+    
+    it 'md bold', ->
+        
+        rgs = Syntax.ranges "**bold**", 'md'
+        inc rgs, 0, '*',      'punctuation bold'
+        inc rgs, 1, '*',      'punctuation bold'
+        inc rgs, 2, 'bold',   'text bold'
+        inc rgs, 6, '*',      'punctuation bold'
+        inc rgs, 7, '*',      'punctuation bold'
+                
+    it 'md italic', ->
+        
+        rgs = Syntax.ranges "*it lic*", 'md'
+        inc rgs, 0, '*',      'punctuation italic'
+        inc rgs, 1, 'it',     'text italic'
+        inc rgs, 4, 'lic',    'text italic'
+        inc rgs, 7, '*',      'punctuation italic'
+        
+        rgs = Syntax.ranges "*italic*", 'md'
+        inc rgs, 0, '*',      'punctuation italic'
+        inc rgs, 1, 'italic', 'text italic'
+        inc rgs, 7, '*',      'punctuation italic'
+ 
+        rgs = Syntax.ranges "*`italic code`*", 'md'
+        inc rgs, 0, '*',      'punctuation italic'
+        inc rgs, 1, '`',      'punctuation italic backtick'
+        inc rgs, 2, 'italic', 'text italic backtick'
+        inc rgs, 9, 'code',   'text italic backtick'
+        inc rgs, 14, '*',     'punctuation italic'
+        
+    it 'md li', ->
+                
+        rgs = Syntax.ranges "- li", 'md'
+        inc rgs, 0, '-',  'li1 marker'
+        inc rgs, 2, 'li', 'li1'
+        
+        rgs = Syntax.ranges "    - **bold**", 'md'
+        inc rgs, 4, '-',    'li2 marker'
+        inc rgs, 8, 'bold', 'li2 bold'
+        
+        rgs = Syntax.ranges "    - **", 'md'
+        inc rgs, 4, '-',    'li2 marker'
+        inc rgs, 6, '*',    'punctuation li2'
+        inc rgs, 7, '*',    'punctuation li2'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -506,49 +556,4 @@ describe 'syntax', ->
         rgs = Syntax.ranges "key: value", 'log'
         inc rgs, 0, 'key',    'dictionary key'
         inc rgs, 3, ':',      'punctuation dictionary'
-
-    # 00     00  0000000    
-    # 000   000  000   000  
-    # 000000000  000   000  
-    # 000 0 000  000   000  
-    # 000   000  0000000    
-    
-    it 'md', ->
-        
-        rgs = Syntax.ranges "**bold**", 'md'
-        inc rgs, 0, '*',      'punctuation bold'
-        inc rgs, 1, '*',      'punctuation bold'
-        inc rgs, 2, 'bold',   'bold text'
-        inc rgs, 6, '*',      'punctuation bold'
-        inc rgs, 7, '*',      'punctuation bold'
-        
-        rgs = Syntax.ranges "    - **bold**", 'md'
-        inc rgs, 4, '-',    'li2 marker'
-        inc rgs, 8, 'bold', 'bold li2'
-        
-        rgs = Syntax.ranges "    - **", 'md'
-        inc rgs, 4, '-',    'li2 marker'
-        inc rgs, 6, '*',    'punctuation li2'
-        inc rgs, 7, '*',    'punctuation li2'
-        
-        rgs = Syntax.ranges "*`italic code`*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
-        inc rgs, 2, 'italic', 'italic string backtick'
-        inc rgs, 9, 'code',   'italic string backtick'
-        inc rgs, 14, '*',     'punctuation italic'
-        
-        rgs = Syntax.ranges "*it lic*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
-        inc rgs, 1, 'it',     'italic text'
-        inc rgs, 4, 'lic',    'italic text'
-        inc rgs, 7, '*',      'punctuation italic'
-        
-        rgs = Syntax.ranges "*italic*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
-        inc rgs, 1, 'italic', 'italic text'
-        inc rgs, 7, '*',      'punctuation italic'
-        
-        rgs = Syntax.ranges "- li", 'md'
-        inc rgs, 0, '-',  'li1 marker'
-        inc rgs, 2, 'li', 'li1'
         

@@ -136,7 +136,10 @@ blocked = (lines) ->
         stackTop = o
         topType = o.type
         
-    popStack = -> stack.pop()
+    popStack = -> 
+        stack.pop()
+        stackTop = stack[-1]
+        topType = stackTop?.type
         
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     
@@ -179,15 +182,13 @@ blocked = (lines) ->
     dashArrow = ->
 
         if chunk.turd == '->'
-            
-            chunk.value += ' function tail'
-            line.chunks[chunkIndex+1].value += ' function head'
+            addValue 0, 'function tail'
+            addValue 1, 'function head'
             return 2
                 
         if chunk.turd == '=>'
-            
-            chunk.value += ' function bound tail'
-            line.chunks[chunkIndex+1].value += ' function bound head'
+            addValue 0, 'function bound tail'
+            addValue 1, 'function bound head'
             return 2
         0
                 
@@ -251,11 +252,64 @@ blocked = (lines) ->
             chunk.value += ' ' + type
             return 1
             
-        if chunk.string == '\\' and topType.startsWith 'string'
+        if chunk.string == '\\' and topType?.startsWith 'string'
             if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
                 chunk.escape = true
         0
     
+    # 00     00  0000000          00000000   0000000   00000000   00     00   0000000   000000000  
+    # 000   000  000   000        000       000   000  000   000  000   000  000   000     000     
+    # 000000000  000   000        000000    000   000  0000000    000000000  000000000     000     
+    # 000 0 000  000   000        000       000   000  000   000  000 0 000  000   000     000     
+    # 000   000  0000000          000        0000000   000   000  000   000  000   000     000     
+    
+    formatString = ->
+        
+        if chunk.turd == '**'
+            
+            if topType?.endsWith 'bold'
+                addValue 0, topType
+                addValue 1, topType
+                popStack()
+                return 2
+
+            type = 'bold'
+            if stackTop?.merge then type = stackTop.type + ' ' + type
+                
+            pushStack type:type, merge:true
+            addValue 0, type
+            addValue 1, type
+            return 2
+            
+        if chunk.string == '*'
+            
+            if topType?.endsWith 'italic'
+                addValue 0, topType
+                popStack()
+                return 1
+
+            type = 'italic'
+            if stackTop?.merge then type = stackTop.type + ' ' + type
+                
+            pushStack type:type, merge:true
+            addValue 0, type
+            return 1
+          
+        if chunk.string == '`'
+            
+            if topType?.endsWith 'backtick'
+                addValue 0, topType
+                popStack()
+                return 1
+                
+            type = 'backtick'
+            if stackTop?.merge then type = stackTop.type + ' ' + type
+                
+            pushStack type:type, merge:true
+            addValue 0, type
+            return 1
+        0
+        
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000     
     # 000  0000  000     000     000       000   000  000   000  000   000  000     
     # 000  000 0 000     000     0000000   0000000    00000000   000   000  000     
@@ -268,41 +322,18 @@ blocked = (lines) ->
         
             if chunk.turd?.startsWith "\#{"
                 pushStack type:'interpolation', weak:true
-                chunk.value += ' string interpolation start'
-                line.chunks[chunkIndex+1].value += ' string interpolation start'
+                addValue 0, 'string interpolation start'
+                addValue 1, 'string interpolation start'
                 return 2
                 
         else if topType == 'interpolation'
             
             if chunk.string == '}'
-                chunk.value += ' string interpolation end'
+                addValue 0, 'string interpolation end'
                 popStack()
                 return 1
         0
         
-    #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
-    # 000          000     000   000  000       000  000   000       000   000  
-    # 0000000      000     000000000  000       0000000    0000000   000   000  
-    #      000     000     000   000  000       000  000   000       000   000  
-    # 0000000      000     000   000   0000000  000   000  00000000  0000000    
-    
-    stacked = ->
-        
-        if stackTop
-            return if stackTop.weak
-            if stackTop.strong
-                chunk.value = topType
-            else
-                chunk.value += ' ' + topType
-            return 1
-        0
-        
-    getChunk = (d) -> line.chunks[chunkIndex+d]
-    setValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
-    addValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value += ' ' + value
-    getValue = (d) -> getChunk(d)?.value
-    getString = (d) -> getChunk(d)?.string
-
     # 000   000  000   000  00     00  0000000    00000000  00000000   
     # 0000  000  000   000  000   000  000   000  000       000   000  
     # 000 0 000  000   000  000000000  0000000    0000000   0000000    
@@ -338,13 +369,42 @@ blocked = (lines) ->
             return 1
         0
         
+    #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
+    # 000          000     000   000  000       000  000   000       000   000  
+    # 0000000      000     000000000  000       0000000    0000000   000   000  
+    #      000     000     000   000  000       000  000   000       000   000  
+    # 0000000      000     000   000   0000000  000   000  00000000  0000000    
+    
+    stacked = ->
+
+        if stackTop
+            return if stackTop.weak
+            if stackTop.strong
+                chunk.value = topType
+            else
+                chunk.value += ' ' + topType
+            return 1
+        0
+        
+    getChunk  = (d) -> line.chunks[chunkIndex+d]
+    setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
+    addValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value += ' ' + value
+    getValue  = (d) -> getChunk(d)?.value
+    getString = (d) -> getChunk(d)?.string
+        
+    # 000   000   0000000   000   000  0000000    000      00000000  00000000    0000000  
+    # 000   000  000   000  0000  000  000   000  000      000       000   000  000       
+    # 000000000  000000000  000 0 000  000   000  000      0000000   0000000    0000000   
+    # 000   000  000   000  000  0000  000   000  000      000       000   000       000  
+    # 000   000  000   000  000   000  0000000    0000000  00000000  000   000  0000000   
+    
     handlers = 
         koffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
         coffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
-        noon:   punct: [ noonComment                                  , stacked ], word: [stacked]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [stacked]
-        md:     {}
+        noon:   punct: [ noonComment                                  , stacked ], word: [number, stacked]
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, stacked]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, stacked]
+        md:     punct: [ formatString, simpleString, stacked ], word: [number, stacked]
         js:     {}
         iss:    {}
         ini:    {}
@@ -363,6 +423,12 @@ blocked = (lines) ->
         sass:   {}   
         scss:   {}  
                         
+    # 000      000  000   000  00000000  000       0000000    0000000   00000000   
+    # 000      000  0000  000  000       000      000   000  000   000  000   000  
+    # 000      000  000 0 000  0000000   000      000   000  000   000  00000000   
+    # 000      000  000  0000  000       000      000   000  000   000  000        
+    # 0000000  000  000   000  00000000  0000000   0000000    0000000   000        
+    
     for line in lines
            
         if extTop
@@ -373,6 +439,12 @@ blocked = (lines) ->
                 
         if ext != line.ext                      # either at start of file or we switched extension
             handl = handlers[ext = line.ext]    # install new handlers
+        
+        #  0000000  000   000  000   000  000   000  000   000  000       0000000    0000000   00000000   
+        # 000       000   000  000   000  0000  000  000  000   000      000   000  000   000  000   000  
+        # 000       000000000  000   000  000 0 000  0000000    000      000   000  000   000  00000000   
+        # 000       000   000  000   000  000  0000  000  000   000      000   000  000   000  000        
+        #  0000000  000   000   0000000   000   000  000   000  0000000   0000000    0000000   000        
         
         chunkIndex = 0
         while chunkIndex < line.chunks.length
