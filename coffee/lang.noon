@@ -186,21 +186,30 @@ noon
 
 cpp hpp cxx c h cs
 
-    define or keyword  
-        t-1 
-            |#|     define
-            ||      keyword
-        if
-        else
+    # define or keyword  
+        # t-1 
+            # |#|     define
+            # ||      keyword
+        # if
+        # else
+        # ifdef
+        # undef
+        # ifndef
+        # define
+        # endif
+    
+    # define
+        # t-1     
+            # |#|     define
+        # include
+        # pragma
+       
+    define
         ifdef
         undef
         ifndef
         define
         endif
-    
-    define
-        t-1     
-            |#|     define
         include
         pragma
         
@@ -210,6 +219,8 @@ cpp hpp cxx c h cs
         once
 
     keyword
+        if
+        else
         for 
         while
         switch

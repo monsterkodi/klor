@@ -18,6 +18,7 @@
 SPACE  = /\s/
 PUNCT  = /\W+/gi
 NUMBER = /^\d+$/
+FLOAT  = /^\d+f$/
 HEXNUM = /^0x[a-fA-F\d]+$/
 
 #  0000000  000   000  000   000  000   000  000   000  00000000  0000000    
@@ -184,14 +185,69 @@ blocked = (lines) ->
         if chunk.turd == '->'
             addValue 0, 'function tail'
             addValue 1, 'function head'
+            if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd == '@:'
+                line.chunks[0].value = 'method'
+                line.chunks[1].value = 'punct method'
             return 2
                 
         if chunk.turd == '=>'
             addValue 0, 'function bound tail'
             addValue 1, 'function bound head'
+            if line.chunks[0].value == 'dictionary key'
+                line.chunks[0].value = 'method'
+                line.chunks[1].value = 'punct method'
             return 2
         0
-                
+               
+    #  0000000   0000000   00000000  00000000  00000000  00000000  
+    # 000       000   000  000       000       000       000       
+    # 000       000   000  000000    000000    0000000   0000000   
+    # 000       000   000  000       000       000       000       
+    #  0000000   0000000   000       000       00000000  00000000  
+    
+    coffeeWord = ->
+        
+        prevString = getString(-1)
+        if prevString in ['class', 'extends']
+            setValue 0, 'class'
+            return 1
+            
+        if prevString == '.'
+            addValue -1, 'property'
+            setValue 0, 'property'
+            if prevPrev = getChunk -2
+                if prevPrev.value not in ['property', 'number']
+                    setValue -2, 'obj'
+            return 1
+        0
+
+    coffeeFunc = ->        
+
+        return 0 if stackTop and topType != 'interpolation'
+        return 0 if chunk.value.startsWith 'keyword'
+        
+        if prev = getChunk -1
+        
+            if prev.value.startsWith 'text'
+                if chunk.string == '='
+                    setValue -1, 'function'
+                else if prev.column+prev.length < chunk.column
+                    setValue -1, 'function call' 
+        0
+        
+    jsFunc = ->
+        0
+        
+    dict = ->
+        
+        if chunk.string == ':' and not chunk.turd?.startsWith '::'
+            if prev = getChunk -1
+                if prev.value.split(' ')[0] in ['string', 'number', 'text', 'keyword']
+                    setValue -1, 'dictionary key'
+                    setValue  0, 'punct dictionary'
+                    return 1
+        0
+        
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
     # 0000000    0000000   000  0000  0000000     00000    00000000   
@@ -210,8 +266,8 @@ blocked = (lines) ->
                 return 1
                 
             if chunkIndex 
-                prev = line.chunks[chunkIndex-1]
-                next = line.chunks[chunkIndex+1]
+                prev = getChunk -1
+                next = getChunk +1
                 if not prev.value.startsWith 'punct'
                     return 0 if (prev.column+prev.length <  chunk.column) and next?.column >  chunk.column+1
                     return 0 if (prev.column+prev.length == chunk.column) and next?.column == chunk.column+1
@@ -274,7 +330,8 @@ blocked = (lines) ->
                 popStack()
                 return 2
 
-            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
+            type = stackTop.type + ' ' + type if stackTop?.merge
+            pushStack merge:true, type:type
             addValue 0, type
             addValue 1, type
             return 2
@@ -287,7 +344,8 @@ blocked = (lines) ->
                 popStack()
                 return 1
 
-            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
+            type = stackTop.type + ' ' + type if stackTop?.merge
+            pushStack merge:true, type:type
             addValue 0, type
             return 1
           
@@ -299,7 +357,8 @@ blocked = (lines) ->
                 popStack()
                 return 1
                 
-            pushStack merge:true, type:stackTop?.merge and stackTop.type + ' ' + type or type
+            type = stackTop.type + ' ' + type if stackTop?.merge
+            pushStack merge:true, type:type
             addValue 0, type
             return 1
         0
@@ -363,6 +422,10 @@ blocked = (lines) ->
             return 1
         0
         
+    xmlPunct = -> 0
+    cppMacro = -> 0
+    float    = -> 0
+        
     #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
     # 000          000     000   000  000       000  000   000       000   000  
     # 0000000      000     000000000  000       0000000    0000000   000   000  
@@ -383,8 +446,8 @@ blocked = (lines) ->
     getChunk  = (d) -> line.chunks[chunkIndex+d]
     setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
     addValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value += ' ' + value
-    getValue  = (d) -> getChunk(d)?.value
-    getString = (d) -> getChunk(d)?.string
+    getValue  = (d) -> getChunk(d)?.value ? ''
+    getString = (d) -> getChunk(d)?.string ? ''
         
     # 000   000   0000000   000   000  0000000    000      00000000  00000000    0000000  
     # 000   000  000   000  0000  000  000   000  000      000       000   000  000       
@@ -393,25 +456,24 @@ blocked = (lines) ->
     # 000   000  000   000  000   000  0000000    0000000  00000000  000   000  0000000   
     
     handlers = 
-        koffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
-        coffee: punct: [ simpleString, hashComment, interpolation, dashArrow,  regexp, stacked ], word: [number, stacked]
+        koffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
+        coffee: punct: [ coffeeFunc, simpleString, hashComment, interpolation, dashArrow, regexp, dict, stacked ], word: [coffeeFunc, number, coffeeWord, stacked]
         noon:   punct: [ noonComment                                  , stacked ], word: [number, stacked]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, stacked]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, stacked]
-        md:     punct: [ formatString, simpleString, stacked ], word: [number, stacked]
-        js:     {}
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp, jsFunc, stacked ], word: [number, stacked]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, jsFunc, stacked ], word: [number, stacked]
+        md:     punct: [ formatString, simpleString, xmlPunct, stacked ], word: [number, stacked]
         iss:    {}
         ini:    {}
         sh:     {}
-        cpp:    {}
-        hpp:    {}
+        cpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
+        hpp:    punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
+        c:      punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
+        h:      punct: [ slashComment, simpleString, cppMacro ], word: [number, float, stacked]
         cs:     {}
-        c:      {}
-        h:      {}
         pug:    {}
-        svg:    {}
-        html:   {}
-        htm:    {}
+        svg:    punct: [ xmlPunct ]
+        html:   punct: [ xmlPunct ]
+        htm:    punct: [ xmlPunct ]
         styl:   {}   
         css:    {}   
         sass:   {}   
@@ -587,7 +649,7 @@ module.exports =
                 {column:1 length:1 string:'>' value:'punct function bound head'} 
                 ]]
     blocks(['f=->1']).should.eql [ext:'koffee' chars:5 index:0 number:1 chunks:[ 
-                {column:0 length:1 string:'f' value:'text'} 
+                {column:0 length:1 string:'f' value:'function'} 
                 {column:1 length:1 string:'=' value:'punct'               turd:'=->' } 
                 {column:2 length:1 string:'-' value:'punct function tail' turd:'->'} 
                 {column:3 length:1 string:'>' value:'punct function head'} 
@@ -602,8 +664,8 @@ module.exports =
 
     blocks(['1.a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
                  {column:0  length:1 string:'1' value:'number'} 
-                 {column:1  length:1 string:'.' value:'punct'} 
-                 {column:2  length:1 string:'a' value:'text'} 
+                 {column:1  length:1 string:'.' value:'punct property'} 
+                 {column:2  length:1 string:'a' value:'property'} 
                  ]]
                  
     blocks(['++a']).should.eql [ext:'koffee' chars:3 index:0 number:1 chunks:[ 
