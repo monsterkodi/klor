@@ -6,8 +6,6 @@
    000     00000000  0000000      000   
 ###
 
-{ log } = require '../../kxk'
-
 Syntax = require '../js/blocks'
 assert = require 'assert'
 chai   = require 'chai'
@@ -106,29 +104,34 @@ describe 'syntax', ->
     it 'strings', ->
        
         rgs = Syntax.ranges """a="\\"E\\"" """
-        inc rgs, 2, '"',       'punctuation string double'
-        inc rgs, 3, '\\"E\\"', 'string double'
-        inc rgs, 8, '"',       'punctuation string double'
+        inc rgs, 2, '"',    'punctuation string double'
+        inc rgs, 4, '"',    'string double'
+        inc rgs, 5, 'E',    'string double'
+        inc rgs, 8, '"',    'punctuation string double'
         
         rgs = Syntax.ranges 'a="\'X\'"'
         inc rgs, 2, '"',   'punctuation string double'
-        inc rgs, 3, "'X'", 'string double'
+        inc rgs, 3, "'",   'string double'
+        inc rgs, 4, "X",   'string double'
         inc rgs, 6, '"',   'punctuation string double'
 
         rgs = Syntax.ranges 'a=\'"X"\'', 'coffee'
         inc rgs, 2, "'",   'punctuation string single'
-        inc rgs, 3, '"X"', 'string single'
+        inc rgs, 3, '"',   'string single'
+        inc rgs, 4, 'X',   'string single'
         inc rgs, 6, "'",   'punctuation string single'
 
         rgs = Syntax.ranges 'a=`"X"`'
         inc rgs, 2, "`",   'punctuation string backtick'
-        inc rgs, 3, '"X"', 'string backtick'
+        inc rgs, 3, '"',   'string backtick'
+        inc rgs, 4, 'X',   'string backtick'
         inc rgs, 6, "`",   'punctuation string backtick'
             
         rgs = Syntax.ranges 'a="  \'X\'  Y  " '
         inc rgs, 2, '"',   'punctuation string double'
-        inc rgs, 5, "'X'", 'string double'
-        inc rgs, 10, "Y",  'string double'
+        inc rgs, 5, "'",   'string double'
+        inc rgs, 6, "X",   'string double'
+        inc rgs, 7, "'",   'string double'
         inc rgs, 13, '"',  'punctuation string double'
                         
         rgs = Syntax.ranges 'a="";b=" ";c="X"'
@@ -158,94 +161,7 @@ describe 'syntax', ->
         inc rgs, 0, '"',   'punctuation string double'
         inc rgs, 3, '666', 'number'
         inc rgs, 7, '"',   'punctuation string double'
-        
-    # 000   000  000000000  00     00  000    
-    # 000   000     000     000   000  000    
-    # 000000000     000     000000000  000    
-    # 000   000     000     000 0 000  000    
-    # 000   000     000     000   000  0000000
-    
-    it 'html', ->
-        
-        rgs = Syntax.ranges "</div>", 'html' 
-        inc rgs, 0, "<",    'punctuation keyword'
-        inc rgs, 1, "/",    'punctuation keyword'
-        inc rgs, 2, "div",  'keyword'
-        inc rgs, 5, ">",    'punctuation keyword'
-
-        rgs = Syntax.ranges "<div>", 'html' 
-        inc rgs, 0, "<",    'punctuation keyword'
-        inc rgs, 1, "div",  'keyword'
-        inc rgs, 4, ">",    'punctuation keyword'
-            
-    #  0000000  00000000   00000000         0000000    00000000  00000000  000  000   000  00000000  
-    # 000       000   000  000   000        000   000  000       000       000  0000  000  000       
-    # 000       00000000   00000000         000   000  0000000   000000    000  000 0 000  0000000   
-    # 000       000        000              000   000  000       000       000  000  0000  000       
-    #  0000000  000        000              0000000    00000000  000       000  000   000  00000000  
-    
-    it 'cpp define', ->
-        
-        rgs = Syntax.ranges "#include", 'cpp'      
-        inc rgs, 0, "#",        'punctuation define'
-        inc rgs, 1, "include",  'define'
-
-        rgs = Syntax.ranges "#if", 'cpp'            
-        inc rgs, 0, "#",        'punctuation define'
-        inc rgs, 1, "if",       'define'
-
-        rgs = Syntax.ranges "#  if", 'cpp'            
-        inc rgs, 0, "#",        'punctuation define'
-        inc rgs, 3, "if",       'define'
-            
-    it 'cpp keyword', ->
-        
-        rgs = Syntax.ranges "if (true) {} else {}", 'cpp'    
-        inc rgs, 0, "if",    'keyword'
-        inc rgs, 4, "true",  'keyword'
-        inc rgs, 13, "else", 'keyword'
-            
-    #  0000000  00000000   00000000         00000000  000       0000000    0000000   000000000  
-    # 000       000   000  000   000        000       000      000   000  000   000     000     
-    # 000       00000000   00000000         000000    000      000   000  000000000     000     
-    # 000       000        000              000       000      000   000  000   000     000     
-    #  0000000  000        000              000       0000000   0000000   000   000     000     
-    
-    it 'cpp float', ->
-
-        rgs = Syntax.ranges "1.0f", 'cpp'
-        inc rgs, 0, "1",  'number float'
-        inc rgs, 1, ".",  'punctuation number float'
-        inc rgs, 2, "0f", 'number float'
-
-        rgs = Syntax.ranges "0.0000f", 'cpp'
-        inc rgs, 2, "0000f", 'number float'
-       
-    # 000   0000000   0000000  
-    # 000  000       000       
-    # 000  0000000   0000000   
-    # 000       000       000  
-    # 000  0000000   0000000   
-    
-    it 'iss', ->
-        
-        rgs = Syntax.ranges "a={#key}", 'iss'
-        inc rgs, 2, '{',   'punctuation property'
-        inc rgs, 3, "#",   'punctuation property'
-        inc rgs, 4, 'key', 'property text'
-        inc rgs, 7, "}",   'punctuation property'
-        
-    #       000   0000000  
-    #       000  000       
-    #       000  0000000   
-    # 000   000       000  
-    #  0000000   0000000   
-    
-    it 'js', ->
-        
-        rgs = Syntax.ranges "func = function() {", 'js'
-        inc rgs, 0, 'func', 'function'
-        
+                
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
     # 000       000   000  000000    000000    0000000   0000000   
@@ -446,6 +362,93 @@ describe 'syntax', ->
         inc rgs, 4, 'prop', 'property'
         inc rgs, 8, '.', 'punctuation property'
         inc rgs, 9, 'erty', 'property'
+        
+    # 000   000  000000000  00     00  000    
+    # 000   000     000     000   000  000    
+    # 000000000     000     000000000  000    
+    # 000   000     000     000 0 000  000    
+    # 000   000     000     000   000  0000000
+    
+    it 'html', ->
+        
+        rgs = Syntax.ranges "</div>", 'html' 
+        inc rgs, 0, "<",    'punctuation keyword'
+        inc rgs, 1, "/",    'punctuation keyword'
+        inc rgs, 2, "div",  'keyword'
+        inc rgs, 5, ">",    'punctuation keyword'
+
+        rgs = Syntax.ranges "<div>", 'html' 
+        inc rgs, 0, "<",    'punctuation keyword'
+        inc rgs, 1, "div",  'keyword'
+        inc rgs, 4, ">",    'punctuation keyword'
+            
+    #  0000000  00000000   00000000         0000000    00000000  00000000  000  000   000  00000000  
+    # 000       000   000  000   000        000   000  000       000       000  0000  000  000       
+    # 000       00000000   00000000         000   000  0000000   000000    000  000 0 000  0000000   
+    # 000       000        000              000   000  000       000       000  000  0000  000       
+    #  0000000  000        000              0000000    00000000  000       000  000   000  00000000  
+    
+    it 'cpp define', ->
+        
+        rgs = Syntax.ranges "#include", 'cpp'      
+        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 1, "include",  'define'
+
+        rgs = Syntax.ranges "#if", 'cpp'            
+        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 1, "if",       'define'
+
+        rgs = Syntax.ranges "#  if", 'cpp'            
+        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 3, "if",       'define'
+            
+    it 'cpp keyword', ->
+        
+        rgs = Syntax.ranges "if (true) {} else {}", 'cpp'    
+        inc rgs, 0, "if",    'keyword'
+        inc rgs, 4, "true",  'keyword'
+        inc rgs, 13, "else", 'keyword'
+            
+    #  0000000  00000000   00000000         00000000  000       0000000    0000000   000000000  
+    # 000       000   000  000   000        000       000      000   000  000   000     000     
+    # 000       00000000   00000000         000000    000      000   000  000000000     000     
+    # 000       000        000              000       000      000   000  000   000     000     
+    #  0000000  000        000              000       0000000   0000000   000   000     000     
+    
+    it 'cpp float', ->
+
+        rgs = Syntax.ranges "1.0f", 'cpp'
+        inc rgs, 0, "1",  'number float'
+        inc rgs, 1, ".",  'punctuation number float'
+        inc rgs, 2, "0f", 'number float'
+
+        rgs = Syntax.ranges "0.0000f", 'cpp'
+        inc rgs, 2, "0000f", 'number float'
+       
+    # 000   0000000   0000000  
+    # 000  000       000       
+    # 000  0000000   0000000   
+    # 000       000       000  
+    # 000  0000000   0000000   
+    
+    it 'iss', ->
+        
+        rgs = Syntax.ranges "a={#key}", 'iss'
+        inc rgs, 2, '{',   'punctuation property'
+        inc rgs, 3, "#",   'punctuation property'
+        inc rgs, 4, 'key', 'property text'
+        inc rgs, 7, "}",   'punctuation property'
+        
+    #       000   0000000  
+    #       000  000       
+    #       000  0000000   
+    # 000   000       000  
+    #  0000000   0000000   
+    
+    it 'js', ->
+        
+        rgs = Syntax.ranges "func = function() {", 'js'
+        inc rgs, 0, 'func', 'function'
         
     #  0000000  000   000  
     # 000       000   000  

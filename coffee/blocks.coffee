@@ -168,7 +168,7 @@ blocked = (lines) ->
                 
     regexp = ->
         
-        # check stack top
+        # check stack top!
         if chunk.string == '/'
             
             if chunkIndex 
@@ -183,19 +183,59 @@ blocked = (lines) ->
             count = 0
             for c in line.chunks[chunkIndex+1..]
                 count++
-                if c.string == '/'
+                if c.string == '/' # check if escaped!
                     for rc in line.chunks[chunkIndex..chunkIndex+count]
                         rc.value += ' regexp'
                     return count
         0
+        
+    simpleString = ->
+        
+        if chunk.string in ['"' "'" '`']
+            value = switch chunk.string 
+                when '"' then 'double' 
+                when "'" then 'single'
+                when '`' then 'backtick'
+            count = 0
+            escape = 0
+            for c in line.chunks[chunkIndex+1..]
+                count++
+                if c.string == '\\'
+                    escape++
+                if c.string == chunk.string and (escape % 2) != 1
+                    for rc in line.chunks[chunkIndex+1..chunkIndex+count-1]
+                        rc.value = "string #{value}"
+                    line.chunks[chunkIndex].value += " string #{value}"
+                    line.chunks[chunkIndex+count].value += " string #{value}"
+                    return count
+                if c.string != '\\'
+                    escape = 0
+        0
     
     handlers = 
-        koffee: punct: [ hashComment,  dashArrow, regexp ]
-        coffee: punct: [ hashComment,  dashArrow, regexp ]
-        noon:   punct: [ noonComment                     ]
-        js:     punct: [ slashComment, dashArrow, regexp ]
-        ts:     punct: [ slashComment, dashArrow, regexp ]
+        koffee: punct: [ hashComment,  simpleString, dashArrow, regexp ]
+        coffee: punct: [ hashComment,  simpleString, dashArrow, regexp ]
+        noon:   punct: [ noonComment                                   ]
+        js:     punct: [ slashComment, simpleString, dashArrow, regexp ]
+        ts:     punct: [ slashComment, simpleString, dashArrow, regexp ]
         md:     {}
+        js:     {}
+        iss:    {}
+        ini:    {}
+        sh:     {}
+        cpp:    {}
+        hpp:    {}
+        cs:     {}
+        c:      {}
+        h:      {}
+        pug:    {}
+        svg:    {}
+        html:   {}
+        htm:    {}
+        styl:   {}   
+        css:    {}   
+        sass:   {}   
+        scss:   {}  
                         
     for line in lines
            
@@ -330,6 +370,8 @@ module.exports =
 
 ▸test 'comment'
 
+    chai()
+    
     blocks(["##"]).should.eql [ext:'koffee' chars:2 index:0 number:1 chunks:[ 
                 {column:0 length:1 string:"#" value:'punct comment' turd:"##"} 
                 {column:1 length:1 string:"#" value:'comment'} 

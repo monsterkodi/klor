@@ -1,5 +1,5 @@
 name            klor
-version         0.16.0
+version         0.17.0
 description     syntax highlighting
 keywords
                 syntax
@@ -16,7 +16,7 @@ bugs
 scripts
                 test  ./node_modules/.bin/mocha -c --require koffee/js/register ./test/syntax.coffee
 dependencies
-                kxk           ^0.284.0
+                kxk           ^0.288.0
                 pretty-time   ^1.1.0
 devDependencies
                 assert  ^2.0.0

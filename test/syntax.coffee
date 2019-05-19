@@ -6,8 +6,6 @@
    000     00000000  0000000      000   
 ###
 
-{ log } = require '../../kxk'
-
 Syntax = require '../js/syntax'
 assert = require 'assert'
 chai   = require 'chai'
