@@ -266,6 +266,16 @@ describe 'ranges', ->
         inc rgs, 26, "10",   'string double'
         inc rgs, 28, "'",    'string double'
         inc rgs, 29, '"',    'punct string double'
+        
+        rgs = ranges '''when '"""' then 'string double triple\''''
+        inc rgs, 6, '"',     'string single'
+        inc rgs, 7, '"',     'string single'
+        inc rgs, 8, '"',     'string single'
+        
+        rgs = ranges "'''when\\''''"
+        inc rgs, 3,  "when",  'string single triple'
+        inc rgs, 8,  "'",     'string single triple'
+        inc rgs, 11, "'",     'punct string single triple'
 
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000    
     # 000  0000  000     000     000       000   000  000   000  000   000  000    

@@ -318,11 +318,10 @@ blocked = (lines) ->
     simpleString = ->
         
         return if topType == 'regexp'
+                
+        if getChunk(-1)?.escape then return stacked()
         
-        if chunk.match in ['"' "'" '`']
-            
-            if line.chunks[chunkIndex-1]?.escape
-                return stacked()
+        if chunk.match in '"\'`'
             
             type = switch chunk.match 
                 when '"' then 'string double' 
@@ -341,21 +340,27 @@ blocked = (lines) ->
             return 1
             
         if chunk.match == '\\' and topType?.startsWith 'string'
-            if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
-                chunk.escape = true
-        0 # we need this here
-
+            if chunkIndex == 0 or not getChunk(-1).escape
+                if getChunk(1).start == chunk.start+1
+                    chunk.escape = true
+                    return stacked()
+                        
     tripleString = -> 
         
         return if not chunk.turd or chunk.turd.length < 3
-        return if topType == 'regexp'
+        return if topType in ['regexp', 'string single', 'string double']
         
+        if getChunk(-1)?.escape then return stacked()
+                
         type = switch chunk.turd[..2]
             when '"""' then 'string double triple' 
             when "'''" then 'string single triple'
             # when '```' then 'string backtick triple'
 
         if type
+            
+            return if type != topType and topType?.startsWith 'string'
+            
             if topType == type
                 popStack()
             else
@@ -365,6 +370,12 @@ blocked = (lines) ->
             addValue 1, type
             addValue 2, type
             return 3
+            
+        if chunk.match == '\\' and topType?.startsWith 'string'
+            if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
+                if getChunk(1).start == chunk.start+1
+                    chunk.escape = true
+                    return stacked()
         
     # 00     00  0000000         0000000  000000000  00000000   000  000   000   0000000   
     # 000   000  000   000      000          000     000   000  000  0000  000  000        
@@ -459,6 +470,8 @@ blocked = (lines) ->
     # 000   000  00000000     000     00     00   0000000   000   000  0000000    
     
     keyword = ->
+        
+        return if notCode
         
         if Syntax.lang[ext].hasOwnProperty(chunk.match) 
             chunk.value = Syntax.lang[ext][chunk.match]
