@@ -11,8 +11,10 @@ require('kxk').chai()
 
 inc = (rgs, start, match, value) -> rgs.should.deep.include     start:start, match:match, value:value
 nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, match:match, value:value
+
+blocks = Blocks.blocks
     
-describe 'Blocks', ->
+describe 'ranges', ->
         
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
@@ -22,29 +24,29 @@ describe 'Blocks', ->
     
     it 'regexp', ->
         rgs = Blocks.ranges "r=/a/", 'coffee'
-        inc rgs, 2, '/', 'punctuation regexp start'
+        inc rgs, 2, '/', 'punct regexp start'
         inc rgs, 3, 'a', 'text regexp'
-        inc rgs, 4, '/', 'punctuation regexp end'
+        inc rgs, 4, '/', 'punct regexp end'
                 
         rgs = Blocks.ranges "/(a|.*|\s\d\w\S\W$|^\s+)/", 'coffee'
-        inc rgs, 0, '/', 'punctuation regexp start'
+        inc rgs, 0, '/', 'punct regexp start'
         inc rgs, 2, 'a', 'text regexp'
             
         rgs = Blocks.ranges "/^#include/", 'coffee'
-        inc rgs, 0, '/',       'punctuation regexp start'
-        inc rgs, 2, "#",       'punctuation regexp'
+        inc rgs, 0, '/',       'punct regexp start'
+        inc rgs, 2, "#",       'punct regexp'
         inc rgs, 3, "include", 'text regexp'
 
         rgs = Blocks.ranges "/\\'hello\\'/ ", 'coffee'
-        inc rgs, 0, '/',       'punctuation regexp start'
-        inc rgs, 1, "\\",      'punctuation regexp'
-        inc rgs, 2, "'",       'punctuation regexp'
+        inc rgs, 0, '/',       'punct regexp start'
+        inc rgs, 1, "\\",      'punct regexp'
+        inc rgs, 2, "'",       'punct regexp'
         inc rgs, 3, "hello",   'text regexp'
 
         rgs = Blocks.ranges "f a /b - c/gi", 'coffee'
-        inc rgs, 4, '/', 'punctuation regexp start'
+        inc rgs, 4, '/', 'punct regexp start'
         inc rgs, 5, 'b', 'text regexp'
-        inc rgs, 10, '/', 'punctuation regexp end'
+        inc rgs, 10, '/', 'punct regexp end'
         
     it 'no regexp', ->
         
@@ -52,10 +54,10 @@ describe 'Blocks', ->
         # f a/b - c/gi
         
         rgs = Blocks.ranges 'a / b - c / d', 'coffee'
-        nut rgs, 2, '/', 'punctuation regexp'
+        nut rgs, 2, '/', 'punct regexp'
 
         rgs = Blocks.ranges 'f a/b, c/d', 'coffee'
-        nut rgs, 3, '/', 'punctuation regexp'
+        nut rgs, 3, '/', 'punct regexp'
         
     # 00000000   00000000   0000000   000   000  000  00000000   00000000  
     # 000   000  000       000   000  000   000  000  000   000  000       
@@ -77,11 +79,11 @@ describe 'Blocks', ->
     it 'comments', ->
         
         rgs = Blocks.ranges "hello # world", 'coffee'
-        inc rgs, 6, "#",    'punctuation comment'
+        inc rgs, 6, "#",    'punct comment'
         inc rgs, 8, "world", 'comment'
 
         rgs = Blocks.ranges "   # bla blub", 'noon'
-        inc rgs, 3, "#",     'punctuation comment'
+        inc rgs, 3, "#",     'punct comment'
         inc rgs, 5, "bla",   'comment'
         inc rgs, 9, "blub",  'comment'
             
@@ -94,27 +96,27 @@ describe 'Blocks', ->
     it 'triple comment', ->
         
         rgs = Blocks.ranges "###a###", 'coffee'
-        inc rgs, 0, "#", 'punctuation comment triple'
-        inc rgs, 1, "#", 'punctuation comment triple'
-        inc rgs, 2, "#", 'punctuation comment triple'
+        inc rgs, 0, "#", 'punct comment triple'
+        inc rgs, 1, "#", 'punct comment triple'
+        inc rgs, 2, "#", 'punct comment triple'
         inc rgs, 3, "a", 'comment triple'
-        inc rgs, 4, "#", 'punctuation comment triple'
-        inc rgs, 5, "#", 'punctuation comment triple'
-        inc rgs, 6, "#", 'punctuation comment triple'
+        inc rgs, 4, "#", 'punct comment triple'
+        inc rgs, 5, "#", 'punct comment triple'
+        inc rgs, 6, "#", 'punct comment triple'
 
         dss = Blocks.dissect "###\na\n###".split('\n'), 'coffee'
-        inc dss[0], 0, "#", 'punctuation comment triple'
-        inc dss[0], 1, "#", 'punctuation comment triple'
-        inc dss[0], 2, "#", 'punctuation comment triple'
+        inc dss[0], 0, "#", 'punct comment triple'
+        inc dss[0], 1, "#", 'punct comment triple'
+        inc dss[0], 2, "#", 'punct comment triple'
         inc dss[1], 0, "a", 'comment triple'
-        inc dss[2], 0, "#", 'punctuation comment triple'
-        inc dss[2], 1, "#", 'punctuation comment triple'
-        inc dss[2], 2, "#", 'punctuation comment triple'
+        inc dss[2], 0, "#", 'punct comment triple'
+        inc dss[2], 1, "#", 'punct comment triple'
+        inc dss[2], 2, "#", 'punct comment triple'
         
     it 'comment header', ->
         
         rgs = Blocks.ranges "# 0 00 0000", 'coffee'
-        inc rgs, 0,  "#",    'punctuation comment'
+        inc rgs, 0,  "#",    'punct comment'
         inc rgs, 2,  "0",    'comment header'
         inc rgs, 4,  "00",   'comment header'
         inc rgs, 7,  "0000", 'comment header'
@@ -138,7 +140,7 @@ describe 'Blocks', ->
 
         rgs = Blocks.ranges "66.700"
         inc rgs, 0, "66",  'number float'
-        inc rgs, 2, ".",   'punctuation number float'
+        inc rgs, 2, ".",   'punct number float'
         inc rgs, 3, "700", 'number float'
 
         rgs = Blocks.ranges "77.800 -100"
@@ -159,9 +161,9 @@ describe 'Blocks', ->
         
         rgs = Blocks.ranges "66.70.0"
         inc rgs, 0, "66", 'semver'
-        inc rgs, 2, ".",  'punctuation semver'
+        inc rgs, 2, ".",  'punct semver'
         inc rgs, 3, "70", 'semver'
-        inc rgs, 5, ".",  'punctuation semver'
+        inc rgs, 5, ".",  'punct semver'
         inc rgs, 6, "0",  'semver'
 
         rgs = Blocks.ranges "^0.7.1"
@@ -183,49 +185,49 @@ describe 'Blocks', ->
     it 'strings', ->
        
         rgs = Blocks.ranges """a="\\"E\\"" """
-        inc rgs, 2, '"',    'punctuation string double'
+        inc rgs, 2, '"',    'punct string double'
         inc rgs, 4, '"',    'string double'
         inc rgs, 5, 'E',    'string double'
-        inc rgs, 8, '"',    'punctuation string double'
+        inc rgs, 8, '"',    'punct string double'
         
         rgs = Blocks.ranges 'a="\'X\'"'
-        inc rgs, 2, '"',   'punctuation string double'
+        inc rgs, 2, '"',   'punct string double'
         inc rgs, 3, "'",   'string double'
         inc rgs, 4, "X",   'string double'
-        inc rgs, 6, '"',   'punctuation string double'
+        inc rgs, 6, '"',   'punct string double'
 
         rgs = Blocks.ranges 'a=\'"X"\'', 'coffee'
-        inc rgs, 2, "'",   'punctuation string single'
+        inc rgs, 2, "'",   'punct string single'
         inc rgs, 3, '"',   'string single'
         inc rgs, 4, 'X',   'string single'
-        inc rgs, 6, "'",   'punctuation string single'
+        inc rgs, 6, "'",   'punct string single'
 
         rgs = Blocks.ranges 'a=`"X"`'
-        inc rgs, 2, "`",   'punctuation string backtick'
+        inc rgs, 2, "`",   'punct string backtick'
         inc rgs, 3, '"',   'string backtick'
         inc rgs, 4, 'X',   'string backtick'
-        inc rgs, 6, "`",   'punctuation string backtick'
+        inc rgs, 6, "`",   'punct string backtick'
             
         rgs = Blocks.ranges 'a="  \'X\'  Y  " '
-        inc rgs, 2, '"',   'punctuation string double'
+        inc rgs, 2, '"',   'punct string double'
         inc rgs, 5, "'",   'string double'
         inc rgs, 6, "X",   'string double'
         inc rgs, 7, "'",   'string double'
-        inc rgs, 13, '"',  'punctuation string double'
+        inc rgs, 13, '"',  'punct string double'
                         
         rgs = Blocks.ranges 'a="";b=" ";c="X"'
         for i in [2,3,7,9,13,15]
-            inc rgs, i, '"', 'punctuation string double'
+            inc rgs, i, '"', 'punct string double'
         inc rgs, 14, 'X', 'string double'
                 
         rgs = Blocks.ranges "a='';b=' ';c='Y'", 'coffee'
         for i in [2,3,7,9,13,15]
-            inc rgs, i, "'", 'punctuation string single'
+            inc rgs, i, "'", 'punct string single'
         inc rgs, 14, 'Y', 'string single'
                 
         rgs = Blocks.ranges "a=``;b=` `;c=`Z`"
         for i in [2,3,7,9,13,15]
-            inc rgs, i, "`", 'punctuation string backtick'
+            inc rgs, i, "`", 'punct string backtick'
         inc rgs, 14, 'Z', 'string backtick'
 
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000       0000000   000000000  000   0000000   000   000  
@@ -237,14 +239,14 @@ describe 'Blocks', ->
     it 'interpolation', ->    
         
         rgs = Blocks.ranges '"#{xxx}"', 'coffee'
-        inc rgs, 0, '"',   'punctuation string double'
+        inc rgs, 0, '"',   'punct string double'
         inc rgs, 3, 'xxx', 'text'
-        inc rgs, 7, '"',   'punctuation string double'
+        inc rgs, 7, '"',   'punct string double'
 
         rgs = Blocks.ranges '"#{666}"', 'coffee'
-        inc rgs, 0, '"',   'punctuation string double'
+        inc rgs, 0, '"',   'punct string double'
         inc rgs, 3, '666', 'number'
-        inc rgs, 7, '"',   'punctuation string double'
+        inc rgs, 7, '"',   'punct string double'
 
     # 00     00  0000000    
     # 000   000  000   000  
@@ -255,36 +257,36 @@ describe 'Blocks', ->
     it 'md bold', ->
         
         rgs = Blocks.ranges "**bold**", 'md'
-        inc rgs, 0, '*',      'punctuation bold'
-        inc rgs, 1, '*',      'punctuation bold'
+        inc rgs, 0, '*',      'punct bold'
+        inc rgs, 1, '*',      'punct bold'
         inc rgs, 2, 'bold',   'text bold'
-        inc rgs, 6, '*',      'punctuation bold'
-        inc rgs, 7, '*',      'punctuation bold'
+        inc rgs, 6, '*',      'punct bold'
+        inc rgs, 7, '*',      'punct bold'
                 
     it 'md italic', ->
         
         rgs = Blocks.ranges "*it lic*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
+        inc rgs, 0, '*',      'punct italic'
         inc rgs, 1, 'it',     'text italic'
         inc rgs, 4, 'lic',    'text italic'
-        inc rgs, 7, '*',      'punctuation italic'
+        inc rgs, 7, '*',      'punct italic'
         
         rgs = Blocks.ranges "*italic*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
+        inc rgs, 0, '*',      'punct italic'
         inc rgs, 1, 'italic', 'text italic'
-        inc rgs, 7, '*',      'punctuation italic'
+        inc rgs, 7, '*',      'punct italic'
  
         rgs = Blocks.ranges "*`italic code`*", 'md'
-        inc rgs, 0, '*',      'punctuation italic'
-        inc rgs, 1, '`',      'punctuation italic backtick'
+        inc rgs, 0, '*',      'punct italic'
+        inc rgs, 1, '`',      'punct italic backtick'
         inc rgs, 2, 'italic', 'text italic backtick'
         inc rgs, 9, 'code',   'text italic backtick'
-        inc rgs, 14, '*',     'punctuation italic'
+        inc rgs, 14, '*',     'punct italic'
         
     it 'md no string', ->
         rgs = Blocks.ranges "it's good", 'md'
         inc rgs, 0, 'it',     'text'
-        inc rgs, 2, "'",      'punctuation'
+        inc rgs, 2, "'",      'punct'
         inc rgs, 3, 's',      'text'
         
     # it 'md li', ->
@@ -299,8 +301,8 @@ describe 'Blocks', ->
 #         
         # rgs = Blocks.ranges "    - **", 'md'
         # inc rgs, 4, '-',    'li2 marker'
-        # inc rgs, 6, '*',    'punctuation li2'
-        # inc rgs, 7, '*',    'punctuation li2'
+        # inc rgs, 6, '*',    'punct li2'
+        # inc rgs, 7, '*',    'punct li2'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -337,7 +339,7 @@ describe 'Blocks', ->
         
         rgs = Blocks.ranges " a: b", 'coffee'
         inc rgs, 1, "a", 'dictionary key'
-        inc rgs, 2, ":", 'punctuation dictionary'
+        inc rgs, 2, ":", 'punct dictionary'
         
         rgs = Blocks.ranges "obj.value = obj.another.value", 'coffee'
         inc rgs, 0,  "obj",    'obj'
@@ -349,7 +351,7 @@ describe 'Blocks', ->
         rgs = Blocks.ranges "if someObject.someProp", 'coffee'
         inc rgs, 0, "if", 'keyword'
         inc rgs, 3, "someObject", 'obj'
-        inc rgs, 13, ".", 'punctuation property'
+        inc rgs, 13, ".", 'punct property'
         inc rgs, 14, "someProp", 'property'
         
         rgs = Blocks.ranges "1 'a'", 'coffee'
@@ -394,38 +396,38 @@ describe 'Blocks', ->
         
         rgs = Blocks.ranges " a: =>", 'coffee'
         inc rgs, 1, "a", 'method'
-        inc rgs, 2, ":", 'punctuation method'
-        inc rgs, 4, "=", 'punctuation function bound tail'
-        inc rgs, 5, ">", 'punctuation function bound head'
+        inc rgs, 2, ":", 'punct method'
+        inc rgs, 4, "=", 'punct function bound tail'
+        inc rgs, 5, ">", 'punct function bound head'
         
         rgs = Blocks.ranges " a: ->", 'coffee'
         inc rgs, 1, "a", 'method'
-        inc rgs, 2, ":", 'punctuation method'
-        inc rgs, 4, "-", 'punctuation function tail'
-        inc rgs, 5, ">", 'punctuation function head'
+        inc rgs, 2, ":", 'punct method'
+        inc rgs, 4, "-", 'punct function tail'
+        inc rgs, 5, ">", 'punct function head'
         
         rgs = Blocks.ranges "mthd:  (arg)    => @member memarg", 'coffee'
         inc rgs, 0,  'mthd', 'method'
-        inc rgs, 4,  ':',    'punctuation method'
-        inc rgs, 16, '=',    'punctuation function bound tail'
-        inc rgs, 17, '>',    'punctuation function bound head'
+        inc rgs, 4,  ':',    'punct method'
+        inc rgs, 16, '=',    'punct function bound tail'
+        inc rgs, 17, '>',    'punct function bound head'
                                 
     it 'koffee', ->
         
         rgs = Blocks.ranges " @: ->", 'coffee'
         inc rgs, 1, "@", 'method'
-        inc rgs, 2, ":", 'punctuation method'
-        inc rgs, 4, "-", 'punctuation function tail'
-        inc rgs, 5, ">", 'punctuation function head'
+        inc rgs, 2, ":", 'punct method'
+        inc rgs, 4, "-", 'punct function tail'
+        inc rgs, 5, ">", 'punct function head'
 
         rgs = Blocks.ranges "▸if ▸then ▸elif ▸else", 'coffee'
-        inc rgs, 0,  "▸",    'punctuation meta'
+        inc rgs, 0,  "▸",    'punct meta'
         inc rgs, 1,  "if",   'meta'
-        inc rgs, 4,  "▸",    'punctuation meta'
+        inc rgs, 4,  "▸",    'punct meta'
         inc rgs, 5,  "then", 'meta'
-        inc rgs, 10, "▸",    'punctuation meta'
+        inc rgs, 10, "▸",    'punct meta'
         inc rgs, 11, "elif", 'meta'
-        inc rgs, 16, "▸",    'punctuation meta'
+        inc rgs, 16, "▸",    'punct meta'
         inc rgs, 17, "else", 'meta'
 
         rgs = Blocks.ranges "[1 'x' a:1 c:d]", 'coffee'
@@ -440,13 +442,13 @@ describe 'Blocks', ->
     # 000        000   000  000  0000  000          000     000   000  000   000     000     000  000   000  000  0000  
     # 000         0000000   000   000   0000000     000      0000000   000   000     000     000   0000000   000   000  
     
-    it 'punctuation', ->
+    it 'punct', ->
         
         rgs = Blocks.ranges '/some\\path/file.txt:10', 'noon'
-        inc rgs, 0,  '/',  'punctuation'
-        inc rgs, 5,  '\\', 'punctuation'
-        inc rgs, 15, '.',  'punctuation'
-        inc rgs, 19, ':',  'punctuation'
+        inc rgs, 0,  '/',  'punct'
+        inc rgs, 5,  '\\', 'punct'
+        inc rgs, 15, '.',  'punct'
+        inc rgs, 19, ':',  'punct'
          
     # 000   000  000000000  00     00  000    
     # 000   000     000     000   000  000    
@@ -457,15 +459,15 @@ describe 'Blocks', ->
     it 'html', ->
         
         rgs = Blocks.ranges "</div>", 'html' 
-        inc rgs, 0, "<",    'punctuation keyword'
-        inc rgs, 1, "/",    'punctuation keyword'
+        inc rgs, 0, "<",    'punct keyword'
+        inc rgs, 1, "/",    'punct keyword'
         inc rgs, 2, "div",  'keyword'
-        inc rgs, 5, ">",    'punctuation keyword'
+        inc rgs, 5, ">",    'punct keyword'
 
         rgs = Blocks.ranges "<div>", 'html' 
-        inc rgs, 0, "<",    'punctuation keyword'
+        inc rgs, 0, "<",    'punct keyword'
         inc rgs, 1, "div",  'keyword'
-        inc rgs, 4, ">",    'punctuation keyword'
+        inc rgs, 4, ">",    'punct keyword'
             
     #  0000000  00000000   00000000         0000000    00000000  00000000  000  000   000  00000000  
     # 000       000   000  000   000        000   000  000       000       000  0000  000  000       
@@ -476,15 +478,15 @@ describe 'Blocks', ->
     it 'cpp define', ->
         
         rgs = Blocks.ranges "#include", 'cpp'      
-        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 0, "#",        'punct define'
         inc rgs, 1, "include",  'define'
 
         rgs = Blocks.ranges "#if", 'cpp'            
-        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 0, "#",        'punct define'
         inc rgs, 1, "if",       'define'
 
         rgs = Blocks.ranges "#  if", 'cpp'            
-        inc rgs, 0, "#",        'punctuation define'
+        inc rgs, 0, "#",        'punct define'
         inc rgs, 3, "if",       'define'
             
     it 'cpp keyword', ->
@@ -504,7 +506,7 @@ describe 'Blocks', ->
 
         rgs = Blocks.ranges "1.0f", 'cpp'
         inc rgs, 0, "1",  'number float'
-        inc rgs, 1, ".",  'punctuation number float'
+        inc rgs, 1, ".",  'punct number float'
         inc rgs, 2, "0f", 'number float'
 
         rgs = Blocks.ranges "0.0000f", 'cpp'
@@ -519,10 +521,10 @@ describe 'Blocks', ->
     # it 'iss', ->
 #         
         # rgs = Blocks.ranges "a={#key}", 'iss'
-        # inc rgs, 2, '{',   'punctuation property'
-        # inc rgs, 3, "#",   'punctuation property'
+        # inc rgs, 2, '{',   'punct property'
+        # inc rgs, 3, "#",   'punct property'
         # inc rgs, 4, 'key', 'property text'
-        # inc rgs, 7, "}",   'punctuation property'
+        # inc rgs, 7, "}",   'punct property'
         
     #       000   0000000  
     #       000  000       
@@ -556,10 +558,10 @@ describe 'Blocks', ->
         # inc rgs, 14, 'dashes', 'dir text'
         
         rgs = Blocks.ranges "prg --arg1 -arg2", 'sh'
-        inc rgs, 4, '-', 'punctuation argument'
-        inc rgs, 5, '-', 'punctuation argument'
+        inc rgs, 4, '-', 'punct argument'
+        inc rgs, 5, '-', 'punct argument'
         inc rgs, 6, 'arg1', 'argument'
-        inc rgs, 11, '-', 'punctuation argument'
+        inc rgs, 11, '-', 'punct argument'
         inc rgs, 12, 'arg2', 'argument'
     
     # 000       0000000    0000000   
@@ -572,28 +574,28 @@ describe 'Blocks', ->
 
         # rgs = Blocks.ranges "http://domain.com", 'log'
         # inc rgs, 0, 'http', 'url protocol'
-        # inc rgs, 4, ':', 'punctuation url'
-        # inc rgs, 5, '/', 'punctuation url'
-        # inc rgs, 6, '/', 'punctuation url'
+        # inc rgs, 4, ':', 'punct url'
+        # inc rgs, 5, '/', 'punct url'
+        # inc rgs, 6, '/', 'punct url'
         # inc rgs, 7, 'domain', 'url domain'
-        # inc rgs, 13, '.', 'punctuation url tld'
+        # inc rgs, 13, '.', 'punct url tld'
         # inc rgs, 14, 'com', 'url tld'
         
         # rgs = Blocks.ranges "file.coffee", 'log'
         # inc rgs, 0, 'file', 'coffee file'
-        # inc rgs, 4, '.', 'punctuation coffee'
+        # inc rgs, 4, '.', 'punct coffee'
         # inc rgs, 5, 'coffee', 'coffee ext'
-#         
+
         # rgs = Blocks.ranges "key /", 'log'
         # inc rgs, 0, 'key',   'text'
-#         
+
         # rgs = Blocks.ranges "/some/path", 'log'
         # inc rgs, 1, 'some',   'dir text'
-        # inc rgs, 5, '/',      'punctuation dir'
-#         
+        # inc rgs, 5, '/',      'punct dir'
+
         # rgs = Blocks.ranges "key: value", 'log'
         # inc rgs, 0, 'key',    'dictionary key'
-        # inc rgs, 3, ':',      'punctuation dictionary'
+        # inc rgs, 3, ':',      'punct dictionary'
         
     # 000   000   0000000    0000000   000   000  
     # 0000  000  000   000  000   000  0000  000  
@@ -609,6 +611,150 @@ describe 'Blocks', ->
 
         # rgs = Blocks.ranges "    prop.erty  value", 'noon'
         # inc rgs, 4, 'prop', 'property'
-        # inc rgs, 8, '.', 'punctuation property'
+        # inc rgs, 8, '.', 'punct property'
         # inc rgs, 9, 'erty', 'property'
         
+describe 'blocks', ->
+    
+    it 'comment', ->
+     
+        blocks(["##"]).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+                    {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
+                    {start:1 length:1 match:"#" value:'comment'} 
+                    ]]
+    
+        blocks([",#a"]).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+                    {start:0 length:1 match:"," value:'punct' turd: ",#"} 
+                    {start:1 length:1 match:"#" value:'punct comment'} 
+                    {start:2 length:1 match:"a" value:'comment'} 
+                    ]]
+                
+    it 'function', ->
+    
+        blocks(['->']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+                    {start:0 length:1 match:'-' value:'punct function tail' turd: '->'} 
+                    {start:1 length:1 match:'>' value:'punct function head'} 
+                    ]]
+        blocks(['=>']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+                    {start:0 length:1 match:'=' value:'punct function bound tail' turd: '=>'} 
+                    {start:1 length:1 match:'>' value:'punct function bound head'} 
+                    ]]
+        blocks(['f=->1']).should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
+                    {start:0 length:1 match:'f' value:'function'} 
+                    {start:1 length:1 match:'=' value:'punct'               turd:'=->' } 
+                    {start:2 length:1 match:'-' value:'punct function tail' turd:'->'} 
+                    {start:3 length:1 match:'>' value:'punct function head'} 
+                    {start:4 length:1 match:'1' value:'number'} 
+                    ]]
+                    
+    it 'minimal', ->
+                    
+        blocks(['1']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
+        blocks(['a']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
+        blocks(['.']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
+    
+        blocks(['1.a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+                     {start:0  length:1 match:'1' value:'number'} 
+                     {start:1  length:1 match:'.' value:'punct property'} 
+                     {start:2  length:1 match:'a' value:'property'} 
+                     ]]
+                     
+        blocks(['++a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+                     {start:0  length:1 match:'+' value:'punct', turd:'++'} 
+                     {start:1  length:1 match:'+' value:'punct'} 
+                     {start:2  length:1 match:'a' value:'text'} 
+                     ]]
+                     
+        blocks(["▸doc 'hello'"]).should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
+                      {start:0  length:1 match:'▸'     value:'punct meta'} 
+                      {start:1  length:3 match:'doc'   value:'meta'} 
+                      {start:5  length:1 match:"'"     value:'punct string single'} 
+                      {start:6  length:5 match:"hello" value:'string single'} 
+                      {start:11 length:1 match:"'"     value:'punct string single'} 
+                      ]]
+                      
+    it 'space', ->
+    
+        b = blocks ["x"]
+        b[0].chunks[0].should.include.property 'start' 0
+    
+        b = blocks [" xx"]
+        b[0].chunks[0].should.include.property 'start' 1
+        
+        b = blocks ["    xxx"]
+        b[0].chunks[0].should.include.property 'start' 4
+    
+        b = blocks ["    x 1  , "]
+        b[0].chunks[0].should.include.property 'start' 4
+        b[0].chunks[1].should.include.property 'start' 6
+        b[0].chunks[2].should.include.property 'start' 9
+    
+    it 'switches', ->
+        
+        b = blocks """
+            ▸doc 'hello'
+                x    
+                y
+            1""".split '\n'
+        b[0].should.include.property 'ext' 'coffee'
+        b[1].should.include.property 'ext' 'md'
+        b[2].should.include.property 'ext' 'md'
+        b[3].should.include.property 'ext' 'coffee'
+    
+        b = blocks """
+            ▸doc 'hello'
+                x  
+                ```coffeescript
+                    1+1
+                ```
+                y
+            1""".split '\n'
+        b[0].should.include.property 'ext' 'coffee'
+        b[1].should.include.property 'ext' 'md'
+        b[2].should.include.property 'ext' 'md'
+        b[3].should.include.property 'ext' 'coffee'
+        b[4].should.include.property 'ext' 'md'
+        b[5].should.include.property 'ext' 'md'
+        b[6].should.include.property 'ext' 'coffee'
+    
+        b = blocks """                    
+            ▸doc 'hello'                  
+                x                         
+                ```coffeescript           
+                    1+1                   
+                    ▸doc 'again'          
+                        some **docs**     
+                ```                       
+                y                         
+            1""".split '\n'               
+        b[0].should.include.property 'ext' 'coffee'
+        b[1].should.include.property 'ext' 'md'
+        b[2].should.include.property 'ext' 'md'
+        b[3].should.include.property 'ext' 'coffee'
+        b[4].should.include.property 'ext' 'coffee'
+        b[5].should.include.property 'ext' 'md'
+        b[6].should.include.property 'ext' 'md'
+        b[7].should.include.property 'ext' 'md'
+        b[8].should.include.property 'ext' 'coffee'
+        
+        b = blocks """
+            ▸dooc 'hello'
+                x  
+            """.split '\n'
+        b[0].should.include.property 'ext' 'coffee'
+        b[1].should.include.property 'ext' 'coffee'
+    
+        b = blocks """
+            ```coffeescript
+                1+1
+            ```
+            ```javascript
+                1+1;
+            ```
+            """.split('\n'), 'md'
+        b[0].should.include.property 'ext' 'md'
+        b[1].should.include.property 'ext' 'coffee'
+        b[2].should.include.property 'ext' 'md'
+        b[3].should.include.property 'ext' 'md'
+        b[4].should.include.property 'ext' 'js'
+            

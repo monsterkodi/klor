@@ -732,7 +732,7 @@ ranged = (lines) ->
             range =
                 start: chunk.start
                 match: chunk.match
-                value: chunk.value.replace 'punct', 'punctuation'
+                value: chunk.value
             rngs.push range
     rngs
 
@@ -751,7 +751,7 @@ dissect = (lines) ->
             range =
                 start: chunk.start
                 match: chunk.match
-                value: chunk.value.replace 'punct', 'punctuation'
+                value: chunk.value
             d.push range
         diss.push d
     diss
@@ -763,6 +763,7 @@ dissect = (lines) ->
 # 00000000  000   000  000         0000000   000   000     000     0000000   
 
 module.exports =
+    blocks:  blocks
     ranges:  (line, ext)  -> ranged blocks [line], ext
     dissect: (lines, ext) -> dissect blocks lines, ext
     
@@ -807,147 +808,6 @@ module.exports =
    000     00000000  0000000      000     
 ###
 
-▸test 'comment'
+▸test 'test'
 
-    require('kxk').chai()
-    
-    blocks(["##"]).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
-                {start:1 length:1 match:"#" value:'comment'} 
-                ]]
-
-    blocks([",#a"]).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                {start:0 length:1 match:"," value:'punct' turd: ",#"} 
-                {start:1 length:1 match:"#" value:'punct comment'} 
-                {start:2 length:1 match:"a" value:'comment'} 
-                ]]
-                
-▸test 'function'
-
-    blocks(['->']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                {start:0 length:1 match:'-' value:'punct function tail' turd: '->'} 
-                {start:1 length:1 match:'>' value:'punct function head'} 
-                ]]
-    blocks(['=>']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                {start:0 length:1 match:'=' value:'punct function bound tail' turd: '=>'} 
-                {start:1 length:1 match:'>' value:'punct function bound head'} 
-                ]]
-    blocks(['f=->1']).should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
-                {start:0 length:1 match:'f' value:'function'} 
-                {start:1 length:1 match:'=' value:'punct'               turd:'=->' } 
-                {start:2 length:1 match:'-' value:'punct function tail' turd:'->'} 
-                {start:3 length:1 match:'>' value:'punct function head'} 
-                {start:4 length:1 match:'1' value:'number'} 
-                ]]
-                
-▸test 'minimal'
-                
-    blocks(['1']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
-    blocks(['a']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
-    blocks(['.']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
-
-    blocks(['1.a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                 {start:0  length:1 match:'1' value:'number'} 
-                 {start:1  length:1 match:'.' value:'punct property'} 
-                 {start:2  length:1 match:'a' value:'property'} 
-                 ]]
-                 
-    blocks(['++a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                 {start:0  length:1 match:'+' value:'punct', turd:'++'} 
-                 {start:1  length:1 match:'+' value:'punct'} 
-                 {start:2  length:1 match:'a' value:'text'} 
-                 ]]
-                 
-    blocks(["▸doc 'hello'"]).should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
-                  {start:0  length:1 match:'▸'     value:'punct meta'} 
-                  {start:1  length:3 match:'doc'   value:'meta'} 
-                  {start:5  length:1 match:"'"     value:'punct string single'} 
-                  {start:6  length:5 match:"hello" value:'string single'} 
-                  {start:11 length:1 match:"'"     value:'punct string single'} 
-                  ]]
-                  
-▸test 'space'
-
-    b = blocks ["x"]
-    b[0].chunks[0].should.include.property 'start' 0
-
-    b = blocks [" xx"]
-    b[0].chunks[0].should.include.property 'start' 1
-    
-    b = blocks ["    xxx"]
-    b[0].chunks[0].should.include.property 'start' 4
-
-    b = blocks ["    x 1  , "]
-    b[0].chunks[0].should.include.property 'start' 4
-    b[0].chunks[1].should.include.property 'start' 6
-    b[0].chunks[2].should.include.property 'start' 9
-
-▸test 'switches'
-    
-    b = blocks """
-        ▸doc 'hello'
-            x    
-            y
-        1""".split '\n'
-    b[0].should.include.property 'ext' 'coffee'
-    b[1].should.include.property 'ext' 'md'
-    b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'coffee'
-
-    b = blocks """
-        ▸doc 'hello'
-            x  
-            ```coffeescript
-                1+1
-            ```
-            y
-        1""".split '\n'
-    b[0].should.include.property 'ext' 'coffee'
-    b[1].should.include.property 'ext' 'md'
-    b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'coffee'
-    b[4].should.include.property 'ext' 'md'
-    b[5].should.include.property 'ext' 'md'
-    b[6].should.include.property 'ext' 'coffee'
-
-    b = blocks """                    
-        ▸doc 'hello'                  
-            x                         
-            ```coffeescript           
-                1+1                   
-                ▸doc 'again'          
-                    some **docs**     
-            ```                       
-            y                         
-        1""".split '\n'               
-    b[0].should.include.property 'ext' 'coffee'
-    b[1].should.include.property 'ext' 'md'
-    b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'coffee'
-    b[4].should.include.property 'ext' 'coffee'
-    b[5].should.include.property 'ext' 'md'
-    b[6].should.include.property 'ext' 'md'
-    b[7].should.include.property 'ext' 'md'
-    b[8].should.include.property 'ext' 'coffee'
-    
-    b = blocks """
-        ▸dooc 'hello'
-            x  
-        """.split '\n'
-    b[0].should.include.property 'ext' 'coffee'
-    b[1].should.include.property 'ext' 'coffee'
-
-    b = blocks """
-        ```coffeescript
-            1+1
-        ```
-        ```javascript
-            1+1;
-        ```
-        """.split('\n'), 'md'
-    b[0].should.include.property 'ext' 'md'
-    b[1].should.include.property 'ext' 'coffee'
-    b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'md'
-    b[4].should.include.property 'ext' 'js'
-    
+    require('kxk').chai()    
