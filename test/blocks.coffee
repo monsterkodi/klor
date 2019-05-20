@@ -97,7 +97,7 @@ describe 'Blocks', ->
         inc rgs, 0, "#", 'punctuation comment triple'
         inc rgs, 1, "#", 'punctuation comment triple'
         inc rgs, 2, "#", 'punctuation comment triple'
-
+        inc rgs, 3, "#", 'comment triple'
         inc rgs, 4, "#", 'punctuation comment triple'
         inc rgs, 5, "#", 'punctuation comment triple'
         inc rgs, 6, "#", 'punctuation comment triple'
