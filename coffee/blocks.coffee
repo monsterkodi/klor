@@ -590,6 +590,7 @@ blocked = (lines) ->
         sass:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         scss:   punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         log:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
+        txt:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
                         
     # 000      000  000   000  00000000  000       0000000    0000000   00000000   
     # 000      000  0000  000  000       000      000   000  000   000  000   000  
@@ -699,14 +700,39 @@ ranged = (lines) ->
     rngs = []
     for line in lines
         for chunk in line.chunks
-            klog chunk.value if not chunk.value.replace
             range =
                 start: chunk.column
                 match: chunk.string
                 value: chunk.value.replace 'punct', 'punctuation'
+            range.clss = range.value
             rngs.push range
     rngs
 
+dissected = (lines) ->
+    
+    diss = []
+    for line in lines
+        d = []
+        for chunk in line.chunks
+            range =
+                start: chunk.column
+                match: chunk.string
+                value: chunk.value.replace 'punct', 'punctuation'
+            range.clss = range.value
+            d.push range
+        diss.push d
+    diss
+        
+# 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
+# 000        000 000   000   000  000   000  000   000     000     000       
+# 0000000     00000    00000000   000   000  0000000       000     0000000   
+# 000        000 000   000        000   000  000   000     000          000  
+# 00000000  000   000  000         0000000   000   000     000     0000000   
+
+module.exports =
+    ranges: (line, ext) -> ranged blocks [line], ext
+    dissected: (lines, ext) -> dissected blocks lines, ext
+    
 # 00000000   00000000    0000000   00000000  000  000      00000000  
 # 000   000  000   000  000   000  000       000  000      000       
 # 00000000   0000000    000   000  000000    000  000      0000000   
@@ -739,10 +765,7 @@ ranged = (lines) ->
             # blocks lines1
         # ▸profile 'syntax1'
             # lines1.map (l) -> Syntax.ranges l, 'coffee'
-        
-module.exports =
-    ranges: (textline, ext) -> ranged blocks [textline], ext
-    
+            
 # 000000000  00000000   0000000  000000000  
 #    000     000       000          000     
 #    000     0000000   0000000      000     
