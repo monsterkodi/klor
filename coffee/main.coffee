@@ -10,8 +10,8 @@ Syntax = require './syntax'
 Blocks = require './blocks'
 
 module.exports = 
-    dissected:  Blocks.dissected
-    # ranges:     Syntax.ranges
-    ranges:     Blocks.ranges
-    init:       Syntax.init
-    exts:       Syntax.exts
+    dissect: Blocks.dissect
+    blocks:  Blocks.ranges
+    ranges:  Syntax.ranges
+    init:    Syntax.init
+    exts:    Syntax.exts
