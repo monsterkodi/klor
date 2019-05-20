@@ -123,6 +123,7 @@ blocked = (lines) ->
     handl      = []
     extTop     = null
     stackTop   = null
+    notCode    = false # shortcut for top of stack != interpolation
     topType    = ''
     ext        = ''
     line       = null
@@ -219,7 +220,7 @@ blocked = (lines) ->
     
     coffeeFunc = ->        
 
-        return if stackTop and topType != 'interpolation'
+        return if notCode
                 
         if chunk.match == '▸'  
             addValue 0, 'meta'
@@ -252,6 +253,8 @@ blocked = (lines) ->
     
     property = ->
             
+        return if notCode
+        
         if getmatch(-1) == '.'
             addValue -1, 'property'
             setValue 0, 'property'
@@ -269,6 +272,8 @@ blocked = (lines) ->
         
     dict = ->
         
+        return if notCode
+        
         if chunk.match == ':' and not chunk.turd?.startsWith '::'
             if prev = getChunk -1
                 if prev.value.split(' ')[0] in ['string', 'number', 'text', 'keyword']
@@ -284,7 +289,7 @@ blocked = (lines) ->
     
     regexp = ->
         
-        return if topType.startsWith 'string'
+        return if topType?.startsWith 'string'
 
         if chunk.match == '/'
             
@@ -328,7 +333,7 @@ blocked = (lines) ->
                 chunk.value += ' ' + type
                 popStack()
                 return 1
-            else if stackTop and topType != 'interpolation'
+            else if notCode
                 return stacked()
                 
             pushStack type:type, strong:true
@@ -468,6 +473,7 @@ blocked = (lines) ->
     number = ->
         
         return 1 if chunk.value != 'text'
+        return if notCode
         
         if NUMBER.test chunk.match
             
@@ -594,11 +600,13 @@ blocked = (lines) ->
         stack.push o 
         stackTop = o
         topType = o.type
+        notCode = topType != 'interpolation'
         
     popStack = -> 
         stack.pop()
         stackTop = stack[-1]
         topType = stackTop?.type
+        notCode = stackTop and topType != 'interpolation'
         
     getChunk  = (d) -> line.chunks[chunkIndex+d]
     setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
@@ -802,7 +810,7 @@ module.exports =
         lines0 = text0.split '\n'
         lines1 = text1.split '\n'
 
-    for i in [0..3]
+    for i in [0..5]
         blocks lines0
         # blocks lines1
         # lines0.map (l) -> Syntax.ranges l, 'coffee'
