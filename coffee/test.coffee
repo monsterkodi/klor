@@ -284,10 +284,27 @@ describe 'ranges', ->
         inc rgs, 14, '*',     'punct italic'
         
     it 'md no string', ->
+        
         rgs = Blocks.ranges "it's good", 'md'
         inc rgs, 0, 'it',     'text'
         inc rgs, 2, "'",      'punct'
         inc rgs, 3, 's',      'text'
+        
+    it 'md no keyword', ->
+        
+        rgs = Blocks.ranges "if is empty in then", 'md'
+        inc rgs, 0,  'if',    'text'
+        inc rgs, 3,  'is',    'text'
+        inc rgs, 6,  'empty', 'text'
+        inc rgs, 12, 'in',    'text'
+        inc rgs, 15, 'then',  'text'
+
+        dss = Blocks.dissect ["▸doc 'md'", "    if is empty in then"], 'coffee'
+        inc dss[1], 4,  'if',    'text'
+        inc dss[1], 7,  'is',    'text'
+        inc dss[1], 10,  'empty', 'text'
+        inc dss[1], 16, 'in',    'text'
+        inc dss[1], 19, 'then',  'text'
         
     # it 'md li', ->
 #                 
@@ -412,6 +429,12 @@ describe 'ranges', ->
         inc rgs, 16, '=',    'punct function bound tail'
         inc rgs, 17, '>',    'punct function bound head'
                                 
+    # 000   000   0000000   00000000  00000000  00000000  00000000  
+    # 000  000   000   000  000       000       000       000       
+    # 0000000    000   000  000000    000000    0000000   0000000   
+    # 000  000   000   000  000       000       000       000       
+    # 000   000   0000000   000       000       00000000  00000000  
+    
     it 'koffee', ->
         
         rgs = Blocks.ranges " @: ->", 'coffee'
@@ -536,6 +559,7 @@ describe 'ranges', ->
         
         rgs = Blocks.ranges "func = function() {", 'js'
         inc rgs, 0, 'func', 'function'
+        inc rgs, 7, 'function', 'keyword function'
         
     #  0000000  000   000  
     # 000       000   000  
