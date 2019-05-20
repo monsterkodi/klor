@@ -97,11 +97,31 @@ describe 'Blocks', ->
         inc rgs, 0, "#", 'punctuation comment triple'
         inc rgs, 1, "#", 'punctuation comment triple'
         inc rgs, 2, "#", 'punctuation comment triple'
-        inc rgs, 3, "#", 'comment triple'
+        inc rgs, 3, "a", 'comment triple'
         inc rgs, 4, "#", 'punctuation comment triple'
         inc rgs, 5, "#", 'punctuation comment triple'
         inc rgs, 6, "#", 'punctuation comment triple'
 
+        dss = Blocks.dissect "###\na\n###".split('\n'), 'coffee'
+        inc dss[0], 0, "#", 'punctuation comment triple'
+        inc dss[0], 1, "#", 'punctuation comment triple'
+        inc dss[0], 2, "#", 'punctuation comment triple'
+        inc dss[1], 0, "a", 'comment triple'
+        inc dss[2], 0, "#", 'punctuation comment triple'
+        inc dss[2], 1, "#", 'punctuation comment triple'
+        inc dss[2], 2, "#", 'punctuation comment triple'
+        
+    it 'comment header', ->
+        
+        rgs = Blocks.ranges "# 0 00 0000", 'coffee'
+        inc rgs, 0,  "#",    'punctuation comment'
+        inc rgs, 2,  "0",    'comment header'
+        inc rgs, 4,  "00",   'comment header'
+        inc rgs, 7,  "0000", 'comment header'
+
+        dss = Blocks.dissect "###\n 0 00 0 \n###".split('\n'), 'coffee'
+        inc dss[1], 1, "0", 'comment triple header'
+        
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
     # 000 0 000  000   000  000000000  0000000    0000000   0000000    0000000   
