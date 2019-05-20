@@ -343,7 +343,7 @@ blocked = (lines) ->
         type = switch chunk.turd[..2]
             when '"""' then 'string double triple' 
             when "'''" then 'string single triple'
-            when '```' then 'string backtick triple'
+            # when '```' then 'string backtick triple'
 
         if type
             if topType == type
@@ -356,13 +356,13 @@ blocked = (lines) ->
             addValue 2, type
             return 3
         
-    # 00     00  0000000          00000000   0000000   00000000   00     00   0000000   000000000  
-    # 000   000  000   000        000       000   000  000   000  000   000  000   000     000     
-    # 000000000  000   000        000000    000   000  0000000    000000000  000000000     000     
-    # 000 0 000  000   000        000       000   000  000   000  000 0 000  000   000     000     
-    # 000   000  0000000          000        0000000   000   000  000   000  000   000     000     
+    # 00     00  0000000         0000000  000000000  00000000   000  000   000   0000000   
+    # 000   000  000   000      000          000     000   000  000  0000  000  000        
+    # 000000000  000   000      0000000      000     0000000    000  000 0 000  000  0000  
+    # 000 0 000  000   000           000     000     000   000  000  000  0000  000   000  
+    # 000   000  0000000        0000000      000     000   000  000  000   000   0000000   
     
-    formatString = ->
+    mdString = ->
         
         if chunk.turd == '**'
             
@@ -391,8 +391,22 @@ blocked = (lines) ->
             pushStack merge:true, type:type
             addValue 0, type
             return 1
-          
+                      
         if chunk.match == '`'
+          
+            if chunk.turd?[..2] == '```'
+    
+                type = 'string backtick triple'
+    
+                if topType == type
+                    popStack()
+                else
+                    pushStack type:type, weak:true
+                    
+                addValue 0, type
+                addValue 1, type
+                addValue 2, type
+                return 3
             
             type = 'backtick'
             if topType?.endsWith type
@@ -404,7 +418,7 @@ blocked = (lines) ->
             pushStack merge:true, type:type
             addValue 0, type
             return 1
-        
+                    
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000     
     # 000  0000  000     000     000       000   000  000   000  000   000  000     
     # 000  000 0 000     000     0000000   0000000    00000000   000   000  000     
@@ -587,7 +601,7 @@ blocked = (lines) ->
         json:   punct: [               simpleString, dict,              stacked ], word: [number, jsFunc,   stacked]
         js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
         ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [number, jsFunc,   stacked]
-        md:     punct: [ formatString, tripleString, simpleString, xmlPunct, stacked ], word: [number,           stacked]
+        md:     punct: [                   mdString, xmlPunct,          stacked ], word: [number,           stacked]
         iss:    punct: [ slashComment, simpleString,                    stacked ], word: [number,           stacked]
         ini:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number,           stacked]
         cpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [number, float,    stacked]
@@ -847,9 +861,9 @@ module.exports =
     blocks(["▸doc 'hello'"]).should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
                   {start:0  length:1 match:'▸'     value:'punct meta'} 
                   {start:1  length:3 match:'doc'   value:'meta'} 
-                  {start:5  length:1 match:"'"     value:'punct match single'} 
-                  {start:6  length:5 match:"hello" value:'match single'} 
-                  {start:11 length:1 match:"'"     value:'punct match single'} 
+                  {start:5  length:1 match:"'"     value:'punct string single'} 
+                  {start:6  length:5 match:"hello" value:'string single'} 
+                  {start:11 length:1 match:"'"     value:'punct string single'} 
                   ]]
                   
 ▸test 'space'
