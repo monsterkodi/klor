@@ -262,12 +262,6 @@ blocked = (lines) ->
         
     jsFunc = ->
         
-        # if prev.value == 'text'
-            # if chunk.match == '='
-                # setValue -1, 'function'
-            # else if prev.start+prev.length < chunk.start
-                # setValue -1, 'function call' 
-        
         if chunk.value == 'keyword function'
             if getmatch(-1) == '=' and getValue(-2).startsWith 'text'
                 setValue -2, 'function'
@@ -290,7 +284,7 @@ blocked = (lines) ->
     
     regexp = ->
         
-        return if topType == 'string'
+        return if topType.startsWith 'string'
 
         if chunk.match == '/'
             
