@@ -191,7 +191,19 @@ blocked = (lines) ->
     
     dashArrow = ->
 
+        return if notCode
+        
+        markFunc = ->
+            if line.chunks[0].value == 'text' 
+                if line.chunks[1].match == '='
+                    line.chunks[0].value = 'function'
+                    line.chunks[1].value += ' function'
+                else if line.chunks[1].match == ':'
+                    line.chunks[0].value = 'method'
+                    line.chunks[1].value += ' method'
+        
         if chunk.turd == '->'
+            markFunc()
             addValue 0, 'function tail'
             addValue 1, 'function head'
             if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd == '@:'
@@ -200,6 +212,7 @@ blocked = (lines) ->
             return 2
                 
         if chunk.turd == '=>'
+            markFunc()
             addValue 0, 'function bound tail'
             addValue 1, 'function bound head'
             if line.chunks[0].value == 'dictionary key'
@@ -247,10 +260,10 @@ blocked = (lines) ->
             return 1 if chunk.value.startsWith 'keyword' # we are done with the keyword
             
             if prev.value == 'text'
-                if chunk.match == '='
-                    setValue -1, 'function'
+                if chunk.match == '(' and prev.start+prev.length == chunk.start
+                    setValue -1, 'function call'
                 else if prev.start+prev.length < chunk.start # spaced
-                    if chunk.match not in ']},'
+                    if chunk.match not in '=]})/%;,.'
                         setValue -1, 'function call' 
         0 # we need this here
     
