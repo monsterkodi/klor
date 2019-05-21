@@ -7,7 +7,7 @@
 ###
 
 { slash, kstr, klog, noon, _ } = require 'kxk'
-        
+  
 Syntax = require './syntax'
 Syntax.init()
 
@@ -24,6 +24,8 @@ PUNCT  = /\W+/gi
 NUMBER = /^\d+$/
 FLOAT  = /^\d+f$/
 HEXNUM = /^0x[a-fA-F\d]+$/
+
+codeTypes = ['interpolation' 'code triple']
 
 #  0000000  000   000  000   000  000   000  000   000  00000000  0000000    
 # 000       000   000  000   000  0000  000  000  000   000       000   000  
@@ -58,7 +60,7 @@ chunked = (lines, ext) ->
             number: lineno
             ext:    ext
 
-        chunks = text.split SPACE
+        chunks = kstr.replaceTabs(text).split SPACE
         
         if chunks.length == 1 and chunks[0] == ''
             return line # empty line
@@ -123,7 +125,7 @@ blocked = (lines) ->
     handl      = []
     extTop     = null
     stackTop   = null
-    notCode    = false # shortcut for top of stack != interpolation
+    notCode    = false # shortcut for top of stack not in codeTypes
     topType    = ''
     ext        = ''
     line       = null
@@ -247,8 +249,9 @@ blocked = (lines) ->
             if prev.value == 'text'
                 if chunk.match == '='
                     setValue -1, 'function'
-                else if prev.start+prev.length < chunk.start
-                    setValue -1, 'function call' 
+                else if prev.start+prev.length < chunk.start # spaced
+                    if chunk.match not in ']},'
+                        setValue -1, 'function call' 
         0 # we need this here
     
     property = ->
@@ -259,7 +262,7 @@ blocked = (lines) ->
             addValue -1, 'property'
             setValue 0, 'property'
             if prevPrev = getChunk -2
-                if prevPrev.value not in ['property', 'number']
+                if prevPrev.value not in ['property', 'number', 'punct']
                     setValue -2, 'obj'
             return 1
         
@@ -417,7 +420,8 @@ blocked = (lines) ->
           
             if chunk.turd?[..2] == '```'
     
-                type = 'string backtick triple'
+                # type = 'string backtick triple'
+                type = 'code triple'
     
                 if topType == type
                     popStack()
@@ -429,13 +433,14 @@ blocked = (lines) ->
                 addValue 2, type
                 return 3
             
-            type = 'backtick'
+            type = 'code'
             if topType?.endsWith type
                 addValue 0, topType
                 popStack()
                 return 1
                 
             type = stackTop.type + ' ' + type if stackTop?.merge
+            # pushStack merge:true, type:type
             pushStack merge:true, type:type
             addValue 0, type
             return 1
@@ -603,23 +608,37 @@ blocked = (lines) ->
                 chunk.value += ' ' + topType
             return 1
        
+    pushExt = (mtch) ->
+        extTop = switch:mtch, start:line, stack:stack
+        extStack.push extTop
+        
+    actExt = ->
+        stack    = []
+        stackTop = null
+        topType  = ''
+        notCode  = false
+        
     popExt = ->
         stack = extTop.stack
         line.ext = extTop.start.ext
         extStack.pop()               
         extTop = extStack[-1]
-    
+        
+        stackTop = stack[-1]
+        topType = stackTop?.type
+        notCode = stackTop and topType not in codeTypes
+        
     pushStack = (o) -> 
         stack.push o 
         stackTop = o
         topType = o.type
-        notCode = topType != 'interpolation'
+        notCode = topType not in codeTypes
         
     popStack = -> 
         stack.pop()
         stackTop = stack[-1]
         topType = stackTop?.type
-        notCode = stackTop and topType != 'interpolation'
+        notCode = stackTop and topType not in codeTypes
         
     getChunk  = (d) -> line.chunks[chunkIndex+d]
     setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
@@ -676,6 +695,7 @@ blocked = (lines) ->
                 line.ext = extTop.switch.to     # make sure the current line ext matches the topmost from stack
                 
         if ext != line.ext                      # either at start of file or we switched extension
+            actExt()
             handl = handlers[ext = line.ext]    # install new handlers
         
         #  0000000  000   000  000   000  000   000  000   000  000       0000000    0000000   00000000   
@@ -702,12 +722,13 @@ blocked = (lines) ->
                         break
             else
                 
-                if mtch = Syntax.swtch[line.ext]?[chunk.match] 
-                    if mtch.turd
-                        turdChunk = getChunk -mtch.turd.length
-                        if mtch.turd == (turdChunk?.turd ? turdChunk?.match)
-                            # push a new extension onto the stack, ext will change on start of next line
-                            extStack.push extTop = switch:mtch, start:line, stack:stack
+                if not notCode
+                    if mtch = Syntax.swtch[line.ext]?[chunk.match] 
+                        if mtch.turd
+                            turdChunk = getChunk -mtch.turd.length
+                            if mtch.turd == (turdChunk?.turd ? turdChunk?.match)
+                                # push a new extension onto the stack, ext will change on start of next line
+                                pushExt mtch
                 
                 for hnd in handl.word ? []
                     if advance = hnd()
@@ -851,3 +872,20 @@ module.exports =
 ▸test 'test'
 
     require('kxk').chai()    
+
+    b = blocks """
+        ▸doc 'hello'
+            x  
+            ```coffeescript
+                1+1
+            ```
+            y
+        1""".split '\n'
+    b[0].should.include.property 'ext' 'coffee'
+    b[1].should.include.property 'ext' 'md'
+    b[2].should.include.property 'ext' 'md'
+    b[3].should.include.property 'ext' 'coffee'
+    b[4].should.include.property 'ext' 'md'
+    b[5].should.include.property 'ext' 'md'
+    b[6].should.include.property 'ext' 'coffee'
+        

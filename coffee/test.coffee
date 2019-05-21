@@ -14,6 +14,7 @@ nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, mat
 
 blocks = Blocks.blocks
 ranges = Blocks.ranges
+dissect = Blocks.dissect
     
 ###
 00000000    0000000   000   000   0000000   00000000   0000000  
@@ -323,9 +324,9 @@ describe 'ranges', ->
  
         rgs = ranges "*`italic code`*", 'md'
         inc rgs, 0, '*',      'punct italic'
-        inc rgs, 1, '`',      'punct italic backtick'
-        inc rgs, 2, 'italic', 'text italic backtick'
-        inc rgs, 9, 'code',   'text italic backtick'
+        inc rgs, 1, '`',      'punct italic code'
+        inc rgs, 2, 'italic', 'text italic code'
+        inc rgs, 9, 'code',   'text italic code'
         inc rgs, 14, '*',     'punct italic'
         
         rgs = ranges "it's good", 'md'
@@ -412,6 +413,15 @@ describe 'ranges', ->
         
         rgs = ranges "1 'a'", 'coffee'
         inc rgs, 0, "1", 'number'
+
+        rgs = ranges "a[0].prop", 'coffee'
+        inc rgs, 3, ']', 'punct'
+        
+        rgs = ranges "[ f ]", 'coffee'
+        inc rgs, 2, 'f', 'text'
+
+        rgs = ranges "[ f , f ]", 'coffee'
+        inc rgs, 2, 'f', 'text'
         
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
@@ -786,12 +796,12 @@ describe 'blocks', ->
             ▸doc 'hello'
                 x    
                 y
-            1""".split '\n'
+            if 1 then false""".split '\n'
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'md'
         b[2].should.include.property 'ext' 'md'
         b[3].should.include.property 'ext' 'coffee'
-    
+        
         b = blocks """
             ▸doc 'hello'
                 x  
