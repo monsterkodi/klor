@@ -452,6 +452,25 @@ describe 'ranges' ->
         rgs = ranges "[ f , f ]" 'coffee'
         inc rgs, 2 'f' 'text'
         
+        rgs = ranges "a[...2]" 'coffee'
+        inc rgs, 2 '.' 'punct range'
+        inc rgs, 3 '.' 'punct range'
+        inc rgs, 4 '.' 'punct range'
+
+        rgs = ranges "a[ -1 .. ]" 'coffee'
+        inc rgs, 6 '.' 'punct range'
+        inc rgs, 7 '.' 'punct range'
+
+        rgs = ranges "a[1..n]" 'coffee'
+        inc rgs, 3 '.' 'punct range'
+        inc rgs, 4 '.' 'punct range'
+
+        rgs = ranges "a[ .... ]" 'coffee'
+        inc rgs, 3 '.' 'punct'
+        inc rgs, 4 '.' 'punct'
+        inc rgs, 5 '.' 'punct'
+        inc rgs, 6 '.' 'punct'
+        
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
     # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  

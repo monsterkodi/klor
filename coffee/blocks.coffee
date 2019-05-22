@@ -17,6 +17,7 @@ Syntax.swtch =
     md:     
         coffeescript: turd:'```' to:'coffee' end:'```'
         javascript:   turd:'```' to:'js'     end:'```'
+        js:           turd:'```' to:'js'     end:'```'
             
 SPACE  = /\s/
 HEADER = /^0+$/
@@ -183,11 +184,7 @@ blocked = (lines) ->
                 popStack()
             else
                 pushStack type:type, strong:true
-                
-            addValue 0, type
-            addValue 1, type
-            addValue 2, type
-            return 3            
+            return addValues 3 type            
 
     starComment = -> 
         
@@ -199,14 +196,10 @@ blocked = (lines) ->
         
         if chunk.turd[..1] == '/*' and not topType 
             pushStack type:type, strong:true                
-            addValue 0, type
-            addValue 1, type
-            return 2
+            return addValues 2 type
         if chunk.turd[..1] == '*/' and topType == type
             popStack()
-            addValue 0, type
-            addValue 1, type
-            return 2
+            return addValues 2 type
             
     #  0000000   00000000   00000000    0000000   000   000  
     # 000   000  000   000  000   000  000   000  000 0 000  
@@ -229,8 +222,8 @@ blocked = (lines) ->
         
         if chunk.turd == '->'
             markFunc()
-            addValue 0, 'function tail'
-            addValue 1, 'function head'
+            addValue 0 'function tail'
+            addValue 1 'function head'
             if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd == '@:'
                 line.chunks[0].value = 'method'
                 line.chunks[1].value = 'punct method'
@@ -238,8 +231,8 @@ blocked = (lines) ->
                 
         if chunk.turd == '=>'
             markFunc()
-            addValue 0, 'function bound tail'
-            addValue 1, 'function bound head'
+            addValue 0 'function bound tail'
+            addValue 1 'function bound head'
             if line.chunks[0].value == 'dictionary key'
                 line.chunks[0].value = 'method'
                 line.chunks[1].value = 'punct method'
@@ -262,34 +255,37 @@ blocked = (lines) ->
 
         return if notCode
                 
-        if chunk.match == '▸'  
-            addValue 0, 'meta'
-            return 1
+        if chunk.match == '▸'
+            return addValue 0 'meta'
             
         if chunk.turd == '~>'
-            addValue 0, 'meta'
-            addValue 1, 'meta'
-            return 2
-        
+            return addValues 2 'meta'
+                                
         if prev = getChunk -1
-        
+            
+            if chunk.turd?.startsWith('..') and prev.match != '.'
+                if chunk.turd[2] != '.'
+                    return addValues 2 'range'
+                if chunk.turd[3] != '.'
+                    return addValues 3 'range'
+            
             if prev.match in ['class', 'extends']
-                setValue 0, 'class'
+                setValue 0 'class'
                 return 1
             
             if prev.value == 'punct meta'
                 if chunk.start == prev.start+1
-                    setValue 0, 'meta'
+                    setValue 0 'meta'
                     return 0 # give switch a chance
             
             return 1 if chunk.value.startsWith 'keyword' # we are done with the keyword
             
             if prev.value == 'text'
                 if chunk.match == '(' and prev.start+prev.length == chunk.start
-                    setValue -1, 'function call'
+                    setValue -1 'function call'
                 else if prev.start+prev.length < chunk.start # spaced
                     if chunk.match not in '=]})/%;,.'
-                        setValue -1, 'function call' 
+                        setValue -1 'function call' 
         0 # we need this here
     
     property = ->
@@ -297,18 +293,20 @@ blocked = (lines) ->
         return if notCode
         
         if getmatch(-1) == '.'
-            addValue -1, 'property'
-            setValue 0, 'property'
-            if prevPrev = getChunk -2
-                if prevPrev.value not in ['property', 'number', 'punct']
-                    setValue -2, 'obj'
-            return 1
+            prevPrev = getChunk -2
+            if prevPrev?.match != '.'
+                addValue -1 'property'
+                setValue 0 'property'
+                if prevPrev
+                    if prevPrev.value not in ['property', 'number', 'punct']
+                        setValue -2 'obj'
+                return 1
         
     jsFunc = ->
         
         if chunk.value == 'keyword function'
             if getmatch(-1) == '=' and getValue(-2).startsWith 'text'
-                setValue -2, 'function'
+                setValue -2 'function'
         0 # we need this here
         
     dict = ->
@@ -318,8 +316,8 @@ blocked = (lines) ->
         if chunk.match == ':' and not chunk.turd?.startsWith '::'
             if prev = getChunk -1
                 if prev.value.split(' ')[0] in ['string', 'number', 'text', 'keyword']
-                    setValue -1, 'dictionary key'
-                    setValue  0, 'punct dictionary'
+                    setValue -1 'dictionary key'
+                    setValue  0 'punct dictionary'
                     return 1
         
     # 00000000   00000000   0000000   00000000  000   000  00000000   
@@ -334,7 +332,7 @@ blocked = (lines) ->
             if chunkIndex == 0 or not getChunk(-1).escape
                 if getChunk(1).start == chunk.start+1
                     chunk.escape = true
-                    addValue 0, 'escape'
+                    addValue 0 'escape'
                     return stacked()
     
     regexp = ->
@@ -358,8 +356,7 @@ blocked = (lines) ->
                     return if (prev.start+prev.length == chunk.start) and next?.start == chunk.start+1
   
             pushStack type:'regexp'
-            chunk.value += ' regexp start'
-            return 1
+            return addValue 0 'regexp start'
             
         escape()
         
@@ -383,14 +380,14 @@ blocked = (lines) ->
                 when '`' then 'string backtick'
                 
             if topType == type
-                chunk.value += ' ' + type
+                addValue 0 type
                 popStack()
                 return 1
             else if notCode
                 return stacked()
                 
-            pushStack type:type, strong:true
-            chunk.value += ' ' + type
+            pushStack strong:true type:type
+            addValue 0 type
             return 1
             
         escape()
@@ -398,7 +395,7 @@ blocked = (lines) ->
     tripleString = -> 
         
         return if not chunk.turd or chunk.turd.length < 3
-        return if topType in ['regexp', 'string single', 'string double']
+        return if topType in ['regexp''string single''string double']
         
         if getChunk(-1)?.escape then return stacked()
                 
@@ -414,12 +411,9 @@ blocked = (lines) ->
             if topType == type
                 popStack()
             else
-                pushStack type:type, strong:true
+                pushStack strong:true type:type
                 
-            addValue 0, type
-            addValue 1, type
-            addValue 2, type
-            return 3
+            return addValues 3 type
             
         escape()
         
@@ -435,58 +429,49 @@ blocked = (lines) ->
             
             type = 'bold'
             if topType?.endsWith type
-                addValue 0, topType
-                addValue 1, topType
+                addValues 2 topType
                 popStack()
                 return 2
 
             type = stackTop.type + ' ' + type if stackTop?.merge
-            pushStack merge:true, type:type
-            addValue 0, type
-            addValue 1, type
-            return 2
+            pushStack merge:true type:type
+            return addValues 2 type
             
         if chunk.match == '*'
             
             type = 'italic'
             if topType?.endsWith type
-                addValue 0, topType
+                addValue 0 topType
                 popStack()
                 return 1
 
             type = stackTop.type + ' ' + type if stackTop?.merge
-            pushStack merge:true, type:type
-            addValue 0, type
+            pushStack merge:true type:type
+            addValue 0 type
             return 1
                       
         if chunk.match == '`'
           
             if chunk.turd?[..2] == '```'
     
-                # type = 'string backtick triple'
                 type = 'code triple'
     
                 if topType == type
                     popStack()
                 else
-                    pushStack type:type, weak:true
-                    
-                addValue 0, type
-                addValue 1, type
-                addValue 2, type
-                return 3
+                    pushStack weak:true type:type
+                return addValues 3 type
             
             type = 'code'
             if topType?.endsWith type
-                addValue 0, topType
+                addValue 0 topType
                 popStack()
                 return 1
                 
             type = stackTop.type + ' ' + type if stackTop?.merge
             # pushStack merge:true, type:type
-            pushStack merge:true, type:type
-            addValue 0, type
-            return 1
+            pushStack merge:true type:type
+            return addValue 0 type
                     
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000     
     # 000  0000  000     000     000       000   000  000   000  000   000  000     
@@ -500,14 +485,12 @@ blocked = (lines) ->
         
             if chunk.turd?.startsWith "\#{"
                 pushStack type:'interpolation', weak:true
-                addValue 0, 'string interpolation start'
-                addValue 1, 'string interpolation start'
-                return 2
+                return addValues 2 'string interpolation start'
                 
         else if topType == 'interpolation'
             
             if chunk.match == '}'
-                addValue 0, 'match interpolation end'
+                addValue 0 'match interpolation end'
                 popStack()
                 return 1
         
@@ -541,17 +524,17 @@ blocked = (lines) ->
             if getmatch(-1) == '.'
 
                 if getValue(-4) == 'number float' and getValue(-2) == 'number float'
-                    setValue -4, 'semver'
-                    setValue -3, 'punct semver'
-                    setValue -2, 'semver'
-                    setValue -1, 'punct semver'
-                    setValue  0, 'semver'
+                    setValue -4 'semver'
+                    setValue -3 'punct semver'
+                    setValue -2 'semver'
+                    setValue -1 'punct semver'
+                    setValue  0 'semver'
                     return 1
 
                 if getValue(-2) == 'number'
-                    setValue -2, 'number float'
-                    addValue -1, 'number float'
-                    setValue  0, 'number float'
+                    setValue -2 'number float'
+                    addValue -1 'number float'
+                    setValue  0 'number float'
                     return 1
 
             chunk.value = 'number'
@@ -574,9 +557,9 @@ blocked = (lines) ->
             if getmatch(-1) == '.'
 
                 if getValue(-2) == 'number'
-                    setValue -2, 'number float'
-                    addValue -1, 'number float'
-                    setValue  0, 'number float'
+                    setValue -2 'number float'
+                    addValue -1 'number float'
+                    setValue  0 'number float'
                     return 1
 
             chunk.value = 'number float'
@@ -591,13 +574,10 @@ blocked = (lines) ->
     xmlPunct = -> 
         
         if chunk.turd == '</'
-            addValue 0, 'keyword'
-            addValue 1, 'keyword'
-            return 2
+            return addValues 2 'keyword'
             
         if chunk.match in ['<''>']
-            addValue 0, 'keyword'
-            return 1
+            return addValue 0 'keyword'
             
     #  0000000  00000000   00000000   
     # 000       000   000  000   000  
@@ -608,8 +588,8 @@ blocked = (lines) ->
     cppMacro = -> 
         
         if chunk.match == "#"
-            addValue 0, 'define'
-            setValue 1, 'define'
+            addValue 0 'define'
+            setValue 1 'define'
             return 2
 
     #  0000000  000   000
@@ -621,18 +601,17 @@ blocked = (lines) ->
     shPunct = ->
         
         if chunk.match == '/' and getChunk(-1)?.start + getChunk(-1)?.length == chunk.start
-            addValue -1, 'dir'
-            return 1
+            return addValue -1 'dir'
         
         if chunk.turd == '--' and getChunk(2)?.start == chunk.start+2
-            addValue 0, 'argument'
-            addValue 1, 'argument'
-            setValue 2, 'argument'
+            addValue 0 'argument'
+            addValue 1 'argument'
+            setValue 2 'argument'
             return 3
             
         if chunk.match == '-' and getChunk(1)?.start == chunk.start+1
-            addValue 0, 'argument'
-            setValue 1, 'argument'
+            addValue 0 'argument'
+            setValue 1 'argument'
             return 2
                  
     #  0000000  000000000   0000000    0000000  000   000  00000000  0000000    
@@ -685,9 +664,17 @@ blocked = (lines) ->
         
     getChunk  = (d) -> line.chunks[chunkIndex+d]
     setValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
-    addValue  = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value += ' ' + value
     getValue  = (d) -> getChunk(d)?.value ? ''
-    getmatch = (d) -> getChunk(d)?.match ? ''
+    getmatch  = (d) -> getChunk(d)?.match ? ''
+    addValue  = (d, value) -> 
+        if 0 <= chunkIndex+d < line.chunks.length 
+            line.chunks[chunkIndex+d].value += ' ' + value
+        1
+        
+    addValues = (n,value) ->    
+        for i in [0...n]
+            addValue i, value
+        n
         
     # 000   000   0000000   000   000  0000000    000      00000000  00000000    0000000  
     # 000   000  000   000  0000  000  000   000  000      000       000   000  000       
