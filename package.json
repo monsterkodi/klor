@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "syntax highlighting",
   "keywords": [
     "syntax",
@@ -21,13 +21,13 @@
     "test": "./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee"
   },
   "dependencies": {
-    "kxk": "^0.288.0",
+    "kxk": "^0.290.0",
     "pretty-time": "^1.1.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",
     "chai": "^4.2.0",
-    "koffee": "^0.43.0",
+    "koffee": "^0.45.0",
     "mocha": "^6.1.4"
   }
 }
