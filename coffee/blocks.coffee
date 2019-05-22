@@ -298,7 +298,7 @@ blocked = (lines) ->
                 addValue -1 'property'
                 setValue 0 'property'
                 if prevPrev
-                    if prevPrev.value not in ['property', 'number', 'punct']
+                    if prevPrev.value not in ['property', 'number'] and not prevPrev.value.startsWith 'punct'
                         setValue -2 'obj'
                 return 1
         
