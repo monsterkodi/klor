@@ -25,6 +25,7 @@ coffee js ts
         continue
         true
         typeof
+        instanceof
         __dirname
         __filename
         valid
@@ -52,9 +53,6 @@ coffee js ts
         fs
         os
 
-    function
-        log
-        
     function call
         err
         error
