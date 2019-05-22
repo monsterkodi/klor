@@ -49,7 +49,7 @@ describe 'ranges' ->
 
         rgs = ranges "/\\'hello\\'/ " 'coffee'
         inc rgs, 0 '/'       'punct regexp start'
-        inc rgs, 1 "\\"      'punct regexp'
+        inc rgs, 1 "\\"      'punct escape regexp'
         inc rgs, 2 "'"       'punct regexp'
         inc rgs, 3 "hello"   'text regexp'
 
@@ -57,6 +57,24 @@ describe 'ranges' ->
         inc rgs, 4 '/'       'punct regexp start'
         inc rgs, 5 'b'       'text regexp'
         inc rgs, 10 '/'      'punct regexp end'
+        
+        rgs = ranges "w=l.split /[\\s\\/]/ ; bla"
+        inc rgs, 10 '/'       'punct regexp start'
+        inc rgs, 14 '\\'      'punct escape regexp'
+        inc rgs, 17 '/'       'punct regexp end'
+        inc rgs, 19 ';'       'punct'
+        
+        rgs = ranges "a = 1 / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
+
+        rgs = ranges "(1+1) / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
+
+        rgs = ranges "a[10] / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
         
     # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
     # 0000  000  000   000        000   000  000       000        000        000 000   000   000  
@@ -116,42 +134,53 @@ describe 'ranges' ->
         inc rgs, 5 "bla"   'comment'
         inc rgs, 9 "blub"  'comment'
             
-        it 'no comment' ->
+        rgs = ranges "(^\s*#\s*)(.*)$" 'noon'
+        for rng in rgs
+            rng.should.not.have.property 'value' 'comment'
             
-            rgs = ranges "(^\s*#\s*)(.*)$" 'noon'
-            for rng in rgs
-                rng.should.not.have.property 'value' 'comment'
-                
-        it 'triple comment' ->
-            
-            rgs = ranges "###a###" 'coffee'
-            inc rgs, 0 "#" 'punct comment triple'
-            inc rgs, 1 "#" 'punct comment triple'
-            inc rgs, 2 "#" 'punct comment triple'
-            inc rgs, 3 "a" 'comment triple'
-            inc rgs, 4 "#" 'punct comment triple'
-            inc rgs, 5 "#" 'punct comment triple'
-            inc rgs, 6 "#" 'punct comment triple'
-    
-            dss = Blocks.dissect "###\na\n###".split('\n'), 'coffee'
-            inc dss[0], 0 "#" 'punct comment triple'
-            inc dss[0], 1 "#" 'punct comment triple'
-            inc dss[0], 2 "#" 'punct comment triple'
-            inc dss[1], 0 "a" 'comment triple'
-            inc dss[2], 0 "#" 'punct comment triple'
-            inc dss[2], 1 "#" 'punct comment triple'
-            inc dss[2], 2 "#" 'punct comment triple'
-            
-        it 'comment header' ->
-            
-            rgs = ranges "# 0 00 0000" 'coffee'
-            inc rgs, 0  "#"    'punct comment'
-            inc rgs, 2  "0"    'comment header'
-            inc rgs, 4  "00"   'comment header'
-            inc rgs, 7  "0000" 'comment header'
-    
-            dss = Blocks.dissect "###\n 0 00 0 \n###".split('\n'), 'coffee'
-            inc dss[1], 1 "0" 'comment triple header'
+    it 'triple comment' ->
+        
+        rgs = ranges "###a###" 'coffee'
+        inc rgs, 0 "#" 'punct comment triple'
+        inc rgs, 1 "#" 'punct comment triple'
+        inc rgs, 2 "#" 'punct comment triple'
+        inc rgs, 3 "a" 'comment triple'
+        inc rgs, 4 "#" 'punct comment triple'
+        inc rgs, 5 "#" 'punct comment triple'
+        inc rgs, 6 "#" 'punct comment triple'
+
+        dss = Blocks.dissect "###\na\n###".split('\n'), 'coffee'
+        inc dss[0], 0 "#" 'punct comment triple'
+        inc dss[0], 1 "#" 'punct comment triple'
+        inc dss[0], 2 "#" 'punct comment triple'
+        inc dss[1], 0 "a" 'comment triple'
+        inc dss[2], 0 "#" 'punct comment triple'
+        inc dss[2], 1 "#" 'punct comment triple'
+        inc dss[2], 2 "#" 'punct comment triple'
+
+        dss = Blocks.dissect "/*\na\n*/".split('\n'), 'styl'
+        inc dss[0], 0 "/" 'punct comment triple'
+        inc dss[0], 1 "*" 'punct comment triple'
+        inc dss[1], 0 "a" 'comment triple'
+        inc dss[2], 0 "*" 'punct comment triple'
+        inc dss[2], 1 "/" 'punct comment triple'
+        
+    it 'comment header' ->
+        
+        rgs = ranges "# 0 00 0000" 'coffee'
+        inc rgs, 0  "#"    'punct comment'
+        inc rgs, 2  "0"    'comment header'
+        inc rgs, 4  "00"   'comment header'
+        inc rgs, 7  "0000" 'comment header'
+
+        dss = Blocks.dissect "###\n 0 00 0 \n###".split('\n'), 'coffee'
+        inc dss[1], 1 "0" 'comment triple header'
+        
+        rgs = ranges "// 000" 'styl'
+        inc rgs, 3  "000"    'comment header'
+
+        dss = Blocks.dissect "/*\n 0 0 0 \n*/".split('\n'), 'styl'
+        inc dss[1], 1 "0" 'comment triple header'
         
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
@@ -540,7 +569,7 @@ describe 'ranges' ->
         inc rgs, 0 "<"    'punct keyword'
         inc rgs, 1 "div"  'keyword'
         inc rgs, 4 ">"    'punct keyword'
-            
+                  
     #  0000000  00000000   00000000 
     # 000       000   000  000   000
     # 000       00000000   00000000 

@@ -137,38 +137,44 @@ blocked = (lines) ->
     # 000       000   000  000000000  000000000  0000000   000 0 000     000     
     # 000       000   000  000 0 000  000 0 000  000       000  0000     000     
     #  0000000   0000000   000   000  000   000  00000000  000   000     000     
-    
+
+    fillComment = (n) ->
+        
+        for i in [0...n]
+            addValue i, 'comment'
+        if chunkIndex < line.chunks.length-n
+            for c in line.chunks[chunkIndex+n..]
+                c.value = 'comment'
+                if HEADER.test c.match
+                    c.value += ' header'
+        return line.chunks.length - chunkIndex + n
+        
     hashComment = -> 
         
         return if stackTop
         
         if chunk.match == "#"
-            chunk.value += ' comment'
-            if chunkIndex < line.chunks.length-1
-                for c in line.chunks[chunkIndex+1..]
-                    c.value = 'comment'
-                    if HEADER.test c.match
-                        c.value += ' header'
-            return line.chunks.length - chunkIndex + 1
+            fillComment 1
 
     noonComment = -> 
         
         return if stackTop
         
-        if chunk.match == "#" and chunkIndex == 0 # the only difference. merge with hashComment?
-            chunk.value += ' comment'
-            if chunkIndex < line.chunks.length-1
-                for c in line.chunks[chunkIndex+1..]
-                    c.value = 'comment'
-            return line.chunks.length - chunkIndex + 1
+        if chunk.match == "#" and chunkIndex == 0
+            fillComment 1
         
     slashComment = ->
-    
+
+        return if stackTop
+        
+        if chunk.turd == "//"
+            fillComment 2
+        
     blockComment = -> 
         
         return if not chunk.turd or chunk.turd.length < 3
         
-        type = 'comment triple' 
+        type = 'comment triple'
         
         return if topType and topType not in ['interpolation', type]
         
@@ -182,7 +188,26 @@ blocked = (lines) ->
             addValue 1, type
             addValue 2, type
             return 3            
-                
+
+    starComment = -> 
+        
+        return if not chunk.turd
+        
+        type = 'comment triple'
+        
+        return if topType and topType != type
+        
+        if chunk.turd[..1] == '/*' and not topType 
+            pushStack type:type, strong:true                
+            addValue 0, type
+            addValue 1, type
+            return 2
+        if chunk.turd[..1] == '*/' and topType == type
+            popStack()
+            addValue 0, type
+            addValue 1, type
+            return 2
+            
     #  0000000   00000000   00000000    0000000   000   000  
     # 000   000  000   000  000   000  000   000  000 0 000  
     # 000000000  0000000    0000000    000   000  000000000  
@@ -303,10 +328,21 @@ blocked = (lines) ->
     # 000   000  000       000   000  000        000 000   000        
     # 000   000  00000000   0000000   00000000  000   000  000        
     
+    escape = ->
+        
+        if chunk.match == '\\' and (topType == 'regexp' or topType?.startsWith 'string')
+            if chunkIndex == 0 or not getChunk(-1).escape
+                if getChunk(1).start == chunk.start+1
+                    chunk.escape = true
+                    addValue 0, 'escape'
+                    return stacked()
+    
     regexp = ->
         
         return if topType?.startsWith 'string'
 
+        if getChunk(-1)?.escape then return stacked()
+        
         if chunk.match == '/'
             
             if topType == 'regexp'
@@ -317,20 +353,22 @@ blocked = (lines) ->
             if chunkIndex 
                 prev = getChunk -1
                 next = getChunk +1
-                if not prev.value.startsWith 'punct'
+                if not prev.value.startsWith('punct') or prev.match in ")]"
                     return if (prev.start+prev.length <  chunk.start) and next?.start >  chunk.start+1
                     return if (prev.start+prev.length == chunk.start) and next?.start == chunk.start+1
   
             pushStack type:'regexp'
             chunk.value += ' regexp start'
             return 1
+            
+        escape()
         
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        
     # 0000000      000     0000000    000  000 0 000  000  0000  
     #      000     000     000   000  000  000  0000  000   000  
     # 0000000      000     000   000  000  000   000   0000000   
-    
+        
     simpleString = ->
         
         return if topType == 'regexp'
@@ -355,11 +393,7 @@ blocked = (lines) ->
             chunk.value += ' ' + type
             return 1
             
-        if chunk.match == '\\' and topType?.startsWith 'string'
-            if chunkIndex == 0 or not getChunk(-1).escape
-                if getChunk(1).start == chunk.start+1
-                    chunk.escape = true
-                    return stacked()
+        escape()
                         
     tripleString = -> 
         
@@ -387,11 +421,7 @@ blocked = (lines) ->
             addValue 2, type
             return 3
             
-        if chunk.match == '\\' and topType?.startsWith 'string'
-            if chunkIndex == 0 or not line.chunks[chunkIndex-1].escape
-                if getChunk(1).start == chunk.start+1
-                    chunk.escape = true
-                    return stacked()
+        escape()
         
     # 00     00  0000000         0000000  000000000  00000000   000  000   000   0000000   
     # 000   000  000   000      000          000     000   000  000  0000  000  000        
@@ -667,31 +697,31 @@ blocked = (lines) ->
     
     handlers = 
         coffee: 
-                punct: [ blockComment, hashComment, coffeeFunc, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
-                word:  [ keyword, coffeeFunc, commentHeader, number, property, stacked ]
-        noon:   punct: [ noonComment,                                   stacked ], word: [keyword, number,           stacked]
-        json:   punct: [               simpleString, dict,              stacked ], word: [keyword, number,           stacked]
-        js:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [keyword, jsFunc, number,   stacked]
-        ts:     punct: [ slashComment, simpleString, dashArrow, regexp, stacked ], word: [keyword, jsFunc, number,   stacked]
-        md:     punct: [                   mdString, xmlPunct,          stacked ], word: [         number,           stacked]
-        iss:    punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        ini:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [         number,           stacked]
-        cpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [keyword, number, float,    stacked]
-        hpp:    punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [keyword, number, float,    stacked]
-        c:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [keyword, number, float,    stacked]
-        h:      punct: [ slashComment, simpleString, cppMacro,          stacked ], word: [keyword, number, float,    stacked]
-        sh:     punct: [ hashComment,  simpleString, shPunct,           stacked ], word: [keyword, number,           stacked]
-        cs:     punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        pug:    punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        svg:    punct: [               simpleString, xmlPunct,          stacked ], word: [keyword, number,           stacked]
-        html:   punct: [               simpleString, xmlPunct,          stacked ], word: [keyword, number,           stacked]
-        htm:    punct: [               simpleString, xmlPunct,          stacked ], word: [keyword, number,           stacked]
-        styl:   punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        css:    punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        sass:   punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        scss:   punct: [ slashComment, simpleString,                    stacked ], word: [keyword, number,           stacked]
-        log:    punct: [ slashComment, simpleString,                    stacked ], word: [         number,           stacked]
-        txt:    punct: [ slashComment, simpleString,                    stacked ], word: [         number,           stacked]
+                punct:[ blockComment, hashComment, coffeeFunc, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
+                word: [ keyword, coffeeFunc, commentHeader, number, property, stacked ]
+        noon:   punct:[ noonComment,                                                 stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        js:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ commentHeader, keyword, jsFunc, number, stacked ]
+        ts:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ commentHeader, keyword, jsFunc, number, stacked ]
+        iss:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        ini:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ commentHeader,          number,         stacked ]
+        cpp:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ commentHeader, keyword, number, float,  stacked ]
+        hpp:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ commentHeader, keyword, number, float,  stacked ]
+        c:      punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ commentHeader, keyword, number, float,  stacked ]
+        h:      punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ commentHeader, keyword, number, float,  stacked ]
+        cs:     punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        pug:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        styl:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        css:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        sass:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        scss:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ commentHeader, keyword, number,         stacked ]
+        svg:    punct:[               simpleString, xmlPunct,                        stacked ], word:[                keyword, number,         stacked ]
+        html:   punct:[               simpleString, xmlPunct,                        stacked ], word:[                keyword, number,         stacked ]
+        htm:    punct:[               simpleString, xmlPunct,                        stacked ], word:[                keyword, number,         stacked ]
+        sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[                keyword, number,         stacked ]
+        json:   punct:[               simpleString, dict,                            stacked ], word:[                keyword, number,         stacked ]
+        md:     punct:[                   mdString, xmlPunct,                        stacked ], word:[                         number,         stacked ]
+        log:    punct:[                             simpleString,                    stacked ], word:[                         number,         stacked ]
+        txt:    punct:[                             simpleString,                    stacked ], word:[                         number,         stacked ]
                         
     # 000      000  000   000  00000000  000       0000000    0000000   00000000   
     # 000      000  0000  000  000       000      000   000  000   000  000   000  
