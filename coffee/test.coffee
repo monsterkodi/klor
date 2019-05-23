@@ -14,7 +14,7 @@ nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, mat
 
 blocks  = Blocks.blocks
 ranges  = Blocks.ranges
-dissect = Blocks.dissect
+dissect = (c,l) -> Blocks.dissect c.split('\n'), l
   
 ▸doc 'sample'
     ```coffeescript
@@ -64,7 +64,7 @@ describe 'ranges' ->
         inc rgs, 5 "#" 'punct comment triple'
         inc rgs, 6 "#" 'punct comment triple'
 
-        dss = Blocks.dissect "###\na\n###".split('\n'), 'coffee'
+        dss = dissect "###\na\n###" 'coffee'
         inc dss[0], 0 "#" 'punct comment triple'
         inc dss[0], 1 "#" 'punct comment triple'
         inc dss[0], 2 "#" 'punct comment triple'
@@ -73,7 +73,7 @@ describe 'ranges' ->
         inc dss[2], 1 "#" 'punct comment triple'
         inc dss[2], 2 "#" 'punct comment triple'
 
-        dss = Blocks.dissect "/*\na\n*/".split('\n'), 'styl'
+        dss = dissect "/*\na\n*/" 'styl'
         inc dss[0], 0 "/" 'punct comment triple'
         inc dss[0], 1 "*" 'punct comment triple'
         inc dss[1], 0 "a" 'comment triple'
@@ -88,13 +88,13 @@ describe 'ranges' ->
         inc rgs, 4  "00"   'comment header'
         inc rgs, 7  "0000" 'comment header'
 
-        dss = Blocks.dissect "###\n 0 00 0 \n###".split('\n'), 'coffee'
+        dss = dissect "###\n 0 00 0 \n###" 'coffee'
         inc dss[1], 1 "0" 'comment triple header'
         
         rgs = ranges "// 000" 'styl'
         inc rgs, 3  "000"    'comment header'
 
-        dss = Blocks.dissect "/*\n 0 0 0 \n*/".split('\n'), 'styl'
+        dss = dissect "/*\n 0 0 0 \n*/" 'styl'
         inc dss[1], 1 "0" 'comment triple header'
         
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
@@ -174,12 +174,6 @@ describe 'ranges' ->
         inc rgs, 3 '"'   'string single'
         inc rgs, 4 'X'   'string single'
         inc rgs, 6 "'"   'punct string single'
-
-        rgs = ranges 'a=`"X"`'
-        inc rgs, 2 "`"   'punct string backtick'
-        inc rgs, 3 '"'   'string backtick'
-        inc rgs, 4 'X'   'string backtick'
-        inc rgs, 6 "`"   'punct string backtick'
             
         rgs = ranges 'a="  \'X\'  Y  " '
         inc rgs, 2 '"'   'punct string double'
@@ -197,11 +191,6 @@ describe 'ranges' ->
         for i in [2 3 7 9 13 15]
             inc rgs, i, "'", 'punct string single'
         inc rgs, 14 'Y' 'string single'
-                
-        rgs = ranges "a=``;b=` `;c=`Z`"
-        for i in [2 3 7 9 13 15]
-            inc rgs, i, "`", 'punct string backtick'
-        inc rgs, 14 'Z' 'string backtick'
         
         rgs = ranges '''"s = '/some\\path/file.txt:10'"'''
         inc rgs, 5 "'"     'string double'
@@ -222,6 +211,17 @@ describe 'ranges' ->
         inc rgs, 8  "'"     'string single triple'
         inc rgs, 11 "'"     'punct string single triple'
 
+        # rgs = ranges 'a=`"X"`'
+        # inc rgs, 2 "`"   'punct string backtick'
+        # inc rgs, 3 '"'   'string backtick'
+        # inc rgs, 4 'X'   'string backtick'
+        # inc rgs, 6 "`"   'punct string backtick'
+        
+        # rgs = ranges "a=``;b=` `;c=`Z`"
+        # for i in [2 3 7 9 13 15]
+            # inc rgs, i, "`", 'punct string backtick'
+        # inc rgs, 14 'Z' 'string backtick'
+        
         # interpolation
         
         rgs = ranges '"#{xxx}"' 'coffee'
@@ -550,7 +550,7 @@ describe 'ranges' ->
         inc rgs, 5 "/" 'punct regexp triple'
         inc rgs, 6 "/" 'punct regexp triple'
 
-        dss = Blocks.dissect "///\na\n///".split('\n'), 'coffee'
+        dss = dissect "///\na\n///" 'coffee'
         inc dss[0], 0 "/" 'punct regexp triple'
         inc dss[0], 1 "/" 'punct regexp triple'
         inc dss[0], 2 "/" 'punct regexp triple'
@@ -559,11 +559,11 @@ describe 'ranges' ->
         inc dss[2], 1 "/" 'punct regexp triple'
         inc dss[2], 2 "/" 'punct regexp triple'
 
-        dss = Blocks.dissect """
+        dss = dissect """
             ///
                 ([\\\\?]) # comment
             ///
-            """.split('\n'), 'coffee'
+            """ 'coffee'
         inc dss[0], 0  "/"  'punct regexp triple'
         inc dss[0], 1  "/"  'punct regexp triple'
         inc dss[0], 2  "/"  'punct regexp triple'
@@ -612,13 +612,18 @@ describe 'ranges' ->
     # 000   000  0000000    
     
     it 'md' ->
-        
+                
         rgs = ranges "**bold**" 'md'
         inc rgs, 0 '*'      'punct bold'
         inc rgs, 1 '*'      'punct bold'
         inc rgs, 2 'bold'   'text bold'
         inc rgs, 6 '*'      'punct bold'
         inc rgs, 7 '*'      'punct bold'
+        
+        rgs = ranges ",**b**," 'md'
+        inc rgs, 1 '*'      'punct bold'
+        inc rgs, 3 'b'      'text bold'
+        inc rgs, 4 '*'      'punct bold'
                 
         rgs = ranges "*it lic*" 'md'
         inc rgs, 0 '*'      'punct italic'
@@ -650,25 +655,63 @@ describe 'ranges' ->
         inc rgs, 12 'in'    'text'
         inc rgs, 15 'then'  'text'
 
-        dss = Blocks.dissect ["▸doc 'md'" "    if is empty in then"], 'coffee'
+        dss = dissect "▸doc 'md'\n    if is empty in then" 'coffee'
         inc dss[1], 4  'if'    'text'
         inc dss[1], 7  'is'    'text'
         inc dss[1], 10  'empty' 'text'
         inc dss[1], 16 'in'    'text'
         inc dss[1], 19 'then'  'text'
-    
-        # rgs = ranges "- li" 'md'
-        # inc rgs, 0 '-'  'li1 marker'
-        # inc rgs, 2 'li' 'li1'
+        
+        rgs = ranges '```coffeescript', 'md'
+        inc rgs, 0 '`' 'punct code triple'
+        inc rgs, 3 'coffeescript' 'comment'
+            
+        rgs = ranges "- li" 'md'
+        inc rgs, 0 '-'  'punct li1 marker'
+        inc rgs, 2 'li' 'text li1'
 
-        # rgs = ranges "    - **bold**" 'md'
-        # inc rgs, 4 '-'    'li2 marker'
-        # inc rgs, 8 'bold' 'li2 bold'
+        rgs = ranges "    - **bold**" 'md'
+        inc rgs, 4 '-'    'punct li2 marker'
+        inc rgs, 8 'bold' 'text li2 bold'
+        
+        rgs = ranges "        - **bold**" 'md'
+        inc rgs, 8 '-'    'punct li3 marker'
+        inc rgs, 12 'bold' 'text li3 bold'
 
-        # rgs = ranges "    - **" 'md'
-        # inc rgs, 4 '-'    'li2 marker'
-        # inc rgs, 6 '*'    'punct li2'
-        # inc rgs, 7 '*'    'punct li2'
+        rgs = ranges "        * **bold**" 'md'
+        inc rgs, 8 '*'    'punct li3 marker'
+        inc rgs, 12 'bold' 'text li3 bold'
+
+        dss = dissect """
+            - li1
+            text
+        """ 'md'
+        inc dss[0], 0  '-'    'punct li1 marker'
+        inc dss[1], 0  'text' 'text'
+
+        dss = dissect """
+            # h1
+            ## h2
+            ### h3
+            #### h4
+            ##### h5
+        """ 'md'
+        inc dss[0], 0  "#"    'punct h1'
+        inc dss[0], 2  "h1"   'text h1'
+        inc dss[1], 0  "#"    'punct h2'
+        inc dss[1], 3  "h2"   'text h2'
+        inc dss[2], 0  "#"    'punct h3'
+        inc dss[2], 4  "h3"   'text h3'
+        inc dss[3], 0  "#"    'punct h4'
+        inc dss[3], 5  "h4"   'text h4'
+        inc dss[4], 0  "#"    'punct h5'
+        inc dss[4], 6  "h5"   'text h5'
+
+        dss = dissect """
+            ```js
+            ```
+        """ 'md'
+        inc dss[1], 0 '`' 'punct code triple'
         
     # 000   000  000000000  00     00  000    
     # 000   000     000     000   000  000    

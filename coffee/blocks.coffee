@@ -15,9 +15,9 @@ Syntax.swtch =
     coffee: 
         doc:          turd:'▸'   to:'md'  indent: 1
     md:     
-        coffeescript: turd:'```' to:'coffee' end:'```'
-        javascript:   turd:'```' to:'js'     end:'```'
-        js:           turd:'```' to:'js'     end:'```'
+        coffeescript: turd:'```' to:'coffee' end:'```' add:'code triple'
+        javascript:   turd:'```' to:'js'     end:'```' add:'code triple'
+        js:           turd:'```' to:'js'     end:'```' add:'code triple'
             
 SPACE  = /\s/
 HEADER = /^0+$/
@@ -417,12 +417,12 @@ blocked = (lines) ->
                 
         if getChunk(-1)?.escape then return stacked()
         
-        if chunk.match in '"\'`'
+        if chunk.match in '"\''
             
             type = switch chunk.match 
                 when '"' then 'string double' 
                 when "'" then 'string single'
-                when '`' then 'string backtick'
+                # when '`' then 'string backtick'
                 
             if topType == type
                 addValue 0 type
@@ -461,27 +461,52 @@ blocked = (lines) ->
             
         escape()
         
-    # 00     00  0000000         0000000  000000000  00000000   000  000   000   0000000   
-    # 000   000  000   000      000          000     000   000  000  0000  000  000        
-    # 000000000  000   000      0000000      000     0000000    000  000 0 000  000  0000  
-    # 000 0 000  000   000           000     000     000   000  000  000  0000  000   000  
-    # 000   000  0000000        0000000      000     000   000  000  000   000   0000000   
+    # 00     00  0000000  
+    # 000   000  000   000
+    # 000000000  000   000
+    # 000 0 000  000   000
+    # 000   000  0000000  
     
-    mdString = ->
+    mdPunct = ->
         
-        if chunk.turd == '**'
+        if chunkIndex == 0 
             
-            type = 'bold'
-            if topType?.endsWith type
-                addValues 2 topType
-                popStack()
-                return 2
-
-            type = stackTop.type + ' ' + type if stackTop?.merge
-            pushStack merge:true type:type
-            return addValues 2 type
-            
+            if not chunk.turd and chunk.match in '-*' and getChunk(1)?.start > chunk.start+1
+                type = ['li1''li2''li3'][chunk.start/4]
+                pushStack merge:true fill:true type:type
+                return addValue 0 type + ' marker'
+                
+            if chunk.match == '#'
+                if not chunk.turd
+                    pushStack merge:true fill:true type:'h1'
+                    return addValue 0 'h1'
+                switch chunk.turd
+                    when '##' 
+                        pushStack merge:true fill:true type:'h2'
+                        return addValues 2 'h2'
+                    when '###' 
+                        pushStack merge:true fill:true type:'h3'
+                        return addValues 3 'h3'
+                    when '####' 
+                        pushStack merge:true fill:true type:'h4'
+                        return addValues 4 'h4'
+                    when '#####' 
+                        pushStack merge:true fill:true type:'h5'
+                        return addValues 5 'h5'
+        
         if chunk.match == '*'
+            
+            if chunk.turd?[..1] == '**'
+                
+                type = 'bold'
+                if topType?.endsWith type
+                    addValues 2 topType
+                    popStack()
+                    return 2
+    
+                type = stackTop.type + ' ' + type if stackTop?.merge
+                pushStack merge:true type:type
+                return addValues 2 type
             
             type = 'italic'
             if topType?.endsWith type
@@ -501,8 +526,12 @@ blocked = (lines) ->
                 type = 'code triple'
     
                 if topType == type
+                    log 'FARKRKK'
                     popStack()
                 else
+                    if getmatch(3) in ['coffeescript''javascript''js']
+                        setValue 3 'comment'
+                        return addValues 3 type
                     pushStack weak:true type:type
                 return addValues 3 type
             
@@ -516,7 +545,7 @@ blocked = (lines) ->
 
             pushStack merge:true type:type
             return addValue 0 type
-                    
+                                
     # 000  000   000  000000000  00000000  00000000   00000000    0000000   000     
     # 000  0000  000     000     000       000   000  000   000  000   000  000     
     # 000  000 0 000     000     0000000   0000000    00000000   000   000  000     
@@ -750,7 +779,7 @@ blocked = (lines) ->
         htm:    punct:[               simpleString, xmlPunct,                        stacked ], word:[                keyword, number,         stacked ]
         sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[                keyword, number,         stacked ]
         json:   punct:[               simpleString, dict,                            stacked ], word:[                keyword, number,         stacked ]
-        md:     punct:[                   mdString, xmlPunct,                        stacked ], word:[                         number,         stacked ]
+        md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[                         number,         stacked ]
         log:    punct:[                             simpleString,                    stacked ], word:[                         number,         stacked ]
         txt:    punct:[                             simpleString,                    stacked ], word:[                         number,         stacked ]
                         
@@ -761,7 +790,10 @@ blocked = (lines) ->
     # 0000000  000  000   000  00000000  0000000   0000000    0000000   000        
     
     for line in lines
-           
+
+        if stackTop?.fill
+            popStack()
+        
         if extTop
             if extTop.switch.indent and line.chunks[0]?.start <= extTop.start.chunks[0].start
                 popExt()                        # end of extension block reached that is terminated by indentation
@@ -771,7 +803,7 @@ blocked = (lines) ->
         if ext != line.ext                      # either at start of file or we switched extension
             actExt()
             handl = handlers[ext = line.ext]    # install new handlers
-        
+            
         #  0000000  000   000  000   000  000   000  000   000  000       0000000    0000000   00000000   
         # 000       000   000  000   000  0000  000  000  000   000      000   000  000   000  000   000  
         # 000       000000000  000   000  000 0 000  0000000    000      000   000  000   000  00000000   
@@ -788,13 +820,15 @@ blocked = (lines) ->
                                         
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
+                        addValues chunk.turd.length, extTop.switch.add if extTop.switch.add
                         popExt() # end of extension block reached that is terminated by turd
                                        
                 for hnd in handl.punct ? []
                     if advance = hnd()
                         chunkIndex += advance
                         break
-            else
+                        
+            else # words, numbers
                 
                 if not notCode
                     if mtch = Syntax.swtch[line.ext]?[chunk.match] 
