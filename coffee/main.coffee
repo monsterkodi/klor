@@ -8,7 +8,7 @@
 
 Syntax = require './syntax'
 Blocks = require './blocks'
-
+    
 module.exports = 
     dissect: Blocks.dissect
     blocks:  Blocks.ranges

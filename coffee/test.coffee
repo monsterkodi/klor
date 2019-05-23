@@ -15,7 +15,13 @@ nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, mat
 blocks  = Blocks.blocks
 ranges  = Blocks.ranges
 dissect = Blocks.dissect
-    
+  
+▸doc 'sample'
+    ```coffeescript
+    class Class extends Super
+        @: ->  @a @b 'c'
+    ```
+
 ###
 00000000    0000000   000   000   0000000   00000000   0000000  
 000   000  000   000  0000  000  000        000       000       
@@ -366,71 +372,6 @@ describe 'ranges' ->
         inc rgs, 0 '"'   'punct string double'
         inc rgs, 3 '666' 'number'
         inc rgs, 7 '"'   'punct string double'
-
-    # 00     00  0000000    
-    # 000   000  000   000  
-    # 000000000  000   000  
-    # 000 0 000  000   000  
-    # 000   000  0000000    
-    
-    it 'md' ->
-        
-        rgs = ranges "**bold**" 'md'
-        inc rgs, 0 '*'      'punct bold'
-        inc rgs, 1 '*'      'punct bold'
-        inc rgs, 2 'bold'   'text bold'
-        inc rgs, 6 '*'      'punct bold'
-        inc rgs, 7 '*'      'punct bold'
-                
-        rgs = ranges "*it lic*" 'md'
-        inc rgs, 0 '*'      'punct italic'
-        inc rgs, 1 'it'     'text italic'
-        inc rgs, 4 'lic'    'text italic'
-        inc rgs, 7 '*'      'punct italic'
-        
-        rgs = ranges "*italic*" 'md'
-        inc rgs, 0 '*'      'punct italic'
-        inc rgs, 1 'italic' 'text italic'
-        inc rgs, 7 '*'      'punct italic'
- 
-        rgs = ranges "*`italic code`*" 'md'
-        inc rgs, 0 '*'      'punct italic'
-        inc rgs, 1 '`'      'punct italic code'
-        inc rgs, 2 'italic' 'text italic code'
-        inc rgs, 9 'code'   'text italic code'
-        inc rgs, 14 '*'     'punct italic'
-        
-        rgs = ranges "it's good" 'md'
-        inc rgs, 0 'it'     'text'
-        inc rgs, 2 "'"      'punct'
-        inc rgs, 3 's'      'text'
-        
-        rgs = ranges "if is empty in then" 'md'
-        inc rgs, 0  'if'    'text'
-        inc rgs, 3  'is'    'text'
-        inc rgs, 6  'empty' 'text'
-        inc rgs, 12 'in'    'text'
-        inc rgs, 15 'then'  'text'
-
-        dss = Blocks.dissect ["▸doc 'md'" "    if is empty in then"], 'coffee'
-        inc dss[1], 4  'if'    'text'
-        inc dss[1], 7  'is'    'text'
-        inc dss[1], 10  'empty' 'text'
-        inc dss[1], 16 'in'    'text'
-        inc dss[1], 19 'then'  'text'
-    
-        # rgs = ranges "- li" 'md'
-        # inc rgs, 0 '-'  'li1 marker'
-        # inc rgs, 2 'li' 'li1'
-
-        # rgs = ranges "    - **bold**" 'md'
-        # inc rgs, 4 '-'    'li2 marker'
-        # inc rgs, 8 'bold' 'li2 bold'
-
-        # rgs = ranges "    - **" 'md'
-        # inc rgs, 4 '-'    'li2 marker'
-        # inc rgs, 6 '*'    'punct li2'
-        # inc rgs, 7 '*'    'punct li2'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -448,10 +389,7 @@ describe 'ranges' ->
         
         rgs = ranges "exist?.prop" 'coffee'
         inc rgs, 7 'prop' 'property'
-                
-        rgs = ranges "@height/2 + @height/6" 'coffee'
-        inc rgs, 8 "2" 'number'
-        
+                        
         rgs = ranges "a and b" 'coffee'
         inc rgs, 0 "a" 'text'
         inc rgs, 2 "and" 'keyword'
@@ -512,7 +450,23 @@ describe 'ranges' ->
         inc rgs, 4 '.' 'punct'
         inc rgs, 5 '.' 'punct'
         inc rgs, 6 '.' 'punct'
-                
+        
+        rgs = ranges "@f [1]" 'coffee'
+        inc rgs, 0 "@" 'punct function call'
+        inc rgs, 1 "f" 'function call'
+
+        rgs = ranges "@f = 1" 'coffee'
+        inc rgs, 0 "@" 'punct this'
+        inc rgs, 1 "f" 'text this'
+        
+        rgs = ranges "@height/2 + @height/6" 'coffee'
+        inc rgs, 0 '@'      'punct this'
+        inc rgs, 1 'height' 'text this'
+        inc rgs, 8 "2" 'number'
+        
+        # rgs = ranges "@:->@a @b 1"
+        # inc rgs, 0 '@'      ''
+        
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
     # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  
@@ -535,7 +489,7 @@ describe 'ranges' ->
 
         rgs = ranges "f [1]" 'coffee'
         inc rgs, 0 "f" 'function call'
-            
+        
         rgs = ranges "fffff {1}" 'coffee'
         inc rgs, 0 "fffff" 'function call'
 
@@ -636,6 +590,12 @@ describe 'ranges' ->
         inc rgs, 4 "-" 'punct function tail'
         inc rgs, 5 ">" 'punct function head'
 
+        rgs = ranges " @:->a" 'coffee'
+        inc rgs, 1 "@" 'method'
+        inc rgs, 2 ":" 'punct method'
+        inc rgs, 3 "-" 'punct function tail'
+        inc rgs, 4 ">" 'punct function head'
+        
         rgs = ranges "▸if ▸then ▸elif ▸else" 'coffee'
         inc rgs, 0  "▸"    'punct meta'
         inc rgs, 1  "if"   'meta'
@@ -652,20 +612,71 @@ describe 'ranges' ->
         inc rgs, 7  "a"   'dictionary key'
         inc rgs, 11 "c"   'dictionary key'
                     
-    # 00000000   000   000  000   000   0000000  000000000
-    # 000   000  000   000  0000  000  000          000   
-    # 00000000   000   000  000 0 000  000          000   
-    # 000        000   000  000  0000  000          000   
-    # 000         0000000   000   000   0000000     000   
+    # 00     00  0000000    
+    # 000   000  000   000  
+    # 000000000  000   000  
+    # 000 0 000  000   000  
+    # 000   000  0000000    
     
-    it 'punct' ->
+    it 'md' ->
         
-        rgs = ranges '/some\\path/file.txt:10' 'noon'
-        inc rgs, 0  '/'  'punct'
-        inc rgs, 5  '\\' 'punct'
-        inc rgs, 15 '.'  'punct'
-        inc rgs, 19 ':'  'punct'
-         
+        rgs = ranges "**bold**" 'md'
+        inc rgs, 0 '*'      'punct bold'
+        inc rgs, 1 '*'      'punct bold'
+        inc rgs, 2 'bold'   'text bold'
+        inc rgs, 6 '*'      'punct bold'
+        inc rgs, 7 '*'      'punct bold'
+                
+        rgs = ranges "*it lic*" 'md'
+        inc rgs, 0 '*'      'punct italic'
+        inc rgs, 1 'it'     'text italic'
+        inc rgs, 4 'lic'    'text italic'
+        inc rgs, 7 '*'      'punct italic'
+        
+        rgs = ranges "*italic*" 'md'
+        inc rgs, 0 '*'      'punct italic'
+        inc rgs, 1 'italic' 'text italic'
+        inc rgs, 7 '*'      'punct italic'
+ 
+        rgs = ranges "*`italic code`*" 'md'
+        inc rgs, 0 '*'      'punct italic'
+        inc rgs, 1 '`'      'punct italic code'
+        inc rgs, 2 'italic' 'text italic code'
+        inc rgs, 9 'code'   'text italic code'
+        inc rgs, 14 '*'     'punct italic'
+        
+        rgs = ranges "it's good" 'md'
+        inc rgs, 0 'it'     'text'
+        inc rgs, 2 "'"      'punct'
+        inc rgs, 3 's'      'text'
+        
+        rgs = ranges "if is empty in then" 'md'
+        inc rgs, 0  'if'    'text'
+        inc rgs, 3  'is'    'text'
+        inc rgs, 6  'empty' 'text'
+        inc rgs, 12 'in'    'text'
+        inc rgs, 15 'then'  'text'
+
+        dss = Blocks.dissect ["▸doc 'md'" "    if is empty in then"], 'coffee'
+        inc dss[1], 4  'if'    'text'
+        inc dss[1], 7  'is'    'text'
+        inc dss[1], 10  'empty' 'text'
+        inc dss[1], 16 'in'    'text'
+        inc dss[1], 19 'then'  'text'
+    
+        # rgs = ranges "- li" 'md'
+        # inc rgs, 0 '-'  'li1 marker'
+        # inc rgs, 2 'li' 'li1'
+
+        # rgs = ranges "    - **bold**" 'md'
+        # inc rgs, 4 '-'    'li2 marker'
+        # inc rgs, 8 'bold' 'li2 bold'
+
+        # rgs = ranges "    - **" 'md'
+        # inc rgs, 4 '-'    'li2 marker'
+        # inc rgs, 6 '*'    'punct li2'
+        # inc rgs, 7 '*'    'punct li2'
+        
     # 000   000  000000000  00     00  000    
     # 000   000     000     000   000  000    
     # 000000000     000     000000000  000    
@@ -811,6 +822,12 @@ describe 'ranges' ->
     # 000   000   0000000    0000000   000   000  
     
     it 'noon' ->
+        
+        rgs = ranges '/some\\path/file.txt:10' 'noon'
+        inc rgs, 0  '/'  'punct'
+        inc rgs, 5  '\\' 'punct'
+        inc rgs, 15 '.'  'punct'
+        inc rgs, 19 ':'  'punct'
         
         # rgs = ranges "    property  value" 'noon'
         # inc rgs, 4 'property' 'property'

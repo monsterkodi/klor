@@ -220,23 +220,25 @@ blocked = (lines) ->
                     line.chunks[0].value = 'method'
                     line.chunks[1].value += ' method'
         
-        if chunk.turd == '->'
-            markFunc()
-            addValue 0 'function tail'
-            addValue 1 'function head'
-            if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd == '@:'
-                line.chunks[0].value = 'method'
-                line.chunks[1].value = 'punct method'
-            return 2
-                
-        if chunk.turd == '=>'
-            markFunc()
-            addValue 0 'function bound tail'
-            addValue 1 'function bound head'
-            if line.chunks[0].value == 'dictionary key'
-                line.chunks[0].value = 'method'
-                line.chunks[1].value = 'punct method'
-            return 2
+        if chunk.turd
+            
+            if chunk.turd.startsWith '->'
+                markFunc()
+                addValue 0 'function tail'
+                addValue 1 'function head'
+                if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd?[..1] == '@:'
+                    line.chunks[0].value = 'method'
+                    line.chunks[1].value = 'punct method'
+                return 2
+                    
+            if chunk.turd.startsWith '=>'
+                markFunc()
+                addValue 0 'function bound tail'
+                addValue 1 'function bound head'
+                if line.chunks[0].value == 'dictionary key'
+                    line.chunks[0].value = 'method'
+                    line.chunks[1].value = 'punct method'
+                return 2
               
     commentHeader = ->
         
@@ -251,7 +253,14 @@ blocked = (lines) ->
     # 000       000   000  000       000       000       000       
     #  0000000   0000000   000       000       00000000  00000000  
     
-    coffeeFunc = ->        
+    thisCall = ->
+        
+        setValue -1 'function call'
+        if getmatch(-2) == '@'
+            setValue -2 'punct function call'
+        0
+    
+    coffeePunct = ->
 
         return if notCode
                 
@@ -260,7 +269,7 @@ blocked = (lines) ->
             
         if chunk.turd == '~>'
             return addValues 2 'meta'
-                                
+            
         if prev = getChunk -1
             
             if chunk.turd?.startsWith('..') and prev.match != '.'
@@ -268,30 +277,47 @@ blocked = (lines) ->
                     return addValues 2 'range'
                 if chunk.turd[3] != '.'
                     return addValues 3 'range'
-            
-            if prev.match in ['class', 'extends']
-                setValue 0 'class'
-                return 1
-            
+                    
+            if prev.value.startsWith 'text'
+                                
+                prevEnd = prev.start+prev.length
+                if chunk.match == '(' and prevEnd == chunk.start
+                    return thisCall()
+                else if prevEnd < chunk.start # spaced
+                    if chunk.value == 'text' or chunk.match in '[({"\''
+                        return thisCall()
+                    else if chunk.match in '+-/' 
+                        next = getChunk 1
+                        if not next or next.match != '=' and next.start == chunk.start+1
+                            return thisCall()
+
+    coffeeWord = ->
+        
+        return if notCode
+        
+        if prev = getChunk -1
+                            
             if prev.value == 'punct meta'
                 if chunk.start == prev.start+1
                     setValue 0 'meta'
                     return 0 # give switch a chance
             
-            return 1 if chunk.value.startsWith 'keyword' # we are done with the keyword
-
-            if prev.value == 'text'
-                if chunk.match == '(' and prev.start+prev.length == chunk.start
-                    setValue -1 'function call'
-                else if prev.start+prev.length < chunk.start # spaced
-                    if chunk.value == 'text' or chunk.match in '[({"\''
-                        setValue -1 'function call' 
-                    else if chunk.match in '+-/' 
-                        next = getChunk 1
-                        if not next or next.match != '=' and next.start == chunk.start+1
-                            setValue -1 'function call' 
-        0 # we need this here
-    
+            if prev.match in ['class', 'extends']
+                setValue 0 'class'
+                return 1
+                        
+            if chunk.value.startsWith 'keyword' 
+                                
+                return 1 # we are done with the keyword
+                
+            if prev.match == '@'
+                addValue -1 'this'
+                addValue  0 'this'
+                return 1
+                
+            if prev.value == 'text' and prev.start+prev.length < chunk.start # spaced
+                return thisCall()
+                                
     property = ->
             
         return if notCode
@@ -702,8 +728,8 @@ blocked = (lines) ->
     
     handlers = 
         coffee: 
-                punct:[ blockComment, hashComment, tripleRegexp, coffeeFunc, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
-                word: [ keyword, coffeeFunc, commentHeader, number, property, stacked ]
+                punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
+                word: [ keyword, coffeeWord, commentHeader, number, property, stacked ]
         noon:   punct:[ noonComment,                                                 stacked ], word:[ commentHeader, keyword, number,         stacked ]
         js:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ commentHeader, keyword, jsFunc, number, stacked ]
         ts:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ commentHeader, keyword, jsFunc, number, stacked ]
