@@ -152,7 +152,7 @@ blocked = (lines) ->
         
     hashComment = -> 
         
-        return if stackTop
+        return if stackTop and topType != 'regexp triple'
         
         if chunk.match == "#"
             fillComment 1
@@ -279,13 +279,17 @@ blocked = (lines) ->
                     return 0 # give switch a chance
             
             return 1 if chunk.value.startsWith 'keyword' # we are done with the keyword
-            
+
             if prev.value == 'text'
                 if chunk.match == '(' and prev.start+prev.length == chunk.start
                     setValue -1 'function call'
                 else if prev.start+prev.length < chunk.start # spaced
-                    if chunk.match not in '=]})/%;,.'
+                    if chunk.value == 'text' or chunk.match in '[({"\''
                         setValue -1 'function call' 
+                    else if chunk.match in '+-/' 
+                        next = getChunk 1
+                        if not next or next.match != '=' and next.start == chunk.start+1
+                            setValue -1 'function call' 
         0 # we need this here
     
     property = ->
@@ -328,7 +332,7 @@ blocked = (lines) ->
     
     escape = ->
         
-        if chunk.match == '\\' and (topType == 'regexp' or topType?.startsWith 'string')
+        if chunk.match == '\\' and (topType?.startsWith('regexp') or topType?.startsWith 'string')
             if chunkIndex == 0 or not getChunk(-1).escape
                 if getChunk(1).start == chunk.start+1
                     chunk.escape = true
@@ -360,6 +364,21 @@ blocked = (lines) ->
             
         escape()
         
+    tripleRegexp = -> 
+        
+        return if not chunk.turd or chunk.turd.length < 3
+        
+        type = 'regexp triple'
+        
+        return if topType and topType not in ['interpolation', type]
+        
+        if chunk.turd[..2] == '///'
+            if topType == type
+                popStack()
+            else
+                pushStack type:type
+            return addValues 3 type   
+            
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        
     # 0000000      000     0000000    000  000 0 000  000  0000  
@@ -402,7 +421,6 @@ blocked = (lines) ->
         type = switch chunk.turd[..2]
             when '"""' then 'string double triple' 
             when "'''" then 'string single triple'
-            # when '```' then 'string backtick triple'
 
         if type
             
@@ -469,7 +487,7 @@ blocked = (lines) ->
                 return 1
                 
             type = stackTop.type + ' ' + type if stackTop?.merge
-            # pushStack merge:true, type:type
+
             pushStack merge:true type:type
             return addValue 0 type
                     
@@ -684,7 +702,7 @@ blocked = (lines) ->
     
     handlers = 
         coffee: 
-                punct:[ blockComment, hashComment, coffeeFunc, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
+                punct:[ blockComment, hashComment, tripleRegexp, coffeeFunc, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
                 word: [ keyword, coffeeFunc, commentHeader, number, property, stacked ]
         noon:   punct:[ noonComment,                                                 stacked ], word:[ commentHeader, keyword, number,         stacked ]
         js:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ commentHeader, keyword, jsFunc, number, stacked ]

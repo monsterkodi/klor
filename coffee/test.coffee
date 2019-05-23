@@ -76,6 +76,48 @@ describe 'ranges' ->
         inc rgs, 6 '/', 'punct'
         inc rgs, 8 '2', 'number'
         
+    # 000000000  00000000   000  00000000   000      00000000  
+    #    000     000   000  000  000   000  000      000       
+    #    000     0000000    000  00000000   000      0000000   
+    #    000     000   000  000  000        000      000       
+    #    000     000   000  000  000        0000000  00000000  
+    
+    it 'triple regexp' ->
+        
+        rgs = ranges "///a///" 'coffee'
+        inc rgs, 0 "/" 'punct regexp triple'
+        inc rgs, 1 "/" 'punct regexp triple'
+        inc rgs, 2 "/" 'punct regexp triple'
+        inc rgs, 3 "a" 'text regexp triple'
+        inc rgs, 4 "/" 'punct regexp triple'
+        inc rgs, 5 "/" 'punct regexp triple'
+        inc rgs, 6 "/" 'punct regexp triple'
+
+        dss = Blocks.dissect "///\na\n///".split('\n'), 'coffee'
+        inc dss[0], 0 "/" 'punct regexp triple'
+        inc dss[0], 1 "/" 'punct regexp triple'
+        inc dss[0], 2 "/" 'punct regexp triple'
+        inc dss[1], 0 "a" 'text regexp triple'
+        inc dss[2], 0 "/" 'punct regexp triple'
+        inc dss[2], 1 "/" 'punct regexp triple'
+        inc dss[2], 2 "/" 'punct regexp triple'
+
+        dss = Blocks.dissect """
+            ///
+                ([\\\\?]) # comment
+            ///
+            """.split('\n'), 'coffee'
+        inc dss[0], 0  "/"  'punct regexp triple'
+        inc dss[0], 1  "/"  'punct regexp triple'
+        inc dss[0], 2  "/"  'punct regexp triple'
+        inc dss[1], 4  "("  'punct regexp triple'
+        inc dss[1], 6  "\\" 'punct escape regexp triple'
+        inc dss[1], 12 "#"  'punct comment'
+        inc dss[1], 14 "comment" 'comment'
+        inc dss[2], 0  "/"  'punct regexp triple'
+        inc dss[2], 1  "/"  'punct regexp triple'
+        inc dss[2], 2  "/"  'punct regexp triple'
+        
     # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
     # 0000  000  000   000        000   000  000       000        000        000 000   000   000  
     # 000 0 000  000   000        0000000    0000000   000  0000  0000000     00000    00000000   
@@ -470,7 +512,7 @@ describe 'ranges' ->
         inc rgs, 4 '.' 'punct'
         inc rgs, 5 '.' 'punct'
         inc rgs, 6 '.' 'punct'
-        
+                
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
     # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  
@@ -496,10 +538,64 @@ describe 'ranges' ->
             
         rgs = ranges "fffff {1}" 'coffee'
         inc rgs, 0 "fffff" 'function call'
-            
+
+        rgs = ranges "i ++a"
+        inc rgs, 0 'i' 'function call'
+        
+        rgs = ranges "i +4"
+        inc rgs, 0 'i' 'function call'
+
+        rgs = ranges "i -4"
+        inc rgs, 0 'i' 'function call'
+        
         rgs = ranges "pos= (item, p) -> " 'coffee'
         inc rgs, 0 "pos" 'function'
-            
+        
+        rgs = ranges "i != false"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i += 1"
+        inc rgs, 0 'i' 'text'
+        
+        rgs = ranges "i -= 1"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i *= 1"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i /= 1"
+        inc rgs, 0 'i' 'text'
+        
+        rgs = ranges "i ? false"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i < 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i > 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i + 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i - 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i * 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i / 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i % 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i = 3"
+        inc rgs, 0 'i' 'text'
+
+        rgs = ranges "i == 3"
+        inc rgs, 0 'i' 'text'
+        
     # 00     00  00000000  000000000  000   000   0000000   0000000    
     # 000   000  000          000     000   000  000   000  000   000  
     # 000000000  0000000      000     000000000  000   000  000   000  
