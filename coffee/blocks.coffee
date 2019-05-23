@@ -284,7 +284,7 @@ blocked = (lines) ->
                 if chunk.match == '(' and prevEnd == chunk.start
                     return thisCall()
                 else if prevEnd < chunk.start # spaced
-                    if chunk.value == 'text' or chunk.match in '[({"\''
+                    if chunk.match in '@[({"\''
                         return thisCall()
                     else if chunk.match in '+-/' 
                         next = getChunk 1
@@ -315,7 +315,7 @@ blocked = (lines) ->
                 addValue  0 'this'
                 return 1
                 
-            if prev.value == 'text' and prev.start+prev.length < chunk.start # spaced
+            if prev.value.startsWith('text') and prev.start+prev.length < chunk.start # spaced
                 return thisCall()
                                 
     property = ->

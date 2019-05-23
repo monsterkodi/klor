@@ -19,7 +19,7 @@ dissect = Blocks.dissect
 ▸doc 'sample'
     ```coffeescript
     class Class extends Super
-        @: ->  @a @b 'c'
+        @: -> @a 3 b @c+1 /d/
     ```
 
 ###
@@ -31,140 +31,7 @@ dissect = Blocks.dissect
 ###
 
 describe 'ranges' ->
-        
-    # 00000000   00000000   0000000   00000000  000   000  00000000   
-    # 000   000  000       000        000        000 000   000   000  
-    # 0000000    0000000   000  0000  0000000     00000    00000000   
-    # 000   000  000       000   000  000        000 000   000        
-    # 000   000  00000000   0000000   00000000  000   000  000        
-    
-    it 'regexp' ->
-        rgs = ranges "r=/a/" 'coffee'
-        inc rgs, 2 '/'       'punct regexp start'
-        inc rgs, 3 'a'       'text regexp'
-        inc rgs, 4 '/'       'punct regexp end'
-                
-        rgs = ranges "/(a|.*|\s\d\w\S\W$|^\s+)/" 'coffee'
-        inc rgs, 0 '/'       'punct regexp start'
-        inc rgs, 2 'a'       'text regexp'
-            
-        rgs = ranges "/^#include/" 'coffee'
-        inc rgs, 0 '/'       'punct regexp start'
-        inc rgs, 2 "#"       'punct regexp'
-        inc rgs, 3 "include" 'text regexp'
-
-        rgs = ranges "/\\'hello\\'/ " 'coffee'
-        inc rgs, 0 '/'       'punct regexp start'
-        inc rgs, 1 "\\"      'punct escape regexp'
-        inc rgs, 2 "'"       'punct regexp'
-        inc rgs, 3 "hello"   'text regexp'
-
-        rgs = ranges "f a /b - c/gi" 'coffee'
-        inc rgs, 4 '/'       'punct regexp start'
-        inc rgs, 5 'b'       'text regexp'
-        inc rgs, 10 '/'      'punct regexp end'
-        
-        rgs = ranges "w=l.split /[\\s\\/]/ ; bla"
-        inc rgs, 10 '/'       'punct regexp start'
-        inc rgs, 14 '\\'      'punct escape regexp'
-        inc rgs, 17 '/'       'punct regexp end'
-        inc rgs, 19 ';'       'punct'
-        
-        rgs = ranges "a = 1 / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
-
-        rgs = ranges "(1+1) / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
-
-        rgs = ranges "a[10] / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
-        
-    # 000000000  00000000   000  00000000   000      00000000  
-    #    000     000   000  000  000   000  000      000       
-    #    000     0000000    000  00000000   000      0000000   
-    #    000     000   000  000  000        000      000       
-    #    000     000   000  000  000        0000000  00000000  
-    
-    it 'triple regexp' ->
-        
-        rgs = ranges "///a///" 'coffee'
-        inc rgs, 0 "/" 'punct regexp triple'
-        inc rgs, 1 "/" 'punct regexp triple'
-        inc rgs, 2 "/" 'punct regexp triple'
-        inc rgs, 3 "a" 'text regexp triple'
-        inc rgs, 4 "/" 'punct regexp triple'
-        inc rgs, 5 "/" 'punct regexp triple'
-        inc rgs, 6 "/" 'punct regexp triple'
-
-        dss = Blocks.dissect "///\na\n///".split('\n'), 'coffee'
-        inc dss[0], 0 "/" 'punct regexp triple'
-        inc dss[0], 1 "/" 'punct regexp triple'
-        inc dss[0], 2 "/" 'punct regexp triple'
-        inc dss[1], 0 "a" 'text regexp triple'
-        inc dss[2], 0 "/" 'punct regexp triple'
-        inc dss[2], 1 "/" 'punct regexp triple'
-        inc dss[2], 2 "/" 'punct regexp triple'
-
-        dss = Blocks.dissect """
-            ///
-                ([\\\\?]) # comment
-            ///
-            """.split('\n'), 'coffee'
-        inc dss[0], 0  "/"  'punct regexp triple'
-        inc dss[0], 1  "/"  'punct regexp triple'
-        inc dss[0], 2  "/"  'punct regexp triple'
-        inc dss[1], 4  "("  'punct regexp triple'
-        inc dss[1], 6  "\\" 'punct escape regexp triple'
-        inc dss[1], 12 "#"  'punct comment'
-        inc dss[1], 14 "comment" 'comment'
-        inc dss[2], 0  "/"  'punct regexp triple'
-        inc dss[2], 1  "/"  'punct regexp triple'
-        inc dss[2], 2  "/"  'punct regexp triple'
-        
-    # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
-    # 0000  000  000   000        000   000  000       000        000        000 000   000   000  
-    # 000 0 000  000   000        0000000    0000000   000  0000  0000000     00000    00000000   
-    # 000  0000  000   000        000   000  000       000   000  000        000 000   000        
-    # 000   000   0000000         000   000  00000000   0000000   00000000  000   000  000        
-    
-    it 'no regexp' ->
-        
-        # f a / b - c/gi
-        # f a/b - c/gi
-        
-        rgs = ranges 'a / b - c / d' 'coffee'
-        nut rgs, 2 '/' 'punct regexp'
-
-        rgs = ranges 'f a/b, c/d' 'coffee'
-        nut rgs, 3 '/' 'punct regexp'
-        
-        rgs = ranges "m = '/'" 'coffee'
-        nut rgs, 5 '/' 'punct regexp'
-
-        rgs = ranges "m a, '/''/'" 'coffee'
-        nut rgs, 6 '/' 'punct regexp'
-        
-        rgs = ranges """\"m = '/'\"""" 'coffee'
-        nut rgs, 6 '/' 'punct regexp'
-        
-        rgs = ranges "s = '/some\\path/file.txt:10'" 'coffee'
-        nut rgs, 5 '/' 'punct regexp'
-        nut rgs, 9 '/' 'punct regexp'
-            
-    # 00000000   00000000   0000000   000   000  000  00000000   00000000  
-    # 000   000  000       000   000  000   000  000  000   000  000       
-    # 0000000    0000000   000 00 00  000   000  000  0000000    0000000   
-    # 000   000  000       000 0000   000   000  000  000   000  000       
-    # 000   000  00000000   00000 00   0000000   000  000   000  00000000  
-    
-    it 'require' ->
-        
-        rgs = ranges "util = require 'util'" 'coffee'
-        inc rgs, 7 'require' 'require'
-    
+                    
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     000       
     # 000       000   000  000000000  000000000  0000000   000 0 000     000     0000000   
@@ -355,13 +222,7 @@ describe 'ranges' ->
         inc rgs, 8  "'"     'string single triple'
         inc rgs, 11 "'"     'punct string single triple'
 
-    # 000  000   000  000000000  00000000  00000000   00000000    0000000   000    
-    # 000  0000  000     000     000       000   000  000   000  000   000  000    
-    # 000  000 0 000     000     0000000   0000000    00000000   000   000  000    
-    # 000  000  0000     000     000       000   000  000        000   000  000    
-    # 000  000   000     000     00000000  000   000  000         0000000   0000000
-    
-    it 'interpolation' ->    
+        # interpolation
         
         rgs = ranges '"#{xxx}"' 'coffee'
         inc rgs, 0 '"'   'punct string double'
@@ -380,7 +241,10 @@ describe 'ranges' ->
     #  0000000   0000000   000       000       00000000  00000000  
     
     it 'coffee' ->
-                
+
+        rgs = ranges "util = require 'util'" 'coffee'
+        inc rgs, 7 'require' 'require'
+        
         rgs = ranges "class Macro extends Command" 'coffee'
         inc rgs, 0  'class'   'keyword'
         inc rgs, 6  'Macro'   'class'
@@ -463,10 +327,7 @@ describe 'ranges' ->
         inc rgs, 0 '@'      'punct this'
         inc rgs, 1 'height' 'text this'
         inc rgs, 8 "2" 'number'
-        
-        # rgs = ranges "@:->@a @b 1"
-        # inc rgs, 0 '@'      ''
-        
+                
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
     # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  
@@ -474,6 +335,16 @@ describe 'ranges' ->
     # 000        0000000   000   000   0000000     000     000   0000000   000   000  
 
     it 'coffee function' ->
+        
+        rgs = ranges "@a @b 'c'" 'coffee'
+        inc rgs, 0 '@' 'punct function call'
+        inc rgs, 1 'a' 'function call'
+        inc rgs, 3 '@' 'punct function call'
+        inc rgs, 4 'b' 'function call'
+        
+        rgs = ranges "@a 3 @b '5'"
+        inc rgs, 0 '@' 'punct function call'
+        inc rgs, 1 'a' 'function call'
 
         rgs = ranges "fff 1" 'coffee'
         inc rgs, 0 "fff" 'function call'
@@ -611,7 +482,129 @@ describe 'ranges' ->
         inc rgs, 4  "x"   'string single'
         inc rgs, 7  "a"   'dictionary key'
         inc rgs, 11 "c"   'dictionary key'
-                    
+
+    # 00000000   00000000   0000000   00000000  000   000  00000000   
+    # 000   000  000       000        000        000 000   000   000  
+    # 0000000    0000000   000  0000  0000000     00000    00000000   
+    # 000   000  000       000   000  000        000 000   000        
+    # 000   000  00000000   0000000   00000000  000   000  000        
+    
+    it 'regexp' ->
+        rgs = ranges "r=/a/" 'coffee'
+        inc rgs, 2 '/'       'punct regexp start'
+        inc rgs, 3 'a'       'text regexp'
+        inc rgs, 4 '/'       'punct regexp end'
+                
+        rgs = ranges "/(a|.*|\s\d\w\S\W$|^\s+)/" 'coffee'
+        inc rgs, 0 '/'       'punct regexp start'
+        inc rgs, 2 'a'       'text regexp'
+            
+        rgs = ranges "/^#include/" 'coffee'
+        inc rgs, 0 '/'       'punct regexp start'
+        inc rgs, 2 "#"       'punct regexp'
+        inc rgs, 3 "include" 'text regexp'
+
+        rgs = ranges "/\\'hello\\'/ " 'coffee'
+        inc rgs, 0 '/'       'punct regexp start'
+        inc rgs, 1 "\\"      'punct escape regexp'
+        inc rgs, 2 "'"       'punct regexp'
+        inc rgs, 3 "hello"   'text regexp'
+
+        rgs = ranges "f a /b - c/gi" 'coffee'
+        inc rgs, 4 '/'       'punct regexp start'
+        inc rgs, 5 'b'       'text regexp'
+        inc rgs, 10 '/'      'punct regexp end'
+        
+        rgs = ranges "w=l.split /[\\s\\/]/ ; bla"
+        inc rgs, 10 '/'       'punct regexp start'
+        inc rgs, 14 '\\'      'punct escape regexp'
+        inc rgs, 17 '/'       'punct regexp end'
+        inc rgs, 19 ';'       'punct'
+        
+        rgs = ranges "a = 1 / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
+
+        rgs = ranges "(1+1) / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
+
+        rgs = ranges "a[10] / 2"
+        inc rgs, 6 '/', 'punct'
+        inc rgs, 8 '2', 'number'
+        
+    # 000000000  00000000   000  00000000   000      00000000  
+    #    000     000   000  000  000   000  000      000       
+    #    000     0000000    000  00000000   000      0000000   
+    #    000     000   000  000  000        000      000       
+    #    000     000   000  000  000        0000000  00000000  
+    
+    it 'triple regexp' ->
+        
+        rgs = ranges "///a///" 'coffee'
+        inc rgs, 0 "/" 'punct regexp triple'
+        inc rgs, 1 "/" 'punct regexp triple'
+        inc rgs, 2 "/" 'punct regexp triple'
+        inc rgs, 3 "a" 'text regexp triple'
+        inc rgs, 4 "/" 'punct regexp triple'
+        inc rgs, 5 "/" 'punct regexp triple'
+        inc rgs, 6 "/" 'punct regexp triple'
+
+        dss = Blocks.dissect "///\na\n///".split('\n'), 'coffee'
+        inc dss[0], 0 "/" 'punct regexp triple'
+        inc dss[0], 1 "/" 'punct regexp triple'
+        inc dss[0], 2 "/" 'punct regexp triple'
+        inc dss[1], 0 "a" 'text regexp triple'
+        inc dss[2], 0 "/" 'punct regexp triple'
+        inc dss[2], 1 "/" 'punct regexp triple'
+        inc dss[2], 2 "/" 'punct regexp triple'
+
+        dss = Blocks.dissect """
+            ///
+                ([\\\\?]) # comment
+            ///
+            """.split('\n'), 'coffee'
+        inc dss[0], 0  "/"  'punct regexp triple'
+        inc dss[0], 1  "/"  'punct regexp triple'
+        inc dss[0], 2  "/"  'punct regexp triple'
+        inc dss[1], 4  "("  'punct regexp triple'
+        inc dss[1], 6  "\\" 'punct escape regexp triple'
+        inc dss[1], 12 "#"  'punct comment'
+        inc dss[1], 14 "comment" 'comment'
+        inc dss[2], 0  "/"  'punct regexp triple'
+        inc dss[2], 1  "/"  'punct regexp triple'
+        inc dss[2], 2  "/"  'punct regexp triple'
+        
+    # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
+    # 0000  000  000   000        000   000  000       000        000        000 000   000   000  
+    # 000 0 000  000   000        0000000    0000000   000  0000  0000000     00000    00000000   
+    # 000  0000  000   000        000   000  000       000   000  000        000 000   000        
+    # 000   000   0000000         000   000  00000000   0000000   00000000  000   000  000        
+    
+    it 'no regexp' ->
+        
+        # f a / b - c/gi
+        # f a/b - c/gi
+        
+        rgs = ranges 'a / b - c / d' 'coffee'
+        nut rgs, 2 '/' 'punct regexp'
+
+        rgs = ranges 'f a/b, c/d' 'coffee'
+        nut rgs, 3 '/' 'punct regexp'
+        
+        rgs = ranges "m = '/'" 'coffee'
+        nut rgs, 5 '/' 'punct regexp'
+
+        rgs = ranges "m a, '/''/'" 'coffee'
+        nut rgs, 6 '/' 'punct regexp'
+        
+        rgs = ranges """\"m = '/'\"""" 'coffee'
+        nut rgs, 6 '/' 'punct regexp'
+        
+        rgs = ranges "s = '/some\\path/file.txt:10'" 'coffee'
+        nut rgs, 5 '/' 'punct regexp'
+        nut rgs, 9 '/' 'punct regexp'
+        
     # 00     00  0000000    
     # 000   000  000   000  
     # 000000000  000   000  

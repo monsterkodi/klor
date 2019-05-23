@@ -14,7 +14,8 @@ repository
 bugs
                 url  https://github.com/monsterkodi/klor/issues
 scripts
-                test  ./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee
+                test    ./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee
+                watch   onchange coffee/test.coffee coffee/blocks.coffee -- konrad -t
 dependencies
                 kxk           ^0.290.0
                 pretty-time   ^1.1.0
