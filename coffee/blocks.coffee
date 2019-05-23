@@ -278,7 +278,7 @@ blocked = (lines) ->
                 if chunk.turd[3] != '.'
                     return addValues 3 'range'
                     
-            if prev.value.startsWith 'text'
+            if prev.value.startsWith('text') or prev.value == 'property'
                                 
                 prevEnd = prev.start+prev.length
                 if chunk.match == '(' and prevEnd == chunk.start
@@ -422,7 +422,6 @@ blocked = (lines) ->
             type = switch chunk.match 
                 when '"' then 'string double' 
                 when "'" then 'string single'
-                # when '`' then 'string backtick'
                 
             if topType == type
                 addValue 0 type
@@ -525,14 +524,11 @@ blocked = (lines) ->
     
                 type = 'code triple'
     
-                if topType == type
-                    log 'FARKRKK'
-                    popStack()
-                else
-                    if getmatch(3) in ['coffeescript''javascript''js']
-                        setValue 3 'comment'
-                        return addValues 3 type
-                    pushStack weak:true type:type
+                if getmatch(3) in ['coffeescript''javascript''js']
+                    setValue 3 'comment'
+                    return addValues 3 type
+                    
+                pushStack weak:true type:type
                 return addValues 3 type
             
             type = 'code'
