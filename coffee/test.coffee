@@ -7,10 +7,12 @@
 ###
 
 Blocks = require './blocks'
-require('kxk').chai()
+kxk = require 'kxk'
+kxk.chai()
+_ = kxk._
 
-inc = (rgs, start, match, value) -> rgs.should.deep.include     start:start, match:match, value:value
-nut = (rgs, start, match, value) -> rgs.should.not.deep.include start:start, match:match, value:value
+inc = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.deep.include     start:start, match:match, value:value
+nut = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.not.deep.include start:start, match:match, value:value
 
 blocks  = Blocks.blocks
 ranges  = Blocks.ranges

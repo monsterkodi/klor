@@ -43,10 +43,10 @@ coffee js ts
         noon
         args
         post
+        module
         console
         process
         global
-        module
         exports
         window
         document

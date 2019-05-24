@@ -41,9 +41,10 @@ chunked = (lines, ext) ->
         **returns** array of
             
             chunks: [
-                        match: s
+                        turd:   s
+                        match:  s
                         value:  s
-                        start: n
+                        start:  n
                         length: n
                     ]
             ext:    s
@@ -559,7 +560,7 @@ blocked = (lines) ->
         else if topType == 'interpolation'
             
             if chunk.match == '}'
-                addValue 0 'match interpolation end'
+                addValue 0 'string interpolation end'
                 popStack()
                 return 1
         
@@ -870,57 +871,8 @@ blocks = (lines, ext='coffee') ->
         ```coffeescript
         blocked chunked lines, ext
         ```
-
     blocked chunked lines, ext
     
-# 00000000    0000000   000   000   0000000   00000000  0000000    
-# 000   000  000   000  0000  000  000        000       000   000  
-# 0000000    000000000  000 0 000  000  0000  0000000   000   000  
-# 000   000  000   000  000  0000  000   000  000       000   000  
-# 000   000  000   000  000   000   0000000   00000000  0000000    
-
-ranged = (lines) ->
-    
-    ▸doc 'ranged *lines*'
-        
-        *lines*:  array of chunked lines
-        
-        **returns** array of
-
-            start: n
-            match: s
-            value: s
-        
-    rngs = []
-    for line in lines
-        for chunk in line.chunks
-            range =
-                start: chunk.start
-                match: chunk.match
-                value: chunk.value
-            rngs.push range
-    rngs
-
-# 0000000    000   0000000   0000000  00000000   0000000  000000000  
-# 000   000  000  000       000       000       000          000     
-# 000   000  000  0000000   0000000   0000000   000          000     
-# 000   000  000       000       000  000       000          000     
-# 0000000    000  0000000   0000000   00000000   0000000     000     
-
-dissect = (lines) ->
-    
-    diss = []
-    for line in lines
-        d = []
-        for chunk in line.chunks
-            range =
-                start: chunk.start
-                match: chunk.match
-                value: chunk.value
-            d.push range
-        diss.push d
-    diss
-        
 # 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
 # 000        000 000   000   000  000   000  000   000     000     000       
 # 0000000     00000    00000000   000   000  0000000       000     0000000   
@@ -928,9 +880,10 @@ dissect = (lines) ->
 # 00000000  000   000  000         0000000   000   000     000     0000000   
 
 module.exports =
+    
     blocks:  blocks
-    ranges:  (line, ext)  -> ranged blocks [line], ext
-    dissect: (lines, ext) -> dissect blocks lines, ext
+    ranges:  (line, ext)  -> blocks([line], ext)[0].chunks
+    dissect: (lines, ext) -> blocks(lines, ext).map (l) -> l.chunks
     
 # 00000000   00000000    0000000   00000000  000  000      00000000  
 # 000   000  000   000  000   000  000       000  000      000       
