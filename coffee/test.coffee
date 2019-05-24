@@ -338,6 +338,14 @@ describe 'ranges' ->
 
     it 'coffee function' ->
         
+        rgs = ranges "dolater =>"
+        inc rgs, 8 '=' 'punct function bound tail'
+        inc rgs, 9 '>' 'punct function bound head'
+
+        rgs = ranges "dolater ->"
+        inc rgs, 8 '-' 'punct function tail'
+        inc rgs, 9 '>' 'punct function head'
+        
         rgs = ranges "@a @b 'c'" 'coffee'
         inc rgs, 0 '@' 'punct function call'
         inc rgs, 1 'a' 'function call'

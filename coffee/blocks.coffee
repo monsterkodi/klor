@@ -214,7 +214,7 @@ blocked = (lines) ->
         
         markFunc = ->
             if line.chunks[0].value == 'text' 
-                if line.chunks[1].match == '='
+                if line.chunks[1].match == '=' and line.chunks[2].match != '>'
                     line.chunks[0].value = 'function'
                     line.chunks[1].value += ' function'
                 else if line.chunks[1].match == ':'
@@ -360,8 +360,8 @@ blocked = (lines) ->
     escape = ->
         
         if chunk.match == '\\' and (topType?.startsWith('regexp') or topType?.startsWith 'string')
-            if chunkIndex == 0 or not getChunk(-1).escape
-                if getChunk(1).start == chunk.start+1
+            if chunkIndex == 0 or not getChunk(-1)?.escape
+                if getChunk(1)?.start == chunk.start+1
                     chunk.escape = true
                     addValue 0 'escape'
                     return stacked()
