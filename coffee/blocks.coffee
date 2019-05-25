@@ -90,30 +90,23 @@ chunked = (lines, ext) ->
                         c += wl
                     
                     turd = punct = m[0]
-                    # for pc in punct[...-1]
+
                     pi = 0
+                    advance = 1
                     while pi < punct.length-1
                         pc = punct[pi]
-                        
+                        advance = 1
                         if 0xD800 <= punct.charCodeAt(pi) <= 0xDBFF and 0xDC00 <= punct.charCodeAt(pi+1) <= 0xDFFF
+                            advance = 2
                             pc += punct[pi+1]
-
-                            if turd.length
-                                line.chunks.push start:c, length:2, match:pc, turd:turd, value:'punct'
-                            else
-                                line.chunks.push start:c, length:2, match:pc, value:'punct'
-                            turd = turd[2..]
-                            c  += 2
-                            pi += 2
-                            continue
-                        pi += 1
-                                
-                        line.chunks.push start:c, length:1, match:pc, turd:turd, value:'punct'
-                        c += 1
-                        turd = turd[1..]
+                        pi += advance
+                        line.chunks.push start:c, length:advance, match:pc, turd:turd, value:'punct'
+                        c += advance
+                        turd = turd[advance..]
                         
                     if pi < punct.length
-                        line.chunks.push start:c++, length:1, match:punct[-1], value:'punct'
+                        line.chunks.push start:c, length:advance, match:punct[pi..], value:'punct'
+                        c += advance
                                         
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
