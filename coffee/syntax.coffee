@@ -41,6 +41,8 @@ class Syntax
         Syntax.word = {}
         Syntax.turd = {}
         
+        Syntax.exts.push 'koffee'
+        
         for extNames,valueWords of data
             for ext in extNames.split /\s/
             
@@ -87,8 +89,6 @@ class Syntax
                         else
                             for word in words
                                 Syntax.lang[ext][word] = value
-                                
-        # log str Syntax.mtch
                                 
     # 00000000    0000000   000   000   0000000   00000000   0000000  
     # 000   000  000   000  0000  000  000        000       000       

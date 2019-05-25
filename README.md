@@ -1,2 +1,2 @@
 
-A simple syntax highlighting tool.
+🌈 a simple syntax highlighting tool 🦋 

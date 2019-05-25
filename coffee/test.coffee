@@ -33,7 +33,37 @@ dissect = (c,l) -> Blocks.dissect c.split('\n'), l
 ###
 
 describe 'ranges' ->
-                    
+           
+    # 000   000  000   000  000   0000000   0000000   0000000    00000000  
+    # 000   000  0000  000  000  000       000   000  000   000  000       
+    # 000   000  000 0 000  000  000       000   000  000   000  0000000   
+    # 000   000  000  0000  000  000       000   000  000   000  000       
+    #  0000000   000   000  000   0000000   0000000   0000000    00000000  
+    
+    it 'unicode' ->
+        
+        rgs = ranges "🌈"
+        inc rgs, 0 '🌈' 'punct'
+
+        rgs = ranges "🌈🌱"
+        inc rgs, 0 '🌈' 'punct'
+        inc rgs, 2 '🌱' 'punct'
+        
+        rgs = ranges "🙂lol😀"
+        inc rgs, 0 '🙂' 'punct'
+        inc rgs, 2 'lol' 'text'
+        inc rgs, 5 '😀' 'punct'
+        
+        rgs = ranges "a➜b a▬▶b"
+        # log rgs
+        inc rgs, 1 '➜' 'punct'
+        inc rgs, 5 '▬' 'punct'
+        inc rgs, 6 '▶' 'punct'
+        
+        rgs = ranges "🐀🐁🐂🐃🐄🐅🐆🐇🐈🐉🐊🐋🐌🐍🐎🐏🐐🐑🐒🐓🐔🐕🐖🐗🐘🐙🐚🐛🐜🐝🐞🐟🐠🐡🐢🐣🐤🐥"
+        inc rgs, 0 '🐀' 'punct'
+        inc rgs, 24 '🐌' 'punct'
+        
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     000       
     # 000       000   000  000000000  000000000  0000000   000 0 000     000     0000000   
@@ -98,6 +128,13 @@ describe 'ranges' ->
 
         dss = dissect "/*\n 0 0 0 \n*/" 'styl'
         inc dss[1], 1 "0" 'comment triple header'
+        
+        rgs = ranges "# 0 * 0.2"
+        inc rgs, 2 '0' 'comment'
+        inc rgs, 6 '0' 'comment'
+        
+        dss = dissect "###\n 0 1 0 \n###" 'coffee'
+        inc dss[1], 1 "0" 'comment triple'
         
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
@@ -610,27 +647,55 @@ describe 'ranges' ->
         # f a/b - c/gi
         
         rgs = ranges 'a / b - c / d' 'coffee'
-        nut rgs, 2 '/' 'punct regexp'
+        nut rgs, 2 '/' 'punct regexp start'
 
         rgs = ranges 'f a/b, c/d' 'coffee'
-        nut rgs, 3 '/' 'punct regexp'
+        nut rgs, 3 '/' 'punct regexp start'
         
         rgs = ranges "m = '/'" 'coffee'
-        nut rgs, 5 '/' 'punct regexp'
+        nut rgs, 5 '/' 'punct regexp start'
 
         rgs = ranges "m a, '/''/'" 'coffee'
-        nut rgs, 6 '/' 'punct regexp'
+        nut rgs, 6 '/' 'punct regexp start'
         
         rgs = ranges """\"m = '/'\"""" 'coffee'
-        nut rgs, 6 '/' 'punct regexp'
+        nut rgs, 6 '/' 'punct regexp start'
         
         rgs = ranges "s = '/some\\path/file.txt:10'" 'coffee'
-        nut rgs, 5 '/' 'punct regexp'
-        nut rgs, 9 '/' 'punct regexp'
+        nut rgs, 5 '/' 'punct regexp start'
+        nut rgs, 9 '/' 'punct regexp start'
         
         rgs = ranges "num /= 10"
-        nut rgs, 4 '/'  'regexp'
-        nut rgs, 7 '10' 'regexp'
+        nut rgs, 4 '/'  'punct regexp start'
+        nut rgs, 7 '10' 'text regexp'
+        
+        rgs = ranges "4 / 2 / 1"
+        inc rgs, 2 '/' 'punct'
+        inc rgs, 6 '/' 'punct'
+        
+        rgs = ranges "4/2/1"
+        inc rgs, 1 '/' 'punct'
+        inc rgs, 3 '/' 'punct'
+        
+        rgs = ranges "4/ 2 / 1"
+        inc rgs, 1 '/' 'punct'
+        inc rgs, 5 '/' 'punct'
+        
+        rgs = ranges "4 /2 / 1"
+        inc rgs, 2 '/' 'punct'
+        inc rgs, 5 '/' 'punct'
+        
+        rgs = ranges "4 / 2/ 1"
+        inc rgs, 2 '/' 'punct'
+        inc rgs, 5 '/' 'punct'
+        
+        rgs = ranges "4 / 2 /1"
+        inc rgs, 2 '/' 'punct'
+        inc rgs, 6 '/' 'punct'
+        
+        rgs = ranges "4 /2/ 1"
+        inc rgs, 2 '/' 'punct'
+        inc rgs, 4 '/' 'punct'
         
     # 00     00  0000000    
     # 000   000  000   000  
