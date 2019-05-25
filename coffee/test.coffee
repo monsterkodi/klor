@@ -456,6 +456,10 @@ describe 'ranges' ->
         inc rgs, 4  ':'    'punct method'
         inc rgs, 16 '='    'punct function bound tail'
         inc rgs, 17 '>'    'punct function bound head'
+        
+        rgs = ranges "@mthd: (arg) ->"
+        inc rgs, 0 '@'    'punct method class'
+        inc rgs, 1 'mthd' 'method class'
                                 
     # 000   000   0000000   00000000  00000000  00000000  00000000  
     # 000  000   000   000  000       000       000       000       
@@ -551,7 +555,7 @@ describe 'ranges' ->
     
     it 'triple regexp' ->
         
-        rgs = ranges "///a///" 'coffee'
+        rgs = ranges "///a///,b" 'coffee'
         inc rgs, 0 "/" 'punct regexp triple'
         inc rgs, 1 "/" 'punct regexp triple'
         inc rgs, 2 "/" 'punct regexp triple'
@@ -559,7 +563,8 @@ describe 'ranges' ->
         inc rgs, 4 "/" 'punct regexp triple'
         inc rgs, 5 "/" 'punct regexp triple'
         inc rgs, 6 "/" 'punct regexp triple'
-
+        inc rgs, 8 "b" 'text'
+        
         dss = dissect "///\na\n///" 'coffee'
         inc dss[0], 0 "/" 'punct regexp triple'
         inc dss[0], 1 "/" 'punct regexp triple'
@@ -568,11 +573,11 @@ describe 'ranges' ->
         inc dss[2], 0 "/" 'punct regexp triple'
         inc dss[2], 1 "/" 'punct regexp triple'
         inc dss[2], 2 "/" 'punct regexp triple'
-
+        
         dss = dissect """
             ///
                 ([\\\\?]) # comment
-            ///
+            ///, a
             """ 'coffee'
         inc dss[0], 0  "/"  'punct regexp triple'
         inc dss[0], 1  "/"  'punct regexp triple'
@@ -584,6 +589,14 @@ describe 'ranges' ->
         inc dss[2], 0  "/"  'punct regexp triple'
         inc dss[2], 1  "/"  'punct regexp triple'
         inc dss[2], 2  "/"  'punct regexp triple'
+        inc dss[2], 5  "a"  'text'
+        
+        dss = dissect """
+            arr = [ ///a\#{b}///
+                    key: 'value'
+                  ]
+            """ 'coffee'
+        inc dss[1], 8 'key', 'dictionary key'
         
     # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
     # 0000  000  000   000        000   000  000       000        000        000 000   000   000  
@@ -614,6 +627,10 @@ describe 'ranges' ->
         rgs = ranges "s = '/some\\path/file.txt:10'" 'coffee'
         nut rgs, 5 '/' 'punct regexp'
         nut rgs, 9 '/' 'punct regexp'
+        
+        rgs = ranges "num /= 10"
+        nut rgs, 4 '/'  'regexp'
+        nut rgs, 7 '10' 'regexp'
         
     # 00     00  0000000    
     # 000   000  000   000  

@@ -154,6 +154,8 @@ blocked = (lines) ->
     hashComment = -> 
         
         return if stackTop and topType != 'regexp triple'
+        if stackTop and stackTop.lineno == line.number
+            return # comments inside triple regexp only valid on internal lines?
         
         if chunk.match == "#"
             fillComment 1
@@ -230,6 +232,10 @@ blocked = (lines) ->
                 if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd?[..1] == '@:'
                     line.chunks[0].value = 'method'
                     line.chunks[1].value = 'punct method'
+                else if line.chunks[0].match == '@' and line.chunks[1].value == 'dictionary key'
+                    line.chunks[0].value = 'punct method class'
+                    line.chunks[1].value = 'method class'
+                    line.chunks[2].value = 'punct method class'
                 return 2
                     
             if chunk.turd.startsWith '=>'
@@ -398,12 +404,11 @@ blocked = (lines) ->
         type = 'regexp triple'
         
         return if topType and topType not in ['interpolation', type]
-        
         if chunk.turd[..2] == '///'
             if topType == type
                 popStack()
             else
-                pushStack type:type
+                pushStack type:type, lineno:line.number
             return addValues 3 type   
             
     #  0000000  000000000  00000000   000  000   000   0000000   
