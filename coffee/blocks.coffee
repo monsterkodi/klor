@@ -584,13 +584,12 @@ interpolation = ->
             pushStack type:'interpolation', weak:true
             return addValues 2 'string interpolation start'
 
-
-        else if topType == 'interpolation'
-            
-            if chunk.match == '}'
-                addValue 0 'string interpolation end'
-                popStack()
-                return 1
+    else if topType == 'interpolation'
+        
+        if chunk.match == '}'
+            addValue 0 'string interpolation end'
+            popStack()
+            return 1
         
 # 000   000  00000000  000   000  000   000   0000000   00000000   0000000    
 # 000  000   000        000 000   000 0 000  000   000  000   000  000   000  
@@ -805,13 +804,11 @@ handlers =
     sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[ keyword, number,         stacked ]
     json:   punct:[               simpleString, dict,                            stacked ], word:[ keyword, number,         stacked ]
     md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[          number,         stacked ]
+    fish:   punct:[                hashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
     
 for ext in Syntax.exts
     if not handlers[ext]?
         handlers[ext] = punct:[                 simpleString,                    stacked ], word:[          number,         stacked ]
-    # log:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
-    # txt:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
-    # fish:   punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
     
 # 0000000    000       0000000    0000000  000   000  00000000  0000000    
 # 000   000  000      000   000  000       000  000   000       000   000  
@@ -999,20 +996,3 @@ module.exports =
 ▸test 'test'
 
     require('kxk').chai()    
-
-    b = blocks """
-        ▸doc 'hello'
-            x  
-            ```coffeescript
-                1+1
-            ```
-            y
-        1""".split '\n'
-    b[0].should.include.property 'ext' 'coffee'
-    b[1].should.include.property 'ext' 'md'
-    b[2].should.include.property 'ext' 'md'
-    b[3].should.include.property 'ext' 'coffee'
-    b[4].should.include.property 'ext' 'md'
-    b[5].should.include.property 'ext' 'md'
-    b[6].should.include.property 'ext' 'coffee'
-        

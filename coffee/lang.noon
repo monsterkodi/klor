@@ -763,9 +763,6 @@ sh bash
 
 fish
 
-    comment
-        line    #
-
     keyword
         if
         else

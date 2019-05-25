@@ -273,13 +273,20 @@ describe 'ranges' ->
         
         rgs = ranges '"#{xxx}"' 'coffee'
         inc rgs, 0 '"'   'punct string double'
+        inc rgs, 1 "#"   'punct string interpolation start'
+        inc rgs, 2 "{"   'punct string interpolation start'
         inc rgs, 3 'xxx' 'text'
+        inc rgs, 6 "}"   'punct string interpolation end'
         inc rgs, 7 '"'   'punct string double'
 
         rgs = ranges '"#{666}"' 'coffee'
         inc rgs, 0 '"'   'punct string double'
         inc rgs, 3 '666' 'number'
         inc rgs, 7 '"'   'punct string double'
+        
+        rgs = ranges '"#{__dirname}/../"' 'coffee'
+        inc rgs, 12, '}' 'punct string interpolation end'
+        inc rgs, 13, '/' 'string double'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
