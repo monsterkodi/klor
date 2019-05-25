@@ -812,9 +812,13 @@ handlers =
     sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[ keyword, number,         stacked ]
     json:   punct:[               simpleString, dict,                            stacked ], word:[ keyword, number,         stacked ]
     md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[          number,         stacked ]
-    log:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
-    txt:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
-    fish:   punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
+    
+for ext in Syntax.exts
+    if not handlers[ext]?
+        handlers[ext] = punct:[                 simpleString,                    stacked ], word:[          number,         stacked ]
+    # log:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
+    # txt:    punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
+    # fish:   punct:[                             simpleString,                    stacked ], word:[          number,         stacked ]
     
 # 0000000    000       0000000    0000000  000   000  00000000  0000000    
 # 000   000  000      000   000  000       000  000   000       000   000  
@@ -869,6 +873,10 @@ blocked = (lines) ->
         if ext != line.ext                      # either at start of file or we switched extension
             actExt()
             handl = handlers[ext = line.ext]    # install new handlers
+            if not handl
+                ▸dbg line
+                ▸dbg handlers
+            ▸assert handl
             
         #  0000000  000   000  000   000  000   000  000   000  000       0000000    0000000   00000000   
         # 000       000   000  000   000  0000  000  000  000   000      000   000  000   000  000   000  

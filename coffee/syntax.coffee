@@ -41,6 +41,7 @@ class Syntax
         Syntax.word = {}
         Syntax.turd = {}
         
+        Syntax.exts.push 'txt'
         Syntax.exts.push 'koffee'
         
         for extNames,valueWords of data
