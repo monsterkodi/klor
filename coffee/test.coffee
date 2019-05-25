@@ -33,7 +33,12 @@ dissect = (c,l) -> Blocks.dissect c.split('\n'), l
 ###
 
 describe 'ranges' ->
-           
+          
+    it 'fallback' ->
+        
+        rgs = ranges 'text', 'unknown'
+        inc rgs, 0 'text', 'text'
+    
     # 000   000  000   000  000   0000000   0000000   0000000    00000000  
     # 000   000  0000  000  000  000       000   000  000   000  000       
     # 000   000  000 0 000  000  000       000   000  000   000  0000000   

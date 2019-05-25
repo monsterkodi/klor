@@ -53,6 +53,7 @@ chunked = (lines, ext) ->
             number: n+1
         
     ext = 'coffee' if ext == 'koffee'
+    ext = 'txt' if ext not in Syntax.exts
             
     lineno = 0
     lines.map (text) -> 
