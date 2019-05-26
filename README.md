@@ -1,5 +1,6 @@
 
-## 🦋 klor
+![klor](test/sample.png)
+
 
 **klor** is a simple syntax highlighting tool.
 It exports the following function:
