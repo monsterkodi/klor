@@ -63,6 +63,7 @@ exports.map =
     'module this':                      'y2' 
     'module':                           'y6' 
     'class':                            'y5' 
+    'method class':                     'y7' 
     'property':                         'y6' 
     'dictionary key':                   'y8' 
     'punct function call':              'r2' 
