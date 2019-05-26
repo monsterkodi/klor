@@ -3,12 +3,19 @@
 
 **klor** is a simple syntax highlighting tool.
 
-It exports the following:
+It exports the following function:
 
 ### **blocks** *lines*, *ext*
 
 - *lines*: array of strings
-- *ext*: file type
+- *ext*: file type:
+    - coffee js ts 
+    - styl css sass
+    - pug html svg 
+    - bash fish sh 
+    - cpp hpp c h 
+    - noon json
+    - md plist 
     
 **returns** array of objects:
 
@@ -28,19 +35,8 @@ It exports the following:
 ...
 ]
 ```
-#### exts
 
-list of supported file types
-
-- coffee js ts 
-- styl css sass
-- pug html svg 
-- bash fish sh 
-- cpp hpp c h 
-- noon json
-- md plist 
-
-### 🌈 kolor
+## 🌈 kolor
 
 **kolor** is a submodule of **klor** which exports a bunch of functions that wrap strings in 256 color ansi codes.
 
