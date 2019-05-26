@@ -18,6 +18,7 @@ Syntax.swtch =
         coffeescript: turd:'```' to:'coffee' end:'```' add:'code triple'
         javascript:   turd:'```' to:'js'     end:'```' add:'code triple'
         js:           turd:'```' to:'js'     end:'```' add:'code triple'
+        sh:           turd:'```' to:'sh'     end:'```' add:'code triple'
             
 SPACE  = /\s/
 HEADER = /^0+$/
@@ -410,18 +411,20 @@ urlPunct = ->
                 return 6
                 
         if chunk.match == '.'
-            if not prev.value.startsWith('number') and prev.value != 'semver' and prev.match != '/'
-                if ext = getChunk(1)?.match
-                    if ext != '/'
-                        setValue -1 ext + ' file'
-                        addValue  0 ext
-                        setValue  1 ext + ' ext'
-                        return 2
+            if not prev.value.startsWith('number') and prev.value != 'semver' and prev.match not in '\\./'
+                if next = getChunk 1
+                    if next.start == chunk.start+chunk.length
+                        ext = next.match
+                        if ext not in '\\./'
+                            setValue -1 ext + ' file'
+                            addValue  0 ext
+                            setValue  1 ext + ' ext'
+                            return 2
                 
         if chunk.match == '/'
             
             for i in [chunkIndex..0]
-                break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1].start 
+                break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1]?.start 
                 break if line.chunks[i].value.endsWith 'dir'
                 break if line.chunks[i].value.startsWith 'url'
                 break if line.chunks[i].match == '"'
@@ -436,9 +439,9 @@ urlPunct = ->
 urlWord = ->
     
     if prev = getChunk -1
-        if prev.match == '/'
+        if prev.match in '\\/'
             next = getChunk 1
-            if not next or next.start > chunk.start+chunk.length or next.match not in './\\'
+            if not next or next.start > chunk.start+chunk.length or next.match not in '\\./'
                 addValue 0, 'file'
     
 #       000   0000000  
@@ -793,9 +796,13 @@ keyword = ->
     
     return if notCode
     
+    if not Syntax.lang[ext]
+        log "no lang for ext? #{ext}"
+        return
+    
     if Syntax.lang[ext].hasOwnProperty(chunk.match) 
         chunk.value = Syntax.lang[ext][chunk.match]
-        return 0 # give coffeeFunc a chance, number bails for us
+        return # give coffeeFunc a chance, number bails for us
                 
 # 000   000  00     00  000      
 #  000 000   000   000  000      
@@ -933,7 +940,7 @@ handlers =
     sh:     punct:[ hashComment,  simpleString, urlPunct, shPunct,               stacked ], word:[ keyword, urlWord, number, stacked ]
     json:   punct:[               simpleString, jsonPunct, urlPunct,             stacked ], word:[ keyword, jsonWord, urlWord, number, stacked ]
     log:    punct:[               simpleString, urlPunct, dict,                  stacked ], word:[ urlWord, number,         stacked ]
-    md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[          number,         stacked ]
+    md:     punct:[                    mdPunct, urlPunct, xmlPunct,              stacked ], word:[ urlWord, number,         stacked ]
     fish:   punct:[                hashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
     
 for ext in Syntax.exts

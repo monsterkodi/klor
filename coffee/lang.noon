@@ -726,8 +726,6 @@ plist
 # 0000000   000   000  
 
 sh bash
-    comment
-        line    #
 
     keyword
         cd 

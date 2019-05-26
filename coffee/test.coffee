@@ -984,6 +984,14 @@ describe 'ranges' ->
         inc dss[1], 16 'in'    'text'
         inc dss[1], 19 'then'  'text'
         
+        rgs = ranges 'text files. bla'
+        inc rgs, 0, 'text' 'text'
+        inc rgs, 10, '.' 'punct'
+        
+        rgs = ranges '..bla'
+        inc rgs, 0, '.' 'punct'
+        inc rgs, 1, '.' 'punct'
+        
         rgs = ranges '```coffeescript'
         inc rgs, 0 '`' 'punct code triple'
         inc rgs, 3 'coffeescript' 'comment'
@@ -1034,7 +1042,7 @@ describe 'ranges' ->
             ```
         """
         inc dss[1], 0 '`' 'punct code triple'
-        
+                
     # 000   000  000000000  00     00  000    
     # 000   000     000     000   000  000    
     # 000000000     000     000000000  000    
