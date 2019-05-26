@@ -2,7 +2,6 @@
 ## 🦋 klor
 
 **klor** is a simple syntax highlighting tool.
-
 It exports the following function:
 
 ### **blocks** *lines*, *ext*
@@ -35,6 +34,8 @@ It exports the following function:
 ...
 ]
 ```
+
+See [kolor.map](https://github.com/monsterkodi/klor/coffee/kolor.coffee) for a list of recognized chunk values.
 
 ## 🌈 kolor
 
