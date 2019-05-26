@@ -351,6 +351,81 @@ property = -> # word
                 if prevPrev.value not in ['property', 'number'] and not prevPrev.value.startsWith 'punct'
                     setValue -2 'obj'
             return 1
+
+# 000   000   0000000    0000000   000   000  
+# 0000  000  000   000  000   000  0000  000  
+# 000 0 000  000   000  000   000  000 0 000  
+# 000  0000  000   000  000   000  000  0000  
+# 000   000   0000000    0000000   000   000  
+
+noonProp = ->
+    
+    if prev = getChunk -1
+        if prev.start+prev.length+1 < chunk.start
+            if prev.value != 'obj'
+                for i in [chunkIndex-1..0]
+                    if i < chunkIndex-1 and line.chunks[i].start+line.chunks[i].length+1 < line.chunks[i+1].start
+                        break
+                    if line.chunks[i].value == 'text' or line.chunks[i].value == 'obj'
+                        line.chunks[i].value = 'property'
+                    else if line.chunks[i].value == 'punct'
+                        line.chunks[i].value = 'punct property'
+                    else
+                        break
+    0
+
+noonPunct = ->
+    
+    return if notCode # makes this sense here ???
+
+    noonProp()
+            
+noonWord = ->
+    
+    return if notCode # makes this sense here ???
+    
+    if chunk.start == 0
+        setValue 0 'obj'
+        return 1
+
+    noonProp()
+       
+# 000   000  00000000   000      
+# 000   000  000   000  000      
+# 000   000  0000000    000      
+# 000   000  000   000  000      
+#  0000000   000   000  0000000  
+
+urlPunct = ->
+    
+    if prev = getChunk -1
+        if chunk.turd == '://' 
+            if getmatch(4) == '.' and getChunk(5)
+                setValue -1 'url protocol'
+                addValues 3 'url'
+                setValue  3 'url domain'
+                setValue  4 'punct url tld'
+                setValue  5 'url tld'
+                
+                return 6
+                
+        if chunk.match == '.'
+            if not prev.value.startsWith('number') and prev.value != 'semver' and prev.match != '/'
+                if ext = getChunk(1)?.match
+                    if ext != '/'
+                        setValue -1 ext + ' file'
+                        addValue  0 ext
+                        setValue  1 ext + ' ext'
+                        return 2
+                
+        if chunk.match == '/'
+            
+            for i in [chunkIndex..0]
+                if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1].start or line.chunks[i].value.endsWith 'dir'
+                    break
+                line.chunks[i].value += ' dir'
+            return 1
+    0
     
 #       000   0000000  
 #       000  000       
@@ -385,6 +460,12 @@ dict = ->
                 setValue -1 'dictionary key'
                 setValue  0 'punct dictionary'
                 return 1
+
+#       000   0000000   0000000   000   000  
+#       000  000       000   000  0000  000  
+#       000  0000000   000   000  000 0 000  
+# 000   000       000  000   000  000  0000  
+#  0000000   0000000    0000000   000   000  
 
 jsonDict = ->
     
@@ -514,6 +595,64 @@ tripleString = ->
         
     escape()
     
+# 000   000  000   000  00     00  0000000    00000000  00000000   
+# 0000  000  000   000  000   000  000   000  000       000   000  
+# 000 0 000  000   000  000000000  0000000    0000000   0000000    
+# 000  0000  000   000  000 0 000  000   000  000       000   000  
+# 000   000   0000000   000   000  0000000    00000000  000   000  
+
+number = ->
+    
+    # return 1 if chunk.value != 'text'
+    return if notCode
+    
+    if NUMBER.test chunk.match
+        
+        if getmatch(-1) == '.'
+
+            if getValue(-4) == 'number float' and getValue(-2) == 'number float'
+                setValue -5 'punct semver' if getmatch(-5) in '^~'
+                setValue -4 'semver'
+                setValue -3 'punct semver'
+                setValue -2 'semver'
+                setValue -1 'punct semver'
+                setValue  0 'semver'
+                return 1
+
+            if getValue(-2) == 'number'
+                setValue -2 'number float'
+                addValue -1 'number float'
+                setValue  0 'number float'
+                return 1
+
+        chunk.value = 'number'
+        return 1
+        
+    if HEXNUM.test chunk.match
+            
+        chunk.value = 'number hex'
+        return 1
+        
+# 00000000  000       0000000    0000000   000000000  
+# 000       000      000   000  000   000     000     
+# 000000    000      000   000  000000000     000     
+# 000       000      000   000  000   000     000     
+# 000       0000000   0000000   000   000     000     
+
+float = ->
+    
+    if FLOAT.test chunk.match
+        if getmatch(-1) == '.'
+
+            if getValue(-2) == 'number'
+                setValue -2 'number float'
+                addValue -1 'number float'
+                setValue  0 'number float'
+                return 1
+
+        chunk.value = 'number float'
+        return 1
+    
 # 00     00  0000000  
 # 000   000  000   000
 # 000000000  000   000
@@ -630,64 +769,7 @@ keyword = ->
     if Syntax.lang[ext].hasOwnProperty(chunk.match) 
         chunk.value = Syntax.lang[ext][chunk.match]
         return 0 # give coffeeFunc a chance, number bails for us
-            
-# 000   000  000   000  00     00  0000000    00000000  00000000   
-# 0000  000  000   000  000   000  000   000  000       000   000  
-# 000 0 000  000   000  000000000  0000000    0000000   0000000    
-# 000  0000  000   000  000 0 000  000   000  000       000   000  
-# 000   000   0000000   000   000  0000000    00000000  000   000  
-
-number = ->
-    
-    return 1 if chunk.value != 'text'
-    return if notCode
-    
-    if NUMBER.test chunk.match
-        
-        if getmatch(-1) == '.'
-
-            if getValue(-4) == 'number float' and getValue(-2) == 'number float'
-                setValue -4 'semver'
-                setValue -3 'punct semver'
-                setValue -2 'semver'
-                setValue -1 'punct semver'
-                setValue  0 'semver'
-                return 1
-
-            if getValue(-2) == 'number'
-                setValue -2 'number float'
-                addValue -1 'number float'
-                setValue  0 'number float'
-                return 1
-
-        chunk.value = 'number'
-        return 1
-        
-    if HEXNUM.test chunk.match
-            
-        chunk.value = 'number hex'
-        return 1
-        
-# 00000000  000       0000000    0000000   000000000  
-# 000       000      000   000  000   000     000     
-# 000000    000      000   000  000000000     000     
-# 000       000      000   000  000   000     000     
-# 000       0000000   0000000   000   000     000     
-
-float = ->
-    
-    if FLOAT.test chunk.match
-        if getmatch(-1) == '.'
-
-            if getValue(-2) == 'number'
-                setValue -2 'number float'
-                addValue -1 'number float'
-                setValue  0 'number float'
-                return 1
-
-        chunk.value = 'number float'
-        return 1
-    
+                
 # 000   000  00     00  000      
 #  000 000   000   000  000      
 #   00000    000000000  000      
@@ -803,7 +885,7 @@ handlers =
     coffee: 
             punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
             word: [ keyword, coffeeWord, number, property, stacked ]
-    noon:   punct:[ noonComment,                                                 stacked ], word:[ keyword, number,         stacked ]
+    noon:   punct:[ noonComment,  noonPunct, urlPunct,                           stacked ], word:[ noonWord, number, stacked ]
     js:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
     ts:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
     iss:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]

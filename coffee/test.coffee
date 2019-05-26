@@ -14,9 +14,11 @@ _ = kxk._
 inc = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.deep.include     start:start, match:match, value:value
 nut = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.not.deep.include start:start, match:match, value:value
 
-ranges  = klor.ranges
-blocks  = (c,l) -> klor.blocks  c.split('\n'), l
-dissect = (c,l) -> klor.dissect c.split('\n'), l
+ext = 'coffee'
+lang    = (l) -> ext = l
+ranges  = (s,e) -> klor.ranges  s, e ? ext
+blocks  = (c,e) -> klor.blocks  c.split('\n'), e ? ext
+dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
   
 ▸doc 'sample'
     ```coffeescript
@@ -187,6 +189,7 @@ describe 'ranges' ->
         inc rgs, 6 "0"  'semver'
 
         rgs = ranges "^0.7.1"
+        inc rgs, 0 "^" 'punct semver'
         inc rgs, 1 "0" 'semver'
         inc rgs, 3 "7" 'semver'
         inc rgs, 5 "1" 'semver'
@@ -287,6 +290,83 @@ describe 'ranges' ->
         rgs = ranges '"#{__dirname}/../"' 'coffee'
         inc rgs, 12, '}' 'punct string interpolation end'
         inc rgs, 13, '/' 'string double'
+
+    # 000   000   0000000    0000000   000   000  
+    # 0000  000  000   000  000   000  0000  000  
+    # 000 0 000  000   000  000   000  000 0 000  
+    # 000  0000  000   000  000   000  000  0000  
+    # 000   000   0000000    0000000   000   000  
+    
+    it 'noon' ->
+            
+        lang 'noon'
+        
+        rgs = ranges "    property  value"
+        inc rgs, 4 'property' 'property'
+        inc rgs, 14 'value' 'text'
+
+        rgs = ranges "top"
+        inc rgs, 0 'top'  'obj'
+
+        rgs = ranges "top  prop"
+        inc rgs, 0 'top'  'obj'
+        inc rgs, 5 'prop' 'text'
+
+        rgs = ranges "version  ^0.1.2"
+        inc rgs, 0 'version'  'obj'
+        inc rgs, 9 '^' 'punct semver'
+        inc rgs, 10 '0' 'semver'
+        
+        rgs = ranges "some-package-name  1"
+        inc rgs, 0  'some'    'property'
+        inc rgs, 5  'package' 'property'
+        inc rgs, 13 'name'    'property'
+
+        rgs = ranges "some-package-name  ^1.2.3"
+        inc rgs, 0  'some'    'property'
+        inc rgs, 5  'package' 'property'
+        inc rgs, 13 'name'    'property'
+        
+        rgs = ranges "top  prop  value"
+        inc rgs, 0  'top'   'obj'
+        inc rgs, 5  'prop'  'property'
+        inc rgs, 11 'value' 'text'
+        
+        rgs = ranges "http://domain.com"
+        inc rgs, 0 'http' 'url protocol'
+        inc rgs, 4 ':' 'punct url'
+        inc rgs, 5 '/' 'punct url'
+        inc rgs, 6 '/' 'punct url'
+        inc rgs, 7 'domain' 'url domain'
+        inc rgs, 13 '.' 'punct url tld'
+        inc rgs, 14 'com' 'url tld'
+        
+        rgs = ranges "file.coffee"
+        inc rgs, 0 'file' 'coffee file'
+        inc rgs, 4 '.' 'punct coffee'
+        inc rgs, 5 'coffee' 'coffee ext'
+
+        rgs = ranges "/some/path"
+        inc rgs, 1 'some'   'text dir'
+        inc rgs, 5 '/'      'punct dir'
+        
+        rgs = ranges '/some\\path/file.txt:10'
+        inc rgs, 0  '/'    'punct dir'
+        inc rgs, 1  'some' 'text dir'
+        inc rgs, 5  '\\' 'punct dir'
+        inc rgs, 15 '.'  'punct txt'
+        inc rgs, 19 ':'  'punct'
+        
+        rgs = ranges "    test  ./node_modules/.bin/mocha"
+        inc rgs, 4 'test' 'property'
+        inc rgs, 10 '.' 'punct dir'
+        inc rgs, 11 '/' 'punct dir'
+        inc rgs, 12 'node_modules' 'text dir'
+        inc rgs, 24 '/' 'punct dir'
+        inc rgs, 25 '.' 'punct dir'
+        inc rgs, 26 'bin' 'text dir'
+        inc rgs, 29 '/' 'punct dir'
+        inc rgs, 30 'mocha' 'text'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -296,88 +376,90 @@ describe 'ranges' ->
     
     it 'coffee' ->
 
-        rgs = ranges "util = require 'util'" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges "util = require 'util'"
         inc rgs, 7 'require' 'require'
         
-        rgs = ranges "class Macro extends Command" 'coffee'
+        rgs = ranges "class Macro extends Command"
         inc rgs, 0  'class'   'keyword'
         inc rgs, 6  'Macro'   'class'
         inc rgs, 12 'extends' 'keyword'
         inc rgs, 20 'Command' 'class'
         
-        rgs = ranges "exist?.prop" 'coffee'
+        rgs = ranges "exist?.prop"
         inc rgs, 7 'prop' 'property'
                         
-        rgs = ranges "a and b" 'coffee'
+        rgs = ranges "a and b"
         inc rgs, 0 "a" 'text'
         inc rgs, 2 "and" 'keyword'
 
-        rgs = ranges "if a then b" 'coffee'
+        rgs = ranges "if a then b"
         inc rgs, 0 "if" 'keyword'
         inc rgs, 3 "a" 'text'
         inc rgs, 5 "then" 'keyword'
         inc rgs, 10 "b" 'text'
 
-        rgs = ranges "switch a" 'coffee'
+        rgs = ranges "switch a"
         inc rgs, 0 "switch" 'keyword'
         
-        rgs = ranges " a: b" 'coffee'
+        rgs = ranges " a: b"
         inc rgs, 1 "a" 'dictionary key'
         inc rgs, 2 ":" 'punct dictionary'
         
-        rgs = ranges "obj.value = obj.another.value" 'coffee'
+        rgs = ranges "obj.value = obj.another.value"
         inc rgs, 0  "obj"    'obj'
         inc rgs, 4  "value"  'property'
         inc rgs, 12 "obj"    'obj'
         inc rgs, 16 "another"'property'
         inc rgs, 24 "value"  'property'
             
-        rgs = ranges "if someObject.someProp" 'coffee'
+        rgs = ranges "if someObject.someProp"
         inc rgs, 0 "if" 'keyword'
         inc rgs, 3 "someObject" 'obj'
         inc rgs, 13 "." 'punct property'
         inc rgs, 14 "someProp" 'property'
         
-        rgs = ranges "1 'a'" 'coffee'
+        rgs = ranges "1 'a'"
         inc rgs, 0 "1" 'number'
 
-        rgs = ranges "a[0].prop" 'coffee'
+        rgs = ranges "a[0].prop"
         inc rgs, 3 ']' 'punct'
         
-        rgs = ranges "[ f ]" 'coffee'
+        rgs = ranges "[ f ]"
         inc rgs, 2 'f' 'text'
 
-        rgs = ranges "[ f , f ]" 'coffee'
+        rgs = ranges "[ f , f ]"
         inc rgs, 2 'f' 'text'
         
-        rgs = ranges "a[...2]" 'coffee'
+        rgs = ranges "a[...2]"
         inc rgs, 2 '.' 'punct range'
         inc rgs, 3 '.' 'punct range'
         inc rgs, 4 '.' 'punct range'
 
-        rgs = ranges "a[ -1 .. ]" 'coffee'
+        rgs = ranges "a[ -1 .. ]"
         inc rgs, 6 '.' 'punct range'
         inc rgs, 7 '.' 'punct range'
 
-        rgs = ranges "a[1..n]" 'coffee'
+        rgs = ranges "a[1..n]"
         inc rgs, 3 '.' 'punct range'
         inc rgs, 4 '.' 'punct range'
 
-        rgs = ranges "a[ .... ]" 'coffee'
+        rgs = ranges "a[ .... ]"
         inc rgs, 3 '.' 'punct'
         inc rgs, 4 '.' 'punct'
         inc rgs, 5 '.' 'punct'
         inc rgs, 6 '.' 'punct'
         
-        rgs = ranges "@f [1]" 'coffee'
+        rgs = ranges "@f [1]"
         inc rgs, 0 "@" 'punct function call'
         inc rgs, 1 "f" 'function call'
 
-        rgs = ranges "@f = 1" 'coffee'
+        rgs = ranges "@f = 1"
         inc rgs, 0 "@" 'punct this'
         inc rgs, 1 "f" 'text this'
         
-        rgs = ranges "@height/2 + @height/6" 'coffee'
+        rgs = ranges "@height/2 + @height/6"
         inc rgs, 0 '@'      'punct this'
         inc rgs, 1 'height' 'text this'
         inc rgs, 8 "2" 'number'
@@ -390,6 +472,8 @@ describe 'ranges' ->
 
     it 'coffee function' ->
 
+        lang 'coffee'
+        
         rgs = ranges "obj.prop.call 1"
         inc rgs, 0 'obj' 'obj'
         inc rgs, 4 'prop' 'property'
@@ -403,7 +487,7 @@ describe 'ranges' ->
         inc rgs, 8 '-' 'punct function tail'
         inc rgs, 9 '>' 'punct function head'
         
-        rgs = ranges "@a @b 'c'" 'coffee'
+        rgs = ranges "@a @b 'c'"
         inc rgs, 0 '@' 'punct function call'
         inc rgs, 1 'a' 'function call'
         inc rgs, 3 '@' 'punct function call'
@@ -413,22 +497,22 @@ describe 'ranges' ->
         inc rgs, 0 '@' 'punct function call'
         inc rgs, 1 'a' 'function call'
 
-        rgs = ranges "fff 1" 'coffee'
+        rgs = ranges "fff 1"
         inc rgs, 0 "fff" 'function call'
                 
-        rgs = ranges "f 'a'" 'coffee'
+        rgs = ranges "f 'a'"
         inc rgs, 0 "f" 'function call'
         
-        rgs = ranges "ff 'b'" 'coffee'
+        rgs = ranges "ff 'b'"
         inc rgs, 0 "ff" 'function call'
 
-        rgs = ranges "ffff -1" 'coffee'
+        rgs = ranges "ffff -1"
         inc rgs, 0 "ffff" 'function call'
 
-        rgs = ranges "f [1]" 'coffee'
+        rgs = ranges "f [1]"
         inc rgs, 0 "f" 'function call'
         
-        rgs = ranges "fffff {1}" 'coffee'
+        rgs = ranges "fffff {1}"
         inc rgs, 0 "fffff" 'function call'
 
         rgs = ranges "i ++a"
@@ -440,7 +524,7 @@ describe 'ranges' ->
         rgs = ranges "i -4"
         inc rgs, 0 'i' 'function call'
         
-        rgs = ranges "pos= (item, p) -> " 'coffee'
+        rgs = ranges "pos= (item, p) -> "
         inc rgs, 0 "pos" 'function'
         
         rgs = ranges "i != false"
@@ -496,19 +580,21 @@ describe 'ranges' ->
     
     it 'coffee method' ->
         
-        rgs = ranges " a: =>" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges " a: =>"
         inc rgs, 1 "a" 'method'
         inc rgs, 2 ":" 'punct method'
         inc rgs, 4 "=" 'punct function bound tail'
         inc rgs, 5 ">" 'punct function bound head'
         
-        rgs = ranges " a: ->" 'coffee'
+        rgs = ranges " a: ->"
         inc rgs, 1 "a" 'method'
         inc rgs, 2 ":" 'punct method'
         inc rgs, 4 "-" 'punct function tail'
         inc rgs, 5 ">" 'punct function head'
         
-        rgs = ranges "mthd:  (arg)    => @member memarg" 'coffee'
+        rgs = ranges "mthd:  (arg)    => @member memarg"
         inc rgs, 0  'mthd' 'method'
         inc rgs, 4  ':'    'punct method'
         inc rgs, 16 '='    'punct function bound tail'
@@ -526,19 +612,21 @@ describe 'ranges' ->
     
     it 'koffee' ->
         
-        rgs = ranges " @: ->" 'coffee'
+        lang 'koffee'
+        
+        rgs = ranges " @: ->"
         inc rgs, 1 "@" 'method'
         inc rgs, 2 ":" 'punct method'
         inc rgs, 4 "-" 'punct function tail'
         inc rgs, 5 ">" 'punct function head'
 
-        rgs = ranges " @:->a" 'coffee'
+        rgs = ranges " @:->a"
         inc rgs, 1 "@" 'method'
         inc rgs, 2 ":" 'punct method'
         inc rgs, 3 "-" 'punct function tail'
         inc rgs, 4 ">" 'punct function head'
         
-        rgs = ranges "▸if ▸then ▸elif ▸else" 'coffee'
+        rgs = ranges "▸if ▸then ▸elif ▸else"
         inc rgs, 0  "▸"    'punct meta'
         inc rgs, 1  "if"   'meta'
         inc rgs, 4  "▸"    'punct meta'
@@ -548,7 +636,7 @@ describe 'ranges' ->
         inc rgs, 16 "▸"    'punct meta'
         inc rgs, 17 "else" 'meta'
 
-        rgs = ranges "[1 'x' a:1 c:d]" 'coffee'
+        rgs = ranges "[1 'x' a:1 c:d]"
         inc rgs, 1  "1"   'number'
         inc rgs, 4  "x"   'string single'
         inc rgs, 7  "a"   'dictionary key'
@@ -562,26 +650,28 @@ describe 'ranges' ->
     
     it 'js' ->
         
-        rgs = ranges "obj.prop.call(1);" 'js'
+        lang 'js'
+        
+        rgs = ranges "obj.prop.call(1);"
         inc rgs, 0 'obj' 'obj'
         inc rgs, 4 'prop' 'property'
         inc rgs, 9 'call' 'function call'
         
-        rgs = ranges "func = function() {" 'js'
+        rgs = ranges "func = function() {"
         inc rgs, 0 'func' 'function'
         inc rgs, 7 'function' 'keyword function'
         
-        rgs = ranges "obj.value = obj.another.value" 'js'
+        rgs = ranges "obj.value = obj.another.value"
         inc rgs, 0  "obj"    'obj'
         inc rgs, 4  "value"  'property'
         inc rgs, 12 "obj"    'obj'
         inc rgs, 16 "another"'property'
         inc rgs, 24 "value"  'property'
         
-        rgs = ranges "a(2);" 'js'
+        rgs = ranges "a(2);"
         inc rgs, 0 'a' 'function call'
         
-        rgs = ranges "//# sourceMappingURL=data:" 'js'
+        rgs = ranges "//# sourceMappingURL=data:"
         inc rgs, 0 "/" 'punct comment'
         inc rgs, 1 "/" 'punct comment'
         inc rgs, 2 "#" 'comment'
@@ -594,7 +684,9 @@ describe 'ranges' ->
     
     it 'json' ->
         
-        rgs = ranges """{ "A Z": 1 }""" 'json'
+        lang 'json'
+        
+        rgs = ranges """{ "A Z": 1 }"""
         inc rgs, 2 '"' 'punct dictionary'
         inc rgs, 3 'A' 'dictionary key'
         inc rgs, 5 'Z' 'dictionary key'
@@ -608,27 +700,30 @@ describe 'ranges' ->
     # 000   000  00000000   0000000   00000000  000   000  000        
     
     it 'regexp' ->
-        rgs = ranges "r=/a/" 'coffee'
+        
+        lang 'coffee'
+        
+        rgs = ranges "r=/a/"
         inc rgs, 2 '/'       'punct regexp start'
         inc rgs, 3 'a'       'text regexp'
         inc rgs, 4 '/'       'punct regexp end'
                 
-        rgs = ranges "/(a|.*|\s\d\w\S\W$|^\s+)/" 'coffee'
+        rgs = ranges "/(a|.*|\s\d\w\S\W$|^\s+)/"
         inc rgs, 0 '/'       'punct regexp start'
         inc rgs, 2 'a'       'text regexp'
             
-        rgs = ranges "/^#include/" 'coffee'
+        rgs = ranges "/^#include/"
         inc rgs, 0 '/'       'punct regexp start'
         inc rgs, 2 "#"       'punct regexp'
         inc rgs, 3 "include" 'text regexp'
 
-        rgs = ranges "/\\'hello\\'/ " 'coffee'
+        rgs = ranges "/\\'hello\\'/ "
         inc rgs, 0 '/'       'punct regexp start'
         inc rgs, 1 "\\"      'punct escape regexp'
         inc rgs, 2 "'"       'punct regexp'
         inc rgs, 3 "hello"   'text regexp'
 
-        rgs = ranges "f a /b - c/gi" 'coffee'
+        rgs = ranges "f a /b - c/gi"
         inc rgs, 4 '/'       'punct regexp start'
         inc rgs, 5 'b'       'text regexp'
         inc rgs, 10 '/'      'punct regexp end'
@@ -659,7 +754,9 @@ describe 'ranges' ->
     
     it 'triple regexp' ->
         
-        rgs = ranges "///a///,b" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges "///a///,b"
         inc rgs, 0 "/" 'punct regexp triple'
         inc rgs, 1 "/" 'punct regexp triple'
         inc rgs, 2 "/" 'punct regexp triple'
@@ -669,7 +766,7 @@ describe 'ranges' ->
         inc rgs, 6 "/" 'punct regexp triple'
         inc rgs, 8 "b" 'text'
         
-        dss = dissect "///\na\n///" 'coffee'
+        dss = dissect "///\na\n///"
         inc dss[0], 0 "/" 'punct regexp triple'
         inc dss[0], 1 "/" 'punct regexp triple'
         inc dss[0], 2 "/" 'punct regexp triple'
@@ -682,7 +779,7 @@ describe 'ranges' ->
             ///
                 ([\\\\?]) # comment
             ///, a
-            """ 'coffee'
+            """
         inc dss[0], 0  "/"  'punct regexp triple'
         inc dss[0], 1  "/"  'punct regexp triple'
         inc dss[0], 2  "/"  'punct regexp triple'
@@ -699,7 +796,7 @@ describe 'ranges' ->
             arr = [ ///a\#{b}///
                     key: 'value'
                   ]
-            """ 'coffee'
+            """
         inc dss[1], 8 'key', 'dictionary key'
         
     # 000   000   0000000         00000000   00000000   0000000   00000000  000   000  00000000   
@@ -710,25 +807,24 @@ describe 'ranges' ->
     
     it 'no regexp' ->
         
-        # f a / b - c/gi
-        # f a/b - c/gi
-        
-        rgs = ranges 'a / b - c / d' 'coffee'
+        lang 'coffee'
+
+        rgs = ranges 'a / b - c / d' 
         nut rgs, 2 '/' 'punct regexp start'
 
-        rgs = ranges 'f a/b, c/d' 'coffee'
+        rgs = ranges 'f a/b, c/d'
         nut rgs, 3 '/' 'punct regexp start'
         
-        rgs = ranges "m = '/'" 'coffee'
+        rgs = ranges "m = '/'"
         nut rgs, 5 '/' 'punct regexp start'
 
-        rgs = ranges "m a, '/''/'" 'coffee'
+        rgs = ranges "m a, '/''/'"
         nut rgs, 6 '/' 'punct regexp start'
         
-        rgs = ranges """\"m = '/'\"""" 'coffee'
+        rgs = ranges """\"m = '/'\""""
         nut rgs, 6 '/' 'punct regexp start'
         
-        rgs = ranges "s = '/some\\path/file.txt:10'" 'coffee'
+        rgs = ranges "s = '/some\\path/file.txt:10'"
         nut rgs, 5 '/' 'punct regexp start'
         nut rgs, 9 '/' 'punct regexp start'
         
@@ -771,80 +867,82 @@ describe 'ranges' ->
     # 000   000  0000000    
     
     it 'md' ->
-                
-        rgs = ranges "**bold**" 'md'
+        
+        lang 'md'
+        
+        rgs = ranges "**bold**"
         inc rgs, 0 '*'      'punct bold'
         inc rgs, 1 '*'      'punct bold'
         inc rgs, 2 'bold'   'text bold'
         inc rgs, 6 '*'      'punct bold'
         inc rgs, 7 '*'      'punct bold'
         
-        rgs = ranges ",**b**," 'md'
+        rgs = ranges ",**b**,"
         inc rgs, 1 '*'      'punct bold'
         inc rgs, 3 'b'      'text bold'
         inc rgs, 4 '*'      'punct bold'
                 
-        rgs = ranges "*it lic*" 'md'
+        rgs = ranges "*it lic*"
         inc rgs, 0 '*'      'punct italic'
         inc rgs, 1 'it'     'text italic'
         inc rgs, 4 'lic'    'text italic'
         inc rgs, 7 '*'      'punct italic'
         
-        rgs = ranges "*italic*" 'md'
+        rgs = ranges "*italic*"
         inc rgs, 0 '*'      'punct italic'
         inc rgs, 1 'italic' 'text italic'
         inc rgs, 7 '*'      'punct italic'
  
-        rgs = ranges "*`italic code`*" 'md'
+        rgs = ranges "*`italic code`*"
         inc rgs, 0 '*'      'punct italic'
         inc rgs, 1 '`'      'punct italic code'
         inc rgs, 2 'italic' 'text italic code'
         inc rgs, 9 'code'   'text italic code'
         inc rgs, 14 '*'     'punct italic'
         
-        rgs = ranges "it's good" 'md'
+        rgs = ranges "it's good"
         inc rgs, 0 'it'     'text'
         inc rgs, 2 "'"      'punct'
         inc rgs, 3 's'      'text'
         
-        rgs = ranges "if is empty in then" 'md'
+        rgs = ranges "if is empty in then"
         inc rgs, 0  'if'    'text'
         inc rgs, 3  'is'    'text'
         inc rgs, 6  'empty' 'text'
         inc rgs, 12 'in'    'text'
         inc rgs, 15 'then'  'text'
 
-        dss = dissect "▸doc 'md'\n    if is empty in then" 'coffee'
+        dss = dissect "▸doc\n    if is empty in then" 'coffee'
         inc dss[1], 4  'if'    'text'
         inc dss[1], 7  'is'    'text'
         inc dss[1], 10  'empty' 'text'
         inc dss[1], 16 'in'    'text'
         inc dss[1], 19 'then'  'text'
         
-        rgs = ranges '```coffeescript', 'md'
+        rgs = ranges '```coffeescript'
         inc rgs, 0 '`' 'punct code triple'
         inc rgs, 3 'coffeescript' 'comment'
             
-        rgs = ranges "- li" 'md'
+        rgs = ranges "- li"
         inc rgs, 0 '-'  'punct li1 marker'
         inc rgs, 2 'li' 'text li1'
 
-        rgs = ranges "    - **bold**" 'md'
+        rgs = ranges "    - **bold**"
         inc rgs, 4 '-'    'punct li2 marker'
         inc rgs, 8 'bold' 'text li2 bold'
         
-        rgs = ranges "        - **bold**" 'md'
+        rgs = ranges "        - **bold**"
         inc rgs, 8 '-'    'punct li3 marker'
         inc rgs, 12 'bold' 'text li3 bold'
 
-        rgs = ranges "        * **bold**" 'md'
+        rgs = ranges "        * **bold**"
         inc rgs, 8 '*'    'punct li3 marker'
         inc rgs, 12 'bold' 'text li3 bold'
 
         dss = dissect """
             - li1
             text
-        """ 'md'
+        """
         inc dss[0], 0  '-'    'punct li1 marker'
         inc dss[1], 0  'text' 'text'
 
@@ -854,7 +952,7 @@ describe 'ranges' ->
             ### h3
             #### h4
             ##### h5
-        """ 'md'
+        """
         inc dss[0], 0  "#"    'punct h1'
         inc dss[0], 2  "h1"   'text h1'
         inc dss[1], 0  "#"    'punct h2'
@@ -869,7 +967,7 @@ describe 'ranges' ->
         dss = dissect """
             ```js
             ```
-        """ 'md'
+        """
         inc dss[1], 0 '`' 'punct code triple'
         
     # 000   000  000000000  00     00  000    
@@ -880,13 +978,15 @@ describe 'ranges' ->
     
     it 'html' ->
         
-        rgs = ranges "</div>" 'html' 
+        lang 'html'
+        
+        rgs = ranges "</div>" 
         inc rgs, 0 "<"    'punct keyword'
         inc rgs, 1 "/"    'punct keyword'
         inc rgs, 2 "div"  'keyword'
         inc rgs, 5 ">"    'punct keyword'
 
-        rgs = ranges "<div>" 'html' 
+        rgs = ranges "<div>" 
         inc rgs, 0 "<"    'punct keyword'
         inc rgs, 1 "div"  'keyword'
         inc rgs, 4 ">"    'punct keyword'
@@ -899,29 +999,31 @@ describe 'ranges' ->
     
     it 'cpp' ->
         
-        rgs = ranges "#include" 'cpp'      
+        lang 'cpp'
+        
+        rgs = ranges "#include"      
         inc rgs, 0 "#"        'punct define'
         inc rgs, 1 "include"  'define'
 
-        rgs = ranges "#if" 'cpp'            
+        rgs = ranges "#if"            
         inc rgs, 0 "#"        'punct define'
         inc rgs, 1 "if"       'define'
 
-        rgs = ranges "#  if" 'cpp'            
+        rgs = ranges "#  if"            
         inc rgs, 0 "#"        'punct define'
         inc rgs, 3 "if"       'define'
             
-        rgs = ranges "if (true) {} else {}" 'cpp'    
+        rgs = ranges "if (true) {} else {}"    
         inc rgs, 0 "if"    'keyword'
         inc rgs, 4 "true"  'keyword'
         inc rgs, 13 "else" 'keyword'
             
-        rgs = ranges "1.0f" 'cpp'
+        rgs = ranges "1.0f"
         inc rgs, 0 "1"  'number float'
         inc rgs, 1 "."  'punct number float'
         inc rgs, 2 "0f" 'number float'
 
-        rgs = ranges "0.0000f" 'cpp'
+        rgs = ranges "0.0000f"
         inc rgs, 2 "0000f" 'number float'
        
     # 000   0000000   0000000  
@@ -931,8 +1033,8 @@ describe 'ranges' ->
     # 000  0000000   0000000   
     
     # it 'iss' ->
-#         
-        # rgs = ranges "a={#key}" 'iss'
+        # lang 'iss'
+        # rgs = ranges "a={#key}"
         # inc rgs, 2 '{'   'punct property'
         # inc rgs, 3 "#"   'punct property'
         # inc rgs, 4 'key' 'property text'
@@ -946,19 +1048,21 @@ describe 'ranges' ->
     
     it 'sh' ->
 
-        rgs = ranges "dir/path/with/dashes/file.txt" 'sh'
+        lang 'sh'
+        
+        rgs = ranges "dir/path/with/dashes/file.txt"
         inc rgs, 0 'dir' 'text dir'
         inc rgs, 4 'path' 'text dir'
         inc rgs, 9 'with' 'text dir'
         inc rgs, 14 'dashes' 'text dir'
         
-        # rgs = ranges "dir/path-with-dashes/file.txt" 'sh'
+        # rgs = ranges "dir/path-with-dashes/file.txt"
         # inc rgs, 0 'dir' 'dir text'
         # inc rgs, 4 'path' 'dir text'
         # inc rgs, 9 'with' 'dir text'
         # inc rgs, 14 'dashes' 'dir text'
         
-        rgs = ranges "prg --arg1 -arg2" 'sh'
+        rgs = ranges "prg --arg1 -arg2"
         inc rgs, 4 '-' 'punct argument'
         inc rgs, 5 '-' 'punct argument'
         inc rgs, 6 'arg1' 'argument'
@@ -973,7 +1077,9 @@ describe 'ranges' ->
     
     it 'log' ->
 
-        # rgs = ranges "http://domain.com" 'log'
+        # lang 'log'
+        
+        # rgs = ranges "http://domain.com"
         # inc rgs, 0 'http' 'url protocol'
         # inc rgs, 4 ':' 'punct url'
         # inc rgs, 5 '/' 'punct url'
@@ -982,44 +1088,21 @@ describe 'ranges' ->
         # inc rgs, 13 '.' 'punct url tld'
         # inc rgs, 14 'com' 'url tld'
         
-        # rgs = ranges "file.coffee" 'log'
+        # rgs = ranges "file.coffee"
         # inc rgs, 0 'file' 'coffee file'
         # inc rgs, 4 '.' 'punct coffee'
         # inc rgs, 5 'coffee' 'coffee ext'
 
-        # rgs = ranges "key /" 'log'
+        # rgs = ranges "key /"
         # inc rgs, 0 'key'   'text'
 
-        # rgs = ranges "/some/path" 'log'
+        # rgs = ranges "/some/path"
         # inc rgs, 1 'some'   'dir text'
         # inc rgs, 5 '/'      'punct dir'
 
-        # rgs = ranges "key: value" 'log'
+        # rgs = ranges "key: value"
         # inc rgs, 0 'key'    'dictionary key'
         # inc rgs, 3 ':'      'punct dictionary'
-        
-    # 000   000   0000000    0000000   000   000  
-    # 0000  000  000   000  000   000  0000  000  
-    # 000 0 000  000   000  000   000  000 0 000  
-    # 000  0000  000   000  000   000  000  0000  
-    # 000   000   0000000    0000000   000   000  
-    
-    it 'noon' ->
-        
-        rgs = ranges '/some\\path/file.txt:10' 'noon'
-        inc rgs, 0  '/'  'punct'
-        inc rgs, 5  '\\' 'punct'
-        inc rgs, 15 '.'  'punct'
-        inc rgs, 19 ':'  'punct'
-        
-        # rgs = ranges "    property  value" 'noon'
-        # inc rgs, 4 'property' 'property'
-        # inc rgs, 14 'value' 'text'
-
-        # rgs = ranges "    prop.erty  value" 'noon'
-        # inc rgs, 4 'prop' 'property'
-        # inc rgs, 8 '.' 'punct property'
-        # inc rgs, 9 'erty' 'property'
         
 ###
 0000000    000       0000000    0000000  000   000   0000000  
@@ -1039,6 +1122,8 @@ describe 'blocks' ->
     
     it 'comment' ->
      
+        lang 'coffee'
+        
         blocks("##").should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
                     {start:1 length:1 match:"#" value:'comment'} 

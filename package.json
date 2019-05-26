@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "syntax highlighting",
   "keywords": [
     "syntax",
@@ -12,7 +12,7 @@
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/monsterkodi/klor.git"
+    "url": "https://github.com/monsterkodi/klor.git"
   },
   "bugs": {
     "url": "https://github.com/monsterkodi/klor/issues"
@@ -22,7 +22,7 @@
     "watch": "./node_modules/.bin/onchange coffee/test.coffee coffee/klor.coffee -- npm run test"
   },
   "dependencies": {
-    "kxk": "^0.290.0"
+    "kxk": "^0.292.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",
