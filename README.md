@@ -5,20 +5,19 @@
 
 It exports the following:
 
-#### blocks
+### **blocks** *lines*, *ext*
 
-**blocks** *lines*, *ext*
-
-*lines*: array of strings
-*ext*: file type
+- *lines*: array of strings
+- *ext*: file type
     
 **returns** array of objects:
 
 ```coffeescript
+[
     chunks: [
-                turd:   string
                 match:  string 
                 value:  string
+                turd:   string
                 start:  number
                 length: number
             ]
@@ -26,20 +25,20 @@ It exports the following:
     chars:  number
     index:  number
     number: index+1
+...
+]
 ```
 #### exts
 
 list of supported file types
 
-- koffee coffee js ts 
-- styl css sass scss 
-- pug html htm svg 
-- cpp hpp cxx c h 
+- coffee js ts 
+- styl css sass
+- pug html svg 
 - bash fish sh 
+- cpp hpp c h 
 - noon json
 - md plist 
-- iss ini
-- txt log 
 
 ### 🌈 kolor
 
@@ -47,8 +46,8 @@ list of supported file types
 
 It's a merge of [colorette](https://github.com/jorgebucaran/colorette) and [ansi-256-colors](https://github.com/jbnicolai/ansi-256-colors)
 
-[r g b c m y w][1..8] foreground colors 
-[R G B C M Y W][1..8] background colors
+- [r g b c m y w][1..8] foreground colors 
+- [R G B C M Y W][1..8] background colors
     
 ```coffeescript
 klor = require 'klor'
