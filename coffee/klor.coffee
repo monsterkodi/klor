@@ -414,11 +414,11 @@ urlPunct = ->
             if not prev.value.startsWith('number') and prev.value != 'semver' and prev.match not in '\\./'
                 if next = getChunk 1
                     if next.start == chunk.start+chunk.length
-                        ext = next.match
-                        if ext not in '\\./'
-                            setValue -1 ext + ' file'
-                            addValue  0 ext
-                            setValue  1 ext + ' ext'
+                        fileext = next.match
+                        if fileext not in '\\./'
+                            setValue -1 fileext + ' file'
+                            addValue  0 fileext
+                            setValue  1 fileext + ' ext'
                             return 2
                 
         if chunk.match == '/'
