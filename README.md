@@ -8,7 +8,7 @@ It exports the following function:
 ### **blocks** *lines*, *ext*
 
 - *lines*: array of strings
-- *ext*: file type:
+- *ext*: file type
     - coffee js ts 
     - styl css sass
     - pug html svg 
@@ -17,7 +17,7 @@ It exports the following function:
     - noon json
     - md plist 
     
-**returns** array of objects:
+**returns** an array of objects:
 
 ```coffeescript
 [

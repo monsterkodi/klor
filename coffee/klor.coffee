@@ -35,9 +35,9 @@ codeTypes = ['interpolation' 'code triple']
 # 000       000   000  000   000  000  0000  000  000   000       000   000  
 #  0000000  000   000   0000000   000   000  000   000  00000000  0000000    
 
-▸doc 'chunked *lines*, *ext*'
+▸doc 'chunked lines, ext'
                     
-    **returns** array of
+    returns array of
         
         chunks: [
                     turd:   s
@@ -955,11 +955,11 @@ for ext in Syntax.exts
 0000000    0000000   0000000    0000000  000   000  00000000  0000000    
 ###
 
-▸doc 'blocked *lines*'
+▸doc 'blocked lines'
     
-    *lines*: array of chunked lines
+    lines: array of chunked lines
     
-    **returns** lines with 
+    returns lines with 
     - 'ext' switched in some lines
     - 'value' changed in chunks that match language patterns
 
@@ -1058,46 +1058,19 @@ blocked = (lines) ->
                 chunkIndex++
     lines
     
-# 0000000    000       0000000    0000000  000   000   0000000  
-# 000   000  000      000   000  000       000  000   000       
-# 0000000    000      000   000  000       0000000    0000000   
-# 000   000  000      000   000  000       000  000        000  
-# 0000000    0000000   0000000    0000000  000   000  0000000   
-
-blocks = (lines, ext='coffee') ->
-    
-    ▸doc 'blocks *lines*, *ext*'
-
-        *lines*:  array of strings
-        
-        *ext*:
-        - koffee coffee js ts 
-        - styl css sass scss 
-        - pug html htm svg 
-        - cpp hpp cxx c h 
-        - bash fish sh 
-        - noon json
-        - md plist 
-        - iss ini
-        - txt log 
-
-        **returns** the result of
-        ```coffeescript
-        blocked chunked lines, ext
-        ```
-    blocked chunked lines, ext
-    
 # 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
 # 000        000 000   000   000  000   000  000   000     000     000       
 # 0000000     00000    00000000   000   000  0000000       000     0000000   
 # 000        000 000   000        000   000  000   000     000          000  
 # 00000000  000   000  000         0000000   000   000     000     0000000   
 
+blocks = (lines, ext='coffee') -> blocked chunked lines, ext
+
 module.exports =
     
     blocks:  blocks
-    ranges:  (line, ext)  -> blocks([line], ext)[0].chunks
-    dissect: (lines, ext) -> blocks(lines, ext).map (l) -> l.chunks
+    ranges:  (line, ext='coffee')  -> blocks([line], ext)[0].chunks
+    dissect: (lines, ext='coffee') -> blocks(lines, ext).map (l) -> l.chunks
     
 # 00000000   00000000    0000000   00000000  000  000      00000000  
 # 000   000  000   000  000   000  000       000  000      000       
@@ -1117,29 +1090,9 @@ module.exports =
 
     for i in [0..5]
         blocks lines0
-        # blocks lines1
-        # lines0.map (l) -> Syntax.ranges l, 'coffee'
         
     for i in [0..15]
         
         ▸profile 'lines0'
             blocks lines0
-        # ▸profile 'syntax0'
-            # lines0.map (l) -> Syntax.ranges l, 'coffee'
             
-        # ▸profile 'lines1'
-            # blocks lines1
-        # ▸profile 'syntax1'
-            # lines1.map (l) -> Syntax.ranges l, 'coffee'
-            
-###
-000000000  00000000   0000000  000000000  
-   000     000       000          000     
-   000     0000000   0000000      000     
-   000     000            000     000     
-   000     00000000  0000000      000     
-###
-
-▸test 'test'
-
-    require('kxk').chai()    
