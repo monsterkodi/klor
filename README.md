@@ -35,11 +35,11 @@ It exports the following function:
 ]
 ```
 
-See [kolor.map](https://github.com/monsterkodi/klor/coffee/kolor.coffee) for a list of recognized chunk values.
+See [kolor.map](https://github.com/monsterkodi/klor/blob/master/coffee/kolor.coffee) for a list of recognized chunk values.
 
 ## 🌈 kolor
 
-**kolor** is a submodule of **klor** which exports a bunch of functions that wrap strings in 256 color ansi codes.
+**kolor** is a submodule which exports a bunch of functions for wrapping strings in 256 color ansi codes.
 
 It's a merge of [colorette](https://github.com/jorgebucaran/colorette) and [ansi-256-colors](https://github.com/jbnicolai/ansi-256-colors)
 
