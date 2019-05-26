@@ -1,9 +1,9 @@
 ###
-0000000    000       0000000    0000000  000   000   0000000    
-000   000  000      000   000  000       000  000   000         
-0000000    000      000   000  000       0000000    0000000     
-000   000  000      000   000  000       000  000        000    
-0000000    0000000   0000000    0000000  000   000  0000000     
+000   000  000       0000000   00000000   
+000  000   000      000   000  000   000  
+0000000    000      000   000  0000000    
+000  000   000      000   000  000   000  
+000   000  0000000   0000000   000   000  
 ###
 
 { slash, kstr, klog, noon, _ } = require 'kxk'
@@ -160,7 +160,7 @@ fillComment = (n) ->
         if mightBeHeader
             for c in restChunks
                 c.value += ' header'
-    return line.chunks.length - chunkIndex + n
+    line.chunks.length - chunkIndex + n
     
 hashComment = -> 
     
@@ -182,7 +182,7 @@ slashComment = ->
 
     return if stackTop
     
-    if chunk.turd == "//"
+    if chunk.turd?.startsWith "//"
         fillComment 2
     
 blockComment = -> 
@@ -333,15 +333,17 @@ coffeeWord = ->
             addValue  0 'this'
             return 1
             
-        if prev.value.startsWith('text') and prev.start+prev.length < chunk.start # spaced
+        if (prev.value.startsWith('text') or prev.value == 'property') and prev.start+prev.length < chunk.start # spaced
             return thisCall()
-                            
-property = ->
+           
+property = -> # word
         
     return if notCode
     
     if getmatch(-1) == '.'
+        
         prevPrev = getChunk -2
+        
         if prevPrev?.match != '.'
             addValue -1 'property'
             setValue 0 'property'
@@ -350,7 +352,23 @@ property = ->
                     setValue -2 'obj'
             return 1
     
-jsFunc = ->
+#       000   0000000  
+#       000  000       
+#       000  0000000   
+# 000   000       000  
+#  0000000   0000000   
+
+jsPunct = ->
+    
+    return if notCode
+    
+    if prev = getChunk -1
+        if chunk.match == '('
+            if prev.value.startsWith('text') or prev.value == 'property'
+                setValue -1 'function call'
+                return 1
+            
+jsWord = ->
     
     if chunk.value == 'keyword function'
         if getmatch(-1) == '=' and getValue(-2).startsWith 'text'
@@ -367,7 +385,23 @@ dict = ->
                 setValue -1 'dictionary key'
                 setValue  0 'punct dictionary'
                 return 1
+
+jsonDict = ->
     
+    return if notCode
+    
+    if chunk.match == ':'
+        if prev = getChunk -1
+            if prev.match == '"'
+                for i in [chunkIndex-2..0]
+                    if line.chunks[i].value == 'punct string double'
+                        line.chunks[i].value = 'punct dictionary'
+                        break
+                    line.chunks[i].value = 'dictionary key'
+                setValue -1 'punct dictionary'
+                setValue  0 'punct dictionary'
+                return 1
+                
 # 00000000   00000000   0000000   00000000  000   000  00000000   
 # 000   000  000       000        000        000 000   000   000  
 # 0000000    0000000   000  0000  0000000     00000    00000000   
@@ -770,8 +804,8 @@ handlers =
             punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
             word: [ keyword, coffeeWord, number, property, stacked ]
     noon:   punct:[ noonComment,                                                 stacked ], word:[ keyword, number,         stacked ]
-    js:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ keyword, jsFunc, number, stacked ]
-    ts:     punct:[ starComment,  slashComment, simpleString, dashArrow, regexp, stacked ], word:[ keyword, jsFunc, number, stacked ]
+    js:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
+    ts:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
     iss:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
     ini:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[          number,         stacked ]
     cpp:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ keyword, number, float,  stacked ]
@@ -788,7 +822,7 @@ handlers =
     html:   punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
     htm:    punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
     sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[ keyword, number,         stacked ]
-    json:   punct:[               simpleString, dict,                            stacked ], word:[ keyword, number,         stacked ]
+    json:   punct:[               simpleString, jsonDict,                        stacked ], word:[ keyword, number,         stacked ]
     md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[          number,         stacked ]
     fish:   punct:[                hashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
     

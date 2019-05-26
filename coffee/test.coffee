@@ -6,7 +6,7 @@
    000     00000000  0000000      000   
 ###
 
-Blocks = require './blocks'
+klor = require '../'
 kxk = require 'kxk'
 kxk.chai()
 _ = kxk._
@@ -14,9 +14,9 @@ _ = kxk._
 inc = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.deep.include     start:start, match:match, value:value
 nut = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.not.deep.include start:start, match:match, value:value
 
-blocks  = Blocks.blocks
-ranges  = Blocks.ranges
-dissect = (c,l) -> Blocks.dissect c.split('\n'), l
+ranges  = klor.ranges
+blocks  = (c,l) -> klor.blocks  c.split('\n'), l
+dissect = (c,l) -> klor.dissect c.split('\n'), l
   
 ▸doc 'sample'
     ```coffeescript
@@ -389,6 +389,11 @@ describe 'ranges' ->
     # 000        0000000   000   000   0000000     000     000   0000000   000   000  
 
     it 'coffee function' ->
+
+        rgs = ranges "obj.prop.call 1"
+        inc rgs, 0 'obj' 'obj'
+        inc rgs, 4 'prop' 'property'
+        inc rgs, 9 'call' 'function call'
         
         rgs = ranges "dolater =>"
         inc rgs, 8 '=' 'punct function bound tail'
@@ -549,6 +554,53 @@ describe 'ranges' ->
         inc rgs, 7  "a"   'dictionary key'
         inc rgs, 11 "c"   'dictionary key'
 
+    #       000   0000000  
+    #       000  000       
+    #       000  0000000   
+    # 000   000       000  
+    #  0000000   0000000   
+    
+    it 'js' ->
+        
+        rgs = ranges "obj.prop.call(1);" 'js'
+        inc rgs, 0 'obj' 'obj'
+        inc rgs, 4 'prop' 'property'
+        inc rgs, 9 'call' 'function call'
+        
+        rgs = ranges "func = function() {" 'js'
+        inc rgs, 0 'func' 'function'
+        inc rgs, 7 'function' 'keyword function'
+        
+        rgs = ranges "obj.value = obj.another.value" 'js'
+        inc rgs, 0  "obj"    'obj'
+        inc rgs, 4  "value"  'property'
+        inc rgs, 12 "obj"    'obj'
+        inc rgs, 16 "another"'property'
+        inc rgs, 24 "value"  'property'
+        
+        rgs = ranges "a(2);" 'js'
+        inc rgs, 0 'a' 'function call'
+        
+        rgs = ranges "//# sourceMappingURL=data:" 'js'
+        inc rgs, 0 "/" 'punct comment'
+        inc rgs, 1 "/" 'punct comment'
+        inc rgs, 2 "#" 'comment'
+      
+    #       000   0000000   0000000   000   000  
+    #       000  000       000   000  0000  000  
+    #       000  0000000   000   000  000 0 000  
+    # 000   000       000  000   000  000  0000  
+    #  0000000   0000000    0000000   000   000  
+    
+    it 'json' ->
+        
+        rgs = ranges """{ "A Z": 1 }""" 'json'
+        inc rgs, 2 '"' 'punct dictionary'
+        inc rgs, 3 'A' 'dictionary key'
+        inc rgs, 5 'Z' 'dictionary key'
+        inc rgs, 6 '"' 'punct dictionary'
+        inc rgs, 7 ':' 'punct dictionary'
+        
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
     # 0000000    0000000   000  0000  0000000     00000    00000000   
@@ -885,19 +937,7 @@ describe 'ranges' ->
         # inc rgs, 3 "#"   'punct property'
         # inc rgs, 4 'key' 'property text'
         # inc rgs, 7 "}"   'punct property'
-        
-    #       000   0000000  
-    #       000  000       
-    #       000  0000000   
-    # 000   000       000  
-    #  0000000   0000000   
-    
-    it 'js' ->
-        
-        rgs = ranges "func = function() {" 'js'
-        inc rgs, 0 'func' 'function'
-        inc rgs, 7 'function' 'keyword function'
-        
+                
     #  0000000  000   000  
     # 000       000   000  
     # 0000000   000000000  
@@ -999,12 +1039,12 @@ describe 'blocks' ->
     
     it 'comment' ->
      
-        blocks(["##"]).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        blocks("##").should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
                     {start:1 length:1 match:"#" value:'comment'} 
                     ]]
     
-        blocks([",#a"]).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        blocks(",#a").should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:"," value:'punct' turd: ",#"} 
                     {start:1 length:1 match:"#" value:'punct comment'} 
                     {start:2 length:1 match:"a" value:'comment'} 
@@ -1018,15 +1058,15 @@ describe 'blocks' ->
     
     it 'function' ->
     
-        blocks(['->']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        blocks('->').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'-' value:'punct function tail' turd: '->'} 
                     {start:1 length:1 match:'>' value:'punct function head'} 
                     ]]
-        blocks(['=>']).should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        blocks('=>').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'=' value:'punct function bound tail' turd: '=>'} 
                     {start:1 length:1 match:'>' value:'punct function bound head'} 
                     ]]
-        blocks(['f=->1']).should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
+        blocks('f=->1').should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'f' value:'function'} 
                     {start:1 length:1 match:'=' value:'punct function'      turd:'=->' } 
                     {start:2 length:1 match:'-' value:'punct function tail' turd:'->'} 
@@ -1042,23 +1082,23 @@ describe 'blocks' ->
     
     it 'minimal' ->
                     
-        blocks(['1']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
-        blocks(['a']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
-        blocks(['.']).should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
+        blocks('1').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
+        blocks('a').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
+        blocks('.').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
     
-        blocks(['1.a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        blocks('1.a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                      {start:0  length:1 match:'1' value:'number'} 
                      {start:1  length:1 match:'.' value:'punct property'} 
                      {start:2  length:1 match:'a' value:'property'} 
                      ]]
                      
-        blocks(['++a']).should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        blocks('++a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                      {start:0  length:1 match:'+' value:'punct' turd:'++'} 
                      {start:1  length:1 match:'+' value:'punct'} 
                      {start:2  length:1 match:'a' value:'text'} 
                      ]]
                      
-        blocks(["▸doc 'hello'"]).should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
+        blocks("▸doc 'hello'").should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
                       {start:0  length:1 match:'▸'     value:'punct meta'} 
                       {start:1  length:3 match:'doc'   value:'meta'} 
                       {start:5  length:1 match:"'"     value:'punct string single'} 
@@ -1074,16 +1114,16 @@ describe 'blocks' ->
     
     it 'space' ->
     
-        b = blocks ["x"]
+        b = blocks "x"
         b[0].chunks[0].should.include.property 'start' 0
     
-        b = blocks [" xx"]
+        b = blocks " xx"
         b[0].chunks[0].should.include.property 'start' 1
         
-        b = blocks ["    xxx"]
+        b = blocks "    xxx"
         b[0].chunks[0].should.include.property 'start' 4
     
-        b = blocks ["    x 1  , "]
+        b = blocks "    x 1  , "
         b[0].chunks[0].should.include.property 'start' 4
         b[0].chunks[1].should.include.property 'start' 6
         b[0].chunks[2].should.include.property 'start' 9
@@ -1100,7 +1140,7 @@ describe 'blocks' ->
             ▸doc 'hello'
                 x    
                 y
-            if 1 then false""".split '\n'
+            if 1 then false"""
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'md'
         b[2].should.include.property 'ext' 'md'
@@ -1113,7 +1153,7 @@ describe 'blocks' ->
                     1+1
                 ```
                 y
-            1""".split '\n'
+            1"""
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'md'
         b[2].should.include.property 'ext' 'md'
@@ -1131,7 +1171,7 @@ describe 'blocks' ->
                         some **docs**     
                 ```                       
                 y                         
-            1""".split '\n'               
+            1"""
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'md'
         b[2].should.include.property 'ext' 'md'
@@ -1145,7 +1185,7 @@ describe 'blocks' ->
         b = blocks """
             ▸dooc 'hello'
                 x  
-            """.split '\n'
+            """
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'coffee'
     
@@ -1156,7 +1196,7 @@ describe 'blocks' ->
             ```javascript
                 1+1;
             ```
-            """.split('\n'), 'md'
+            """, 'md'
         b[0].should.include.property 'ext' 'md'
         b[1].should.include.property 'ext' 'coffee'
         b[2].should.include.property 'ext' 'md'

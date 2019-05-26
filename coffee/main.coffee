@@ -7,11 +7,11 @@
 ###
 
 Syntax = require './syntax'
-Blocks = require './blocks'
+klor   = require './klor'
     
 module.exports = 
-    dissect: Blocks.dissect
-    blocks:  Blocks.ranges
-    ranges:  Syntax.ranges
+    dissect: klor.dissect
+    blocks:  klor.blocks
+    ranges:  klor.ranges
     init:    Syntax.init
     exts:    Syntax.exts
