@@ -260,17 +260,6 @@ describe 'ranges' ->
         inc rgs, 3  "when"  'string single triple'
         inc rgs, 8  "'"     'string single triple'
         inc rgs, 11 "'"     'punct string single triple'
-
-        # rgs = ranges 'a=`"X"`'
-        # inc rgs, 2 "`"   'punct string backtick'
-        # inc rgs, 3 '"'   'string backtick'
-        # inc rgs, 4 'X'   'string backtick'
-        # inc rgs, 6 "`"   'punct string backtick'
-        
-        # rgs = ranges "a=``;b=` `;c=`Z`"
-        # for i in [2 3 7 9 13 15]
-            # inc rgs, i, "`", 'punct string backtick'
-        # inc rgs, 14 'Z' 'string backtick'
         
         # interpolation
         
@@ -340,6 +329,16 @@ describe 'ranges' ->
         inc rgs, 7 'domain' 'url domain'
         inc rgs, 13 '.' 'punct url tld'
         inc rgs, 14 'com' 'url tld'
+
+        rgs = ranges "http://domain.com/dir/page.html"
+        inc rgs, 0 'http' 'url protocol'
+        inc rgs, 4 ':' 'punct url'
+        inc rgs, 5 '/' 'punct url'
+        inc rgs, 6 '/' 'punct url'
+        inc rgs, 7 'domain' 'url domain'
+        inc rgs, 13 '.' 'punct url tld'
+        inc rgs, 14 'com' 'url tld'
+        inc rgs, 17 '/' 'punct dir'
         
         rgs = ranges "file.coffee"
         inc rgs, 0 'file' 'coffee file'
@@ -349,6 +348,7 @@ describe 'ranges' ->
         rgs = ranges "/some/path"
         inc rgs, 1 'some'   'text dir'
         inc rgs, 5 '/'      'punct dir'
+        inc rgs, 6 'path'   'text file'
         
         rgs = ranges '/some\\path/file.txt:10'
         inc rgs, 0  '/'    'punct dir'
@@ -366,7 +366,7 @@ describe 'ranges' ->
         inc rgs, 25 '.' 'punct dir'
         inc rgs, 26 'bin' 'text dir'
         inc rgs, 29 '/' 'punct dir'
-        inc rgs, 30 'mocha' 'text'
+        inc rgs, 30 'mocha' 'text file'
         
     #  0000000   0000000   00000000  00000000  00000000  00000000  
     # 000       000   000  000       000       000       000       
@@ -692,6 +692,71 @@ describe 'ranges' ->
         inc rgs, 5 'Z' 'dictionary key'
         inc rgs, 6 '"' 'punct dictionary'
         inc rgs, 7 ':' 'punct dictionary'
+        
+        rgs = ranges '"a": "http://domain.com"'
+        inc rgs, 6 'http' 'url protocol'
+        inc rgs, 10 ':' 'punct url'
+        inc rgs, 11 '/' 'punct url'
+        inc rgs, 12 '/' 'punct url'
+        inc rgs, 13 'domain' 'url domain'
+        inc rgs, 19 '.' 'punct url tld'
+        inc rgs, 20 'com' 'url tld'
+
+        rgs = ranges '"http://domain.com/dir/page.html"'
+        inc rgs, 1 'http' 'url protocol'
+        inc rgs, 5 ':' 'punct url'
+        inc rgs, 6 '/' 'punct url'
+        inc rgs, 7 '/' 'punct url'
+        inc rgs, 8 'domain' 'url domain'
+        inc rgs, 14 '.' 'punct url tld'
+        inc rgs, 15 'com' 'url tld'
+        inc rgs, 18 '/' 'punct dir'
+         
+        rgs = ranges '"file.coffee"'
+        inc rgs, 1 'file' 'coffee file'
+        inc rgs, 5 '.' 'punct coffee'
+        inc rgs, 6 'coffee' 'coffee ext'
+
+        rgs = ranges '"/some/path"'
+        inc rgs, 2 'some'   'text dir'
+        inc rgs, 6 '/'      'punct dir'
+        inc rgs, 7 'path'   'text file'
+
+        rgs = ranges '"/some\\path/file.txt:10"'
+        inc rgs, 0 '"'     'punct string double'
+        inc rgs, 1  '/'    'punct dir'
+        inc rgs, 2  'some' 'text dir'
+        inc rgs, 16 '.'  'punct txt'
+        inc rgs, 20 ':'  'string double'
+        inc rgs, 23 '"'  'punct string double'
+
+        rgs = ranges '"./node_modules/.bin/mocha"'
+        inc rgs, 1 '.' 'text dir' # why is this text and not punct?
+        inc rgs, 2 '/' 'punct dir'
+        inc rgs, 3 'node_modules' 'text dir'
+        inc rgs, 15 '/' 'punct dir'
+        inc rgs, 16 '.' 'text dir'
+        inc rgs, 17 'bin' 'text dir'
+        inc rgs, 20 '/' 'punct dir'
+        inc rgs, 21 'mocha' 'text file'
+
+        rgs = ranges '"66.70.0"'
+        inc rgs, 1 "66" 'semver'
+        inc rgs, 3 "."  'punct semver'
+        inc rgs, 4 "70" 'semver'
+        inc rgs, 6 "."  'punct semver'
+        inc rgs, 7 "0"  'semver'
+
+        rgs = ranges '"^0.7.1"'
+        inc rgs, 1 "^" 'punct semver'
+        inc rgs, 2 "0" 'semver'
+        inc rgs, 4 "7" 'semver'
+        inc rgs, 6 "1" 'semver'
+            
+        rgs = ranges '"^1.0.0-alpha.12"'
+        inc rgs, 2 "1" 'semver'
+        inc rgs, 4 "0" 'semver'
+        inc rgs, 6 "0" 'semver'
         
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
@@ -1025,21 +1090,7 @@ describe 'ranges' ->
 
         rgs = ranges "0.0000f"
         inc rgs, 2 "0000f" 'number float'
-       
-    # 000   0000000   0000000  
-    # 000  000       000       
-    # 000  0000000   0000000   
-    # 000       000       000  
-    # 000  0000000   0000000   
-    
-    # it 'iss' ->
-        # lang 'iss'
-        # rgs = ranges "a={#key}"
-        # inc rgs, 2 '{'   'punct property'
-        # inc rgs, 3 "#"   'punct property'
-        # inc rgs, 4 'key' 'property text'
-        # inc rgs, 7 "}"   'punct property'
-                
+                       
     #  0000000  000   000  
     # 000       000   000  
     # 0000000   000000000  
@@ -1056,12 +1107,6 @@ describe 'ranges' ->
         inc rgs, 9 'with' 'text dir'
         inc rgs, 14 'dashes' 'text dir'
         
-        # rgs = ranges "dir/path-with-dashes/file.txt"
-        # inc rgs, 0 'dir' 'dir text'
-        # inc rgs, 4 'path' 'dir text'
-        # inc rgs, 9 'with' 'dir text'
-        # inc rgs, 14 'dashes' 'dir text'
-        
         rgs = ranges "prg --arg1 -arg2"
         inc rgs, 4 '-' 'punct argument'
         inc rgs, 5 '-' 'punct argument'
@@ -1077,32 +1122,29 @@ describe 'ranges' ->
     
     it 'log' ->
 
-        # lang 'log'
+        lang 'log'
         
-        # rgs = ranges "http://domain.com"
-        # inc rgs, 0 'http' 'url protocol'
-        # inc rgs, 4 ':' 'punct url'
-        # inc rgs, 5 '/' 'punct url'
-        # inc rgs, 6 '/' 'punct url'
-        # inc rgs, 7 'domain' 'url domain'
-        # inc rgs, 13 '.' 'punct url tld'
-        # inc rgs, 14 'com' 'url tld'
+        rgs = ranges "http://domain.com"
+        inc rgs, 0 'http' 'url protocol'
+        inc rgs, 4 ':' 'punct url'
+        inc rgs, 5 '/' 'punct url'
+        inc rgs, 6 '/' 'punct url'
+        inc rgs, 7 'domain' 'url domain'
+        inc rgs, 13 '.' 'punct url tld'
+        inc rgs, 14 'com' 'url tld'
         
-        # rgs = ranges "file.coffee"
-        # inc rgs, 0 'file' 'coffee file'
-        # inc rgs, 4 '.' 'punct coffee'
-        # inc rgs, 5 'coffee' 'coffee ext'
+        rgs = ranges "file.coffee"
+        inc rgs, 0 'file' 'coffee file'
+        inc rgs, 4 '.' 'punct coffee'
+        inc rgs, 5 'coffee' 'coffee ext'
 
-        # rgs = ranges "key /"
-        # inc rgs, 0 'key'   'text'
+        rgs = ranges "/some/path"
+        inc rgs, 1 'some'   'text dir'
+        inc rgs, 5 '/'      'punct dir'
 
-        # rgs = ranges "/some/path"
-        # inc rgs, 1 'some'   'dir text'
-        # inc rgs, 5 '/'      'punct dir'
-
-        # rgs = ranges "key: value"
-        # inc rgs, 0 'key'    'dictionary key'
-        # inc rgs, 3 ':'      'punct dictionary'
+        rgs = ranges "key: value"
+        inc rgs, 0 'key'    'dictionary key'
+        inc rgs, 3 ':'      'punct dictionary'
         
 ###
 0000000    000       0000000    0000000  000   000   0000000  

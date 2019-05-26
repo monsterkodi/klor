@@ -421,11 +421,25 @@ urlPunct = ->
         if chunk.match == '/'
             
             for i in [chunkIndex..0]
-                if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1].start or line.chunks[i].value.endsWith 'dir'
-                    break
-                line.chunks[i].value += ' dir'
+                break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1].start 
+                break if line.chunks[i].value.endsWith 'dir'
+                break if line.chunks[i].value.startsWith 'url'
+                break if line.chunks[i].match == '"'
+                if line.chunks[i].value.startsWith 'punct'
+                    line.chunks[i].value = 'punct dir'
+                else
+                    line.chunks[i].value = 'text dir'
+                    
             return 1
     0
+    
+urlWord = ->
+    
+    if prev = getChunk -1
+        if prev.match == '/'
+            next = getChunk 1
+            if not next or next.start > chunk.start+chunk.length or next.match not in './\\'
+                addValue 0, 'file'
     
 #       000   0000000  
 #       000  000       
@@ -467,7 +481,7 @@ dict = ->
 # 000   000       000  000   000  000  0000  
 #  0000000   0000000    0000000   000   000  
 
-jsonDict = ->
+jsonPunct = ->
     
     return if notCode
     
@@ -482,6 +496,19 @@ jsonDict = ->
                 setValue -1 'punct dictionary'
                 setValue  0 'punct dictionary'
                 return 1
+                
+jsonWord = ->
+
+    if topType == 'string double' and prev = getChunk -1
+        if prev.match in '"^~' 
+            if NUMBER.test(getmatch(0)) and getmatch(1) == '.' and NUMBER.test(getmatch(2)) and getmatch(3) == '.' and NUMBER.test(getmatch(4))
+                setValue -1 'punct semver' if prev.match in '^~'
+                setValue 0 'semver'
+                setValue 1 'punct semver'
+                setValue 2 'semver'
+                setValue 3 'punct semver'
+                setValue 4 'semver'
+                return 5
                 
 # 00000000   00000000   0000000   00000000  000   000  00000000   
 # 000   000  000       000        000        000 000   000   000  
@@ -885,7 +912,7 @@ handlers =
     coffee: 
             punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
             word: [ keyword, coffeeWord, number, property, stacked ]
-    noon:   punct:[ noonComment,  noonPunct, urlPunct,                           stacked ], word:[ noonWord, number, stacked ]
+    noon:   punct:[ noonComment,  noonPunct, urlPunct,                           stacked ], word:[ noonWord, urlWord, number, stacked ]
     js:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
     ts:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
     iss:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
@@ -903,8 +930,9 @@ handlers =
     svg:    punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
     html:   punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
     htm:    punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
-    sh:     punct:[ hashComment,  simpleString, shPunct,                         stacked ], word:[ keyword, number,         stacked ]
-    json:   punct:[               simpleString, jsonDict,                        stacked ], word:[ keyword, number,         stacked ]
+    sh:     punct:[ hashComment,  simpleString, urlPunct, shPunct,               stacked ], word:[ keyword, urlWord, number, stacked ]
+    json:   punct:[               simpleString, jsonPunct, urlPunct,             stacked ], word:[ keyword, jsonWord, urlWord, number, stacked ]
+    log:    punct:[               simpleString, urlPunct, dict,                  stacked ], word:[ urlWord, number,         stacked ]
     md:     punct:[                    mdPunct, xmlPunct,                        stacked ], word:[          number,         stacked ]
     fish:   punct:[                hashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
     
