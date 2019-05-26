@@ -21,17 +21,17 @@ It exports the following function:
 
 ```coffeescript
 [
+    ext:    string              
+    chars:  number              
+    index:  number              
+    number: index+1 
     chunks: [
-                match:  string 
-                value:  string
-                turd:   string
-                start:  number
-                length: number
+                match:  string  # without whitespace characters
+                value:  string  # description of match
+                turd:   string  # following punctuation characters
+                start:  number  # character index of match in line
+                length: number  # length of match
             ]
-    ext:    string
-    chars:  number
-    index:  number
-    number: index+1
 ...
 ]
 ```
