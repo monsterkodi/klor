@@ -6,20 +6,28 @@
 000   000  0000000   0000000   000   000  
 ###
 
-{ slash, kstr, klog, noon, _ } = require 'kxk'
-  
-Syntax = require './syntax'
-Syntax.init()
+{ slash, noon, kstr, last } = require 'kxk'
+koffee = require 'koffee'
 
-Syntax.swtch = 
+exts = ['txt''log''koffee'] 
+lang = {}
+    
+for names, keywords of noon.load slash.join __dirname,'..''coffee''lang.noon'
+    for ext in names.split /\s/
+        exts.push(ext) if ext not in exts
+        lang[ext] ?= {}
+        for value,words of keywords
+            for word in words
+                lang[ext][word] = value
+swtch = 
     coffee: 
-        doc:          turd:'▸'   to:'md'  indent: 1
+        doc: turd:'▸' to:'md' indent: 1
     md:     
         coffeescript: turd:'```' to:'coffee' end:'```' add:'code triple'
         javascript:   turd:'```' to:'js'     end:'```' add:'code triple'
         
-for ext in Syntax.exts
-    Syntax.swtch.md[ext] = turd:'```' to:ext, end:'```' add:'code triple'
+for ext in exts
+    swtch.md[ext] = turd:'```' to:ext, end:'```' add:'code triple'
             
 SPACE  = /\s/
 HEADER = /^0+$/
@@ -56,7 +64,7 @@ codeTypes = ['interpolation' 'code triple']
 chunked = (lines, ext) ->    
         
     ext = 'coffee' if ext == 'koffee'
-    ext = 'txt' if ext not in Syntax.exts
+    ext = 'txt' if ext not in exts
             
     lineno = 0
     lines.map (text) -> 
@@ -843,12 +851,12 @@ keyword = ->
     
     return if notCode
     
-    if not Syntax.lang[ext]
+    if not lang[ext]
         # log "no lang for ext? #{ext}"
         return
     
-    if Syntax.lang[ext].hasOwnProperty(chunk.match) 
-        chunk.value = Syntax.lang[ext][chunk.match]
+    if lang[ext].hasOwnProperty(chunk.match) 
+        chunk.value = lang[ext][chunk.match]
         return # give coffeeFunc a chance, number bails for us
                 
 # 000   000  00     00  000      
@@ -990,7 +998,7 @@ handlers =
     md:   punct:[                    mdPunct, urlPunct, xmlPunct                             ], word:[ urlWord, number                    ]
     fish: punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]
     
-for ext in Syntax.exts
+for ext in exts
     if not handlers[ext]?
         handlers[ext] = punct:[ simpleString ], word:[ number ]
         
@@ -1093,7 +1101,7 @@ blocked = (lines) ->
             else # words, numbers
                 
                 if not notCode
-                    if mtch = Syntax.swtch[line.ext]?[chunk.match] 
+                    if mtch = swtch[line.ext]?[chunk.match] 
                         if mtch.turd
                             turdChunk = getChunk -mtch.turd.length
                             if mtch.turd == (turdChunk?.turd ? turdChunk?.match)
@@ -1120,11 +1128,11 @@ parse = (lines, ext='coffee') -> blocked chunked lines, ext
 module.exports =
     
     kolor:   require './kolor'
+    exts:    exts
     parse:   parse
     chunked: chunked
     ranges:  (line, ext='coffee')  -> parse([line], ext)[0].chunks
     dissect: (lines, ext='coffee') -> parse(lines, ext).map (l) -> l.chunks
-    exts:    Syntax.exts
     
 # 00000000   00000000    0000000   00000000  000  000      00000000  
 # 000   000  000   000  000   000  000       000  000      000       
@@ -1134,19 +1142,17 @@ module.exports =
 
 ▸test 'profile'
     
-    ▸profile '-----'
-        
-        text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee" # 6-11ms
-        text1 = slash.readText "#{__dirname}/test.coffee" # 50-120μs
-    
+    text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
+    text1 = slash.readText "#{__dirname}/test.coffee"
+
+    ▸average 2
         lines0 = text0.split '\n'
+    ▸average 2
         lines1 = text1.split '\n'
 
     for i in [0..5]
-        blocks lines0
+        parse lines0
         
-    for i in [0..15]
-        
-        ▸profile 'lines0'
-            blocks lines0
+    ▸average 50
+        parse lines0
             
