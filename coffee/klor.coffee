@@ -17,8 +17,9 @@ Syntax.swtch =
     md:     
         coffeescript: turd:'```' to:'coffee' end:'```' add:'code triple'
         javascript:   turd:'```' to:'js'     end:'```' add:'code triple'
-        js:           turd:'```' to:'js'     end:'```' add:'code triple'
-        sh:           turd:'```' to:'sh'     end:'```' add:'code triple'
+        
+for ext in Syntax.exts
+    Syntax.swtch.md[ext] = turd:'```' to:ext, end:'```' add:'code triple'
             
 SPACE  = /\s/
 HEADER = /^0+$/
@@ -94,19 +95,23 @@ chunked = (lines, ext) ->
 
                     pi = 0
                     advance = 1
+                    value = 'punct'
                     while pi < punct.length-1
                         pc = punct[pi]
                         advance = 1
                         if 0xD800 <= punct.charCodeAt(pi) <= 0xDBFF and 0xDC00 <= punct.charCodeAt(pi+1) <= 0xDFFF
                             advance = 2
+                            value = 'text'
                             pc += punct[pi+1]
+                        else
+                            value = 'punct'
                         pi += advance
-                        line.chunks.push start:c, length:advance, match:pc, turd:turd, value:'punct'
+                        line.chunks.push start:c, length:advance, match:pc, turd:turd, value:value
                         c += advance
                         turd = turd[advance..]
                         
                     if pi < punct.length
-                        line.chunks.push start:c, length:advance, match:punct[pi..], value:'punct'
+                        line.chunks.push start:c, length:advance, match:punct[pi..], value:value
                         c += advance
                                         
                 if c < sc+l        # check for remaining non-punct
@@ -1064,13 +1069,16 @@ blocked = (lines) ->
 # 000        000 000   000        000   000  000   000     000          000  
 # 00000000  000   000  000         0000000   000   000     000     0000000   
 
-blocks = (lines, ext='coffee') -> blocked chunked lines, ext
+parse = (lines, ext='coffee') -> blocked chunked lines, ext
 
 module.exports =
     
-    blocks:  blocks
-    ranges:  (line, ext='coffee')  -> blocks([line], ext)[0].chunks
-    dissect: (lines, ext='coffee') -> blocks(lines, ext).map (l) -> l.chunks
+    kolor:   require './kolor'
+    parse:   parse
+    chunked: chunked
+    ranges:  (line, ext='coffee')  -> parse([line], ext)[0].chunks
+    dissect: (lines, ext='coffee') -> parse(lines, ext).map (l) -> l.chunks
+    exts:    Syntax.exts
     
 # 00000000   00000000    0000000   00000000  000  000      00000000  
 # 000   000  000   000  000   000  000       000  000      000       

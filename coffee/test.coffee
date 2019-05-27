@@ -17,15 +17,9 @@ nut = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''val
 ext = 'coffee'
 lang    = (l) -> ext = l
 ranges  = (s,e) -> klor.ranges  s, e ? ext
-blocks  = (c,e) -> klor.blocks  c.split('\n'), e ? ext
+parse   = (c,e) -> klor.parse   c.split('\n'), e ? ext
 dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
   
-▸doc 'sample'
-    ```coffeescript
-    class Class extends Super
-        @: -> @a 3 b @c+1 /d/
-    ```
-
 ###
 00000000    0000000   000   000   0000000   00000000   0000000  
 000   000  000   000  0000  000  000        000       000       
@@ -53,16 +47,16 @@ describe 'ranges' ->
     it 'unicode' ->
         
         rgs = ranges "🌈"
-        inc rgs, 0 '🌈' 'punct'
+        inc rgs, 0 '🌈' 'text'
 
         rgs = ranges "🌈🌱"
-        inc rgs, 0 '🌈' 'punct'
-        inc rgs, 2 '🌱' 'punct'
+        inc rgs, 0 '🌈' 'text'
+        inc rgs, 2 '🌱' 'text'
         
         rgs = ranges "🙂lol😀"
-        inc rgs, 0 '🙂' 'punct'
+        inc rgs, 0 '🙂' 'text'
         inc rgs, 2 'lol' 'text'
-        inc rgs, 5 '😀' 'punct'
+        inc rgs, 5 '😀' 'text'
         
         rgs = ranges "a➜b a▬▶b"
         # log rgs
@@ -71,8 +65,8 @@ describe 'ranges' ->
         inc rgs, 6 '▶' 'punct'
         
         rgs = ranges "🐀🐁🐂🐃🐄🐅🐆🐇🐈🐉🐊🐋🐌🐍🐎🐏🐐🐑🐒🐓🐔🐕🐖🐗🐘🐙🐚🐛🐜🐝🐞🐟🐠🐡🐢🐣🐤🐥"
-        inc rgs, 0 '🐀' 'punct'
-        inc rgs, 24 '🐌' 'punct'
+        inc rgs, 0 '🐀' 'text'
+        inc rgs, 24 '🐌' 'text'
         
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     000       
@@ -1155,14 +1149,14 @@ describe 'ranges' ->
         inc rgs, 3 ':'      'punct dictionary'
         
 ###
-0000000    000       0000000    0000000  000   000   0000000  
-000   000  000      000   000  000       000  000   000       
-0000000    000      000   000  000       0000000    0000000   
-000   000  000      000   000  000       000  000        000  
-0000000    0000000   0000000    0000000  000   000  0000000   
+00000000    0000000   00000000    0000000  00000000  
+000   000  000   000  000   000  000       000       
+00000000   000000000  0000000    0000000   0000000   
+000        000   000  000   000       000  000       
+000        000   000  000   000  0000000   00000000  
 ###
 
-describe 'blocks' ->
+describe 'parse' ->
     
     #  0000000   0000000   00     00  00     00  00000000  000   000  000000000  
     # 000       000   000  000   000  000   000  000       0000  000     000     
@@ -1174,12 +1168,12 @@ describe 'blocks' ->
      
         lang 'coffee'
         
-        blocks("##").should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        parse("##").should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
                     {start:1 length:1 match:"#" value:'comment'} 
                     ]]
     
-        blocks(",#a").should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        parse(",#a").should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:"," value:'punct' turd: ",#"} 
                     {start:1 length:1 match:"#" value:'punct comment'} 
                     {start:2 length:1 match:"a" value:'comment'} 
@@ -1193,15 +1187,15 @@ describe 'blocks' ->
     
     it 'function' ->
     
-        blocks('->').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        parse('->').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'-' value:'punct function tail' turd: '->'} 
                     {start:1 length:1 match:'>' value:'punct function head'} 
                     ]]
-        blocks('=>').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
+        parse('=>').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'=' value:'punct function bound tail' turd: '=>'} 
                     {start:1 length:1 match:'>' value:'punct function bound head'} 
                     ]]
-        blocks('f=->1').should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
+        parse('f=->1').should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
                     {start:0 length:1 match:'f' value:'function'} 
                     {start:1 length:1 match:'=' value:'punct function'      turd:'=->' } 
                     {start:2 length:1 match:'-' value:'punct function tail' turd:'->'} 
@@ -1217,23 +1211,23 @@ describe 'blocks' ->
     
     it 'minimal' ->
                     
-        blocks('1').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
-        blocks('a').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
-        blocks('.').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
+        parse('1').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
+        parse('a').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
+        parse('.').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
     
-        blocks('1.a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        parse('1.a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                      {start:0  length:1 match:'1' value:'number'} 
                      {start:1  length:1 match:'.' value:'punct property'} 
                      {start:2  length:1 match:'a' value:'property'} 
                      ]]
                      
-        blocks('++a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
+        parse('++a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
                      {start:0  length:1 match:'+' value:'punct' turd:'++'} 
                      {start:1  length:1 match:'+' value:'punct'} 
                      {start:2  length:1 match:'a' value:'text'} 
                      ]]
                      
-        blocks("▸doc 'hello'").should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
+        parse("▸doc 'hello'").should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
                       {start:0  length:1 match:'▸'     value:'punct meta'} 
                       {start:1  length:3 match:'doc'   value:'meta'} 
                       {start:5  length:1 match:"'"     value:'punct string single'} 
@@ -1249,16 +1243,16 @@ describe 'blocks' ->
     
     it 'space' ->
     
-        b = blocks "x"
+        b = parse "x"
         b[0].chunks[0].should.include.property 'start' 0
     
-        b = blocks " xx"
+        b = parse " xx"
         b[0].chunks[0].should.include.property 'start' 1
         
-        b = blocks "    xxx"
+        b = parse "    xxx"
         b[0].chunks[0].should.include.property 'start' 4
     
-        b = blocks "    x 1  , "
+        b = parse "    x 1  , "
         b[0].chunks[0].should.include.property 'start' 4
         b[0].chunks[1].should.include.property 'start' 6
         b[0].chunks[2].should.include.property 'start' 9
@@ -1271,7 +1265,7 @@ describe 'blocks' ->
     
     it 'switches' ->
         
-        b = blocks """
+        b = parse """
             ▸doc 'hello'
                 x    
                 y
@@ -1281,7 +1275,7 @@ describe 'blocks' ->
         b[2].should.include.property 'ext' 'md'
         b[3].should.include.property 'ext' 'coffee'
         
-        b = blocks """
+        b = parse """
             ▸doc 'hello'
                 x  
                 ```coffeescript
@@ -1297,7 +1291,7 @@ describe 'blocks' ->
         b[5].should.include.property 'ext' 'md'
         b[6].should.include.property 'ext' 'coffee'
     
-        b = blocks """                    
+        b = parse """                    
             ▸doc 'hello'                  
                 x                         
                 ```coffeescript           
@@ -1317,14 +1311,14 @@ describe 'blocks' ->
         b[7].should.include.property 'ext' 'md'
         b[8].should.include.property 'ext' 'coffee'
         
-        b = blocks """
+        b = parse """
             ▸dooc 'hello'
                 x  
             """
         b[0].should.include.property 'ext' 'coffee'
         b[1].should.include.property 'ext' 'coffee'
     
-        b = blocks """
+        b = parse """
             ```coffeescript
                 1+1
             ```

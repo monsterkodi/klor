@@ -35,7 +35,6 @@ coffee js ts
         kpos
         
     module
-        n-1  .
         childp
         matchr
         prefs
@@ -73,16 +72,6 @@ coffee js ts
 
 coffee
       
-    # match
-        # |▸|
-            # turd    meta
-            # w-0     meta
-
-    comment
-        tail    #
-        start   ###
-        end     ###
-
     keyword
         of
         in
@@ -159,8 +148,6 @@ json noon
         false
         
 noon
-    comment
-        line  #
         
 #  0000000  00000000   00000000 
 # 000       000   000  000   000
@@ -243,78 +230,14 @@ cpp hpp cxx c h cs
         false
         error
         
-#     000      000         0000000   0000000   00     00  00     00  00000000  000   000  000000000  
-#    000      000         000       000   000  000   000  000   000  000       0000  000     000     
-#   000      000          000       000   000  000000000  000000000  0000000   000 0 000     000     
-#  000      000           000       000   000  000 0 000  000 0 000  000       000  0000     000     
-# 000      000             0000000   0000000   000   000  000   000  00000000  000   000     000     
-      
-cpp hpp cxx c h js styl css sass scss ts
-
-    comment
-        tail    //
-        start   /*
-        end     */
-        
 # 000   000  000000000  00     00  000      
 # 000   000     000     000   000  000      
 # 000000000     000     000000000  000      
 # 000   000     000     000 0 000  000      
 # 000   000     000     000   000  0000000  
 
-html htm md
+html htm pug md styl css scss sass
 
-    keyword
-        t-1 
-            <   keyword
-            </  keyword
-        a
-        b
-        p
-        ul
-        li
-        br
-        tr
-        th
-        td
-        dt
-        hr
-        h1
-        h2
-        h3
-        h4
-        h5
-        div
-        nav
-        img
-        pre
-        map
-        area
-        html
-        head
-        meta
-        body 
-        span
-        link
-        input
-        button
-        section 
-        header
-        footer
-        script
-        style
-        table
-        title
-        blockquote
-        center
-        canvas
-        
-    doctype
-        t-1 
-            <!  keyword
-        doctype
-        
-pug
     keyword
         a
         b
@@ -357,7 +280,8 @@ pug
         center
         canvas
         doctype
-
+        DOCTYPE
+        
 #  0000000  000   000   0000000   
 # 000       000   000  000        
 # 0000000    000 000   000  0000  
@@ -365,15 +289,8 @@ pug
 # 0000000       0       0000000   
 
 html htm svg pug
-
-    comment
-        start   <!--
-        end     -->
     
-    svg keyword    
-        t-1 
-            <   keyword
-            </  keyword
+    keyword
         g
         svg
         path
@@ -422,272 +339,74 @@ html htm svg pug
 # 0000000      000        000     0000000  000       0000000  0000000   0000000   
 
 styl css scss sass
-    keyword html
-        a
-        b
-        p
-        ul
-        li
-        tr
-        th
-        td
-        dt
-        hr
-        h1
-        h2
-        h3
-        h4
-        h5
-        h6
-        div
-        nav
-        img
-        pre
-        map
-        area
-        html
-        head
-        meta
-        body 
-        span
-        link
-        input
-        button
-        section 
-        header
-        footer
-        script
-        style
-        table
-        title
-        blockquote
-        center
-        canvas
-        
+            
     argument
         absolute
-        antialiased
         all
+        antialiased
         auto
         block
         bold
-        border-box
+        border
         bottom
+        box
         column
         default
         dotted
         drag
-        ease-in
-        ease-in-out
+        ease
+        ew
         fadein
+        flex
         forwards
+        from
+        grab
+        grid
         hidden
+        in
         initial
-        inline-block
-        inline-flex
-        inline-grid
+        inline
         inset
         italic
         justify
-        left
         larger
-        smaller
+        left
+        lr
         middle
         move
+        no
         normal
-        ew-resize
-        ns-resize
-        no-drag
-        no-repeat
         nowrap
+        ns
+        out
         pointer
         relative
+        repeat
+        resize
         right
         round
         row
-        scroll
-        scaley
         scalex
-        translate
-        translatex
-        translatey
-        translatez
-        translate3d
+        scaley
+        scroll
+        smaller
         solid
         static
         text
         to
         top
+        translate
+        translate3d
+        translatex
+        translatey
+        translatez
         transparent
         underline
         uppercase
-        vertical-lr
+        vertical
         visible
-        -webkit-grab
         
-    keyword
-        after
-        align
-        animation 
-        animation-fill-mode
-        animation-timing-function
-        animation-iteration-count 
-        app
-        area
-        background
-        background-size
-        background-color
-        background-image
-        background-repeat
-        background-position
-        background-blend-mode
-        before
-        blend
-        border
-        border-width
-        border-style
-        border-color
-        border-radius
-        border-top
-        border-left
-        border-right
-        border-bottom
-        border-top-style
-        border-left-style
-        border-right-style
-        border-bottom-style
-        border-top-color
-        border-left-color
-        border-right-color
-        border-bottom-color
-        border-bottom-left-radius
-        border-bottom-right-radius
-        border-top-left-radius
-        border-top-right-radius
-        box-sizing
-        box-shadow
-        caret-color
-        clip
-        color
-        column
-        content
-        cursor
-        decoration
-        delay
-        direction
-        display
-        duration
-        fill
-        filter
-        flex
-        flex-grow
-        flex-shrink
-        flex-direction
-        float
-        flow
-        font
-        font-family
-        font-size
-        font-weight
-        font-style
-        function
-        grid
-        height
-        line-height
-        list-style
-        margin
-        margin-top
-        margin-left
-        margin-right
-        margin-bottom
-        max-height
-        max-width
-        min-height
-        min-width
-        mode
-        opacity
-        origin
-        outline
-        outline-width
-        overflow
-        overflow-x
-        overflow-y
-        padding
-        padding-top
-        padding-left
-        padding-right
-        padding-bottom
-        pointer-events
-        position
-        radius
-        region   
-        repeat
-        resize
-        select
-        selection
-        size
-        sizing
-        start
-        stroke
-        stroke-width
-        stroke-linecap
-        stroke-linejoin
-        stroke-dasharray
-        stroke-dashoffset
-        style
-        text-align
-        text-decoration
-        text-transform
-        text-shadow
-        timing
-        transform
-        transform-origin
-        transition
-        type
-        vertical-align
-        white-space
-        writing-mode
-        -webkit-app-region
-        -webkit-user-select
-        -webkit-scrollbar
-        -webkit-scrollbar-thumb
-        -webkit-scrollbar-track
-        -webkit-scrollbar-corner
-        -webkit-transition
-        -webkit-transition-property
-        -webkit-transition-duration
-        -webkit-transition-timing-function
-        -webkit-font-smoothing
-        width
-        word
-        x
-        y
-        z-index
-        zoom
-        
-    function
-        rgb
-        rgba
-        drop-shadow
-        linear-gradient
-        
-    important
-        t-1
-            !   nil
-        important
-        
-    property special
-        t-1     
-            :    property
-        not
-        hover
-        focus
-        active
-        first-child
-        last-child
-        nth-child
-        
-    color property
+    property color
         red
         green
         blue
@@ -699,6 +418,127 @@ styl css scss sass
         white
         orange
         
+    keyword
+        abs
+        after
+        align
+        animation 
+        app
+        area
+        background
+        before
+        blend
+        border
+        bottom
+        box
+        caret
+        clip
+        color
+        column
+        content
+        corner
+        count 
+        cursor
+        dasharray
+        dashoffset
+        decoration
+        delay
+        direction
+        display
+        duration
+        events
+        family
+        fill
+        filter
+        flex
+        float
+        flow
+        font
+        function
+        grid
+        grow
+        height
+        image
+        index
+        iteration
+        left
+        line
+        linecap
+        linejoin
+        list
+        margin
+        max
+        min
+        mode
+        opacity
+        origin
+        origin
+        outline
+        overflow
+        padding
+        pointer
+        position
+        property
+        radius
+        region
+        repeat
+        resize
+        right
+        scrollbar
+        select
+        selection
+        shadow
+        shadow
+        shrink
+        size
+        sizing
+        smoothing
+        space
+        start
+        stroke
+        style
+        text
+        thumb
+        timing
+        top
+        track
+        transform
+        transition
+        type
+        user
+        vertical
+        webkit 
+        weight
+        white
+        width
+        word
+        writing
+        x
+        y
+        z
+        zoom
+        
+    function
+        rgb
+        rgba
+        drop
+        shadow
+        linear
+        gradient
+        
+    important
+        important
+        
+    property special
+        not
+        hover
+        focus
+        active
+        first
+        last
+        nth
+        child
+                
     nil
         none
                 
@@ -710,9 +550,6 @@ styl css scss sass
 
 plist
     keyword
-        t-1 
-            <   keyword
-            </  keyword
         array
         dict
         key
@@ -817,206 +654,8 @@ iss
 
 iss ini md
 
-    match
-        namespace
-            start   [
-            end     ]
     keyword            
         true
     nil
         false
         
-# 00     00  0000000    
-# 000   000  000   000  
-# 000000000  000   000  
-# 000 0 000  000   000  
-# 000   000  0000000    
-
-md
-    match
-        h1
-            fill   |# |
-        h2
-            fill   |## |
-        h3
-            fill   |### |
-        h4
-            fill   |#### |
-        h5
-            fill   |##### |
-        li1
-            fill   |- |
-            turd   li1 marker
-        li1 star
-            fill   |* |
-            turd   li1 marker
-            value  li1
-        li2
-            fill   |    - |
-            turd   li2 marker
-        li3
-            fill   |        - |
-            turd   li3 marker
-        bold
-            start   **
-            end     **
-        italic
-            start   *
-            end     *
-            single  true
-        code
-            start   `
-            end     `
-
-# 00000000    0000000   000000000  000   000    
-# 000   000  000   000     000     000   000    
-# 00000000   000000000     000     000000000    
-# 000        000   000     000     000   000    
-# 000        000   000     000     000   000    
-            
-log iss ini md noon sh
-    tld
-        t-1
-                |.|     url tld
-        com
-        net
-        de
-    match
-        dir
-            end     /
-            single  true
-            spaced  false
-        dir win
-            end     \
-            single  true
-            spaced  false
-        ://
-            w-1     url protocol
-            turd    url punct
-            w-0     url domain
-        @
-            w-1     mail name
-            turd    mail punct
-            w-0     mail domain
-        txt
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        md
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        png
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        bmp
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        jpg
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        gif
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        git
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        ico
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        icns
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        tiff
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        pug
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        styl
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        svg
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        coffee 
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        koffee 
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        sh
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        js
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        css
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        json
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        html
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        cpp
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        h
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        py
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-        noon
-            w-1     file
-            t-1     
-                    |.|  punct
-            word    ext
-            
-            

@@ -1,11 +1,10 @@
 
 ![klor](test/sample.png)
 
-
 **klor** is a simple syntax highlighting tool.
 It exports the following function:
 
-### **blocks** *lines*, *ext*
+### **parse** *lines*, *ext*
 
 - *lines*: array of strings
 - *ext*: file type

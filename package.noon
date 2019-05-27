@@ -1,11 +1,11 @@
 name            klor
-version         0.37.0
+version         0.38.0
 description     syntax highlighting
 keywords
                 syntax
                 highlighting
                 coffeescript
-main            js/main.js
+main            js/klor.js
 author          monsterkodi
 license         Unlicense
 repository
