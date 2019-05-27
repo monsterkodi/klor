@@ -828,16 +828,18 @@ mdPunct = ->
 
 interpolation = ->
     
-    if topType == 'string double'
-    
+    if topType?.startsWith 'string double'
+     
         if chunk.turd?.startsWith "\#{"
             pushStack type:'interpolation', weak:true
-            return addValues 2 'string interpolation start'
+            setValue 0 'punct string interpolation start'
+            setValue 1 'punct string interpolation start'
+            return 2
 
     else if topType == 'interpolation'
-        
+         
         if chunk.match == '}'
-            addValue 0 'string interpolation end'
+            setValue 0 'punct string interpolation end'
             popStack()
             return 1
         
@@ -1155,4 +1157,4 @@ module.exports =
         
     ▸average 50
         parse lines0
-            
+     

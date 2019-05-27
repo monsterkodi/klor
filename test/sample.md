@@ -1,16 +1,16 @@
-# h1
-## h2
-### h3
-#### h4
-##### h5
+# h1 **bold** *italic* `code`
+## h2 **bold** *italic* `code`
+### h3 **bold** *italic* `code`
+#### h4 **bold** *italic* `code`
+##### h5 **bold** *italic* `code`
 
 **bold** *italic* `code` text
 
 [link](http://dot.com/dir/page.html)
 
-- shoot
-    - bullet
-        - point
+- shoot ... **bold** *italic* `code`
+    - bullet.. **bold** *italic* `code`
+        - point. **bold** *italic* `code`
         
 ```coffeescript
 ###
@@ -38,7 +38,7 @@ if true then false else null
 'single'
 "double #{interpolation}"
 """
-triple
+triple #{1+1}
 """
 ```
 

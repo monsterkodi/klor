@@ -46,6 +46,8 @@ describe 'ranges' ->
     
     it 'unicode' ->
         
+        lang 'coffee'
+        
         rgs = ranges "🌈"
         inc rgs, 0 '🌈' 'text'
 
@@ -76,22 +78,28 @@ describe 'ranges' ->
     
     it 'comments' ->
         
-        rgs = ranges "hello # world" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges "hello # world"
         inc rgs, 6 "#"    'punct comment'
         inc rgs, 8 "world" 'comment'
 
-        rgs = ranges "   # bla blub" 'noon'
+        lang 'noon'
+                
+        rgs = ranges "   # bla blub"
         inc rgs, 3 "#"     'punct comment'
         inc rgs, 5 "bla"   'comment'
         inc rgs, 9 "blub"  'comment'
             
-        rgs = ranges "(^\s*#\s*)(.*)$" 'noon'
+        rgs = ranges "(^\s*#\s*)(.*)$"
         for rng in rgs
             rng.should.not.have.property 'value' 'comment'
             
     it 'triple comment' ->
         
-        rgs = ranges "###a###" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges "###a###"
         inc rgs, 0 "#" 'punct comment triple'
         inc rgs, 1 "#" 'punct comment triple'
         inc rgs, 2 "#" 'punct comment triple'
@@ -100,7 +108,7 @@ describe 'ranges' ->
         inc rgs, 5 "#" 'punct comment triple'
         inc rgs, 6 "#" 'punct comment triple'
 
-        dss = dissect "###\na\n###" 'coffee'
+        dss = dissect "###\na\n###"
         inc dss[0], 0 "#" 'punct comment triple'
         inc dss[0], 1 "#" 'punct comment triple'
         inc dss[0], 2 "#" 'punct comment triple'
@@ -109,7 +117,9 @@ describe 'ranges' ->
         inc dss[2], 1 "#" 'punct comment triple'
         inc dss[2], 2 "#" 'punct comment triple'
 
-        dss = dissect "/*\na\n*/" 'styl'
+        lang 'styl'
+        
+        dss = dissect "/*\na\n*/" 
         inc dss[0], 0 "/" 'punct comment triple'
         inc dss[0], 1 "*" 'punct comment triple'
         inc dss[1], 0 "a" 'comment triple'
@@ -118,27 +128,31 @@ describe 'ranges' ->
         
     it 'comment header' ->
         
-        rgs = ranges "# 0 00 0000" 'coffee'
+        lang 'coffee'
+        
+        rgs = ranges "# 0 00 0000" 
         inc rgs, 0  "#"    'punct comment'
         inc rgs, 2  "0"    'comment header'
         inc rgs, 4  "00"   'comment header'
         inc rgs, 7  "0000" 'comment header'
 
-        dss = dissect "###\n 0 00 0 \n###" 'coffee'
-        inc dss[1], 1 "0" 'comment triple header'
-        
-        rgs = ranges "// 000" 'styl'
-        inc rgs, 3  "000"    'comment header'
-
-        dss = dissect "/*\n 0 0 0 \n*/" 'styl'
+        dss = dissect "###\n 0 00 0 \n###"
         inc dss[1], 1 "0" 'comment triple header'
         
         rgs = ranges "# 0 * 0.2"
         inc rgs, 2 '0' 'comment'
         inc rgs, 6 '0' 'comment'
         
-        dss = dissect "###\n 0 1 0 \n###" 'coffee'
+        dss = dissect "###\n 0 1 0 \n###"
         inc dss[1], 1 "0" 'comment triple'
+        
+        lang 'styl'
+        
+        rgs = ranges "// 000"
+        inc rgs, 3  "000"    'comment header'
+
+        dss = dissect "/*\n 0 0 0 \n*/"
+        inc dss[1], 1 "0" 'comment triple header'
         
     # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
     # 0000  000  000   000  000   000  000   000  000       000   000  000       
@@ -148,6 +162,8 @@ describe 'ranges' ->
     
     it 'numbers' ->
         
+        lang 'coffee'
+                
         rgs = ranges "a 6670"
         inc rgs, 2 "6670" 'number'
 
@@ -175,6 +191,8 @@ describe 'ranges' ->
     
     it 'semver' ->    
         
+        lang 'coffee'
+        
         rgs = ranges "66.70.0"
         inc rgs, 0 "66" 'semver'
         inc rgs, 2 "."  'punct semver'
@@ -200,7 +218,9 @@ describe 'ranges' ->
     # 0000000      000     000   000  000  000   000   0000000   0000000   
     
     it 'strings' ->
-       
+        
+        lang 'coffee'
+        
         rgs = ranges """a="\\"E\\"" """
         inc rgs, 2 '"'    'punct string double'
         inc rgs, 4 '"'    'string double'
@@ -231,7 +251,7 @@ describe 'ranges' ->
             inc rgs, i, '"', 'punct string double'
         inc rgs, 14 'X' 'string double'
                 
-        rgs = ranges "a='';b=' ';c='Y'" 'coffee'
+        rgs = ranges "a='';b=' ';c='Y'"
         for i in [2 3 7 9 13 15]
             inc rgs, i, "'", 'punct string single'
         inc rgs, 14 'Y' 'string single'
@@ -257,7 +277,7 @@ describe 'ranges' ->
         
         # interpolation
         
-        rgs = ranges '"#{xxx}"' 'coffee'
+        rgs = ranges '"#{xxx}"'
         inc rgs, 0 '"'   'punct string double'
         inc rgs, 1 "#"   'punct string interpolation start'
         inc rgs, 2 "{"   'punct string interpolation start'
@@ -265,12 +285,24 @@ describe 'ranges' ->
         inc rgs, 6 "}"   'punct string interpolation end'
         inc rgs, 7 '"'   'punct string double'
 
-        rgs = ranges '"#{666}"' 'coffee'
+        rgs = ranges '"#{666}"'
         inc rgs, 0 '"'   'punct string double'
         inc rgs, 3 '666' 'number'
         inc rgs, 7 '"'   'punct string double'
+
+        rgs = ranges '"""#{777}"""'
+        inc rgs, 0  '"'   'punct string double triple'
+        inc rgs, 1  '"'   'punct string double triple'
+        inc rgs, 2  '"'   'punct string double triple'
+        inc rgs, 3  '#'   'punct string interpolation start'
+        inc rgs, 4  '{'   'punct string interpolation start'
+        inc rgs, 5  '777' 'number'
+        inc rgs, 8  '}'   'punct string interpolation end'
+        inc rgs, 9  '"'   'punct string double triple'
+        inc rgs, 10 '"'   'punct string double triple'
+        inc rgs, 11 '"'   'punct string double triple'
         
-        rgs = ranges '"#{__dirname}/../"' 'coffee'
+        rgs = ranges '"#{__dirname}/../"'
         inc rgs, 12, '}' 'punct string interpolation end'
         inc rgs, 13, '/' 'string double'
 
