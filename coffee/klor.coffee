@@ -7,7 +7,6 @@
 ###
 
 { slash, noon, kstr, last } = require 'kxk'
-koffee = require 'koffee'
 
 exts = ['txt''log''koffee'] 
 lang = {}
