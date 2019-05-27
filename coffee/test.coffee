@@ -1057,7 +1057,65 @@ describe 'ranges' ->
         inc rgs, 0 "<"    'punct keyword'
         inc rgs, 1 "div"  'keyword'
         inc rgs, 4 ">"    'punct keyword'
-                  
+
+    #  0000000  000000000  000   000  000      
+    # 000          000      000 000   000      
+    # 0000000      000       00000    000      
+    #      000     000        000     000      
+    # 0000000      000        000     0000000  
+    
+    it 'styl' ->
+        
+        lang 'styl'
+        
+        rgs = ranges "1em" 
+        inc rgs, 0 "1em"  'number'
+
+        rgs = ranges "1ex" 
+        inc rgs, 0 "1ex"  'number'
+
+        rgs = ranges "1px" 
+        inc rgs, 0 "1px"  'number'
+
+        rgs = ranges "1s" 
+        inc rgs, 0 "1s"  'number'
+
+        rgs = ranges ".clss" 
+        inc rgs, 0 "."     'punct class'
+        inc rgs, 1 "clss"  'class'
+
+        rgs = ranges "#id" 
+        inc rgs, 0 "#"    'punct function'
+        inc rgs, 1 "id"   'function'
+
+        rgs = ranges "#id-foo-bar" 
+        inc rgs, 0 "#"    'punct function'
+        inc rgs, 1 "id"   'function'
+        inc rgs, 3 "-"    'punct function'
+        inc rgs, 4 "foo"  'function'
+        inc rgs, 7 "-"    'punct function'
+        inc rgs, 8 "bar"  'function'
+
+        rgs = ranges ".clss-foo-bar" 
+        inc rgs, 0 "."    'punct class'
+        inc rgs, 1 "clss" 'class'
+        inc rgs, 5 "-"    'punct class'
+        inc rgs, 6 "foo"  'class'
+        inc rgs, 9 "-"    'punct class'
+        inc rgs, 10 "bar"  'class'
+        
+        rgs = ranges "#666"
+        inc rgs, 0 "#"   'punct number hex'
+        inc rgs, 1 "666" 'number hex'
+        
+        rgs = ranges "#abc"
+        inc rgs, 0 "#"   'punct number hex'
+        inc rgs, 1 "abc" 'number hex'
+        
+        rgs = ranges "#f0f0f0"
+        inc rgs, 0 "#"      'punct number hex'
+        inc rgs, 1 "f0f0f0" 'number hex'
+        
     #  0000000  00000000   00000000 
     # 000       000   000  000   000
     # 000       00000000   00000000 

@@ -27,6 +27,7 @@ PUNCT  = /\W+/g
 NUMBER = /^\d+$/
 FLOAT  = /^\d+f$/
 HEXNUM = /^0x[a-fA-F\d]+$/
+HEX    = /^[a-fA-F\d]+$/
 
 codeTypes = ['interpolation' 'code triple']
 
@@ -638,7 +639,6 @@ tripleString = ->
 
 number = ->
     
-    # return 1 if chunk.value != 'text'
     return if notCode
     
     if NUMBER.test chunk.match
@@ -688,6 +688,48 @@ float = ->
         chunk.value = 'number float'
         return 1
     
+#  0000000   0000000   0000000  
+# 000       000       000       
+# 000       0000000   0000000   
+# 000            000       000  
+#  0000000  0000000   0000000   
+
+cssWord = ->
+    
+    if chunk.match[-2..] in ['px''em''ex'] and NUMBER.test chunk.match[...-2]
+        setValue 0 'number'
+        return 1
+        
+    if chunk.match[-1..] in ['s'] and NUMBER.test chunk.match[...-1]
+        setValue 0 'number'
+        return 1
+        
+    if prev = getChunk -1
+
+        if prev.match == '.'
+            addValue -1 'class'
+            setValue  0 'class'
+            return 1
+
+        if prev.match == "#"
+            
+            if chunk.match.length == 3 or chunk.match.length == 6
+                if HEX.test chunk.match
+                    addValue -1 'number hex'
+                    setValue  0 'number hex'
+                    return 1
+            
+            addValue -1 'function'
+            setValue  0 'function'
+            return 1
+            
+        if prev.match == '-'
+            if prevPrev = getChunk -2
+                if prevPrev.value in ['class''function']
+                    addValue -1 prevPrev.value
+                    setValue  0 prevPrev.value
+                    return 1
+        
 # 00     00  0000000  
 # 000   000  000   000
 # 000000000  000   000
@@ -922,35 +964,39 @@ addValues = (n,value) ->
     
 handlers = 
     coffee: 
-            punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict, stacked ]
-            word: [ keyword, coffeeWord, number, property, stacked ]
-    noon:   punct:[ noonComment,  noonPunct, urlPunct,                           stacked ], word:[ noonWord, urlWord, number, stacked ]
-    js:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
-    ts:     punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict, stacked ], word:[ keyword, jsWord, number, property, stacked ]
-    iss:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    ini:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[          number,         stacked ]
-    cpp:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ keyword, number, float,  stacked ]
-    hpp:    punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ keyword, number, float,  stacked ]
-    c:      punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ keyword, number, float,  stacked ]
-    h:      punct:[ starComment,  slashComment, simpleString, cppMacro,          stacked ], word:[ keyword, number, float,  stacked ]
-    cs:     punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    pug:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    styl:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    css:    punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    sass:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    scss:   punct:[ starComment,  slashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
-    svg:    punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
-    html:   punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
-    htm:    punct:[               simpleString, xmlPunct,                        stacked ], word:[ keyword, number,         stacked ]
-    sh:     punct:[ hashComment,  simpleString, urlPunct, shPunct,               stacked ], word:[ keyword, urlWord, number, stacked ]
-    json:   punct:[               simpleString, jsonPunct, urlPunct,             stacked ], word:[ keyword, jsonWord, urlWord, number, stacked ]
-    log:    punct:[               simpleString, urlPunct, dict,                  stacked ], word:[ urlWord, number,         stacked ]
-    md:     punct:[                    mdPunct, urlPunct, xmlPunct,              stacked ], word:[ urlWord, number,         stacked ]
-    fish:   punct:[                hashComment, simpleString,                    stacked ], word:[ keyword, number,         stacked ]
+          punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
+          word: [ keyword, coffeeWord, number, property ]
+    noon: punct:[ noonComment,  noonPunct, urlPunct                                          ], word:[ noonWord, urlWord, number          ]
+    js:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
+    ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
+    iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
+    ini:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[          number                    ]
+    cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
+    hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
+    c:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
+    h:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
+    cs:   punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
+    pug:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
+    styl: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
+    css:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
+    sass: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
+    scss: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
+    svg:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
+    html: punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
+    htm:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
+    sh:   punct:[ hashComment,  simpleString, urlPunct, shPunct                              ], word:[ keyword, urlWord, number           ]
+    json: punct:[               simpleString, jsonPunct, urlPunct                            ], word:[ keyword, jsonWord, urlWord, number ]
+    log:  punct:[               simpleString, urlPunct, dict                                 ], word:[ urlWord, number                    ]
+    md:   punct:[                    mdPunct, urlPunct, xmlPunct                             ], word:[ urlWord, number                    ]
+    fish: punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]
     
 for ext in Syntax.exts
     if not handlers[ext]?
-        handlers[ext] = punct:[                 simpleString,                    stacked ], word:[          number,         stacked ]
+        handlers[ext] = punct:[ simpleString ], word:[ number ]
+        
+for ext,obj of handlers
+    handlers[ext].punct.push stacked
+    handlers[ext].word.push stacked
     
 ###
 0000000    000       0000000    0000000  000   000  00000000  0000000    
