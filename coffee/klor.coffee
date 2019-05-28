@@ -557,7 +557,7 @@ regexp = ->
         if chunkIndex 
             prev = getChunk -1
             next = getChunk +1
-            if not prev.value.startsWith('punct') or prev.match in ")]"
+            if not prev.value.startsWith('punct') and not prev.value.startsWith('keyword') or prev.match in ")]"
                 return if (prev.start+prev.length <  chunk.start) and next?.start >  chunk.start+1
                 return if (prev.start+prev.length == chunk.start) and next?.start == chunk.start+1
   

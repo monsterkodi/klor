@@ -820,22 +820,36 @@ describe 'ranges' ->
         inc rgs, 10 '/'      'punct regexp end'
         
         rgs = ranges "w=l.split /[\\s\\/]/ ; bla"
-        inc rgs, 10 '/'       'punct regexp start'
-        inc rgs, 14 '\\'      'punct escape regexp'
-        inc rgs, 17 '/'       'punct regexp end'
-        inc rgs, 19 ';'       'punct'
+        inc rgs, 10 '/'      'punct regexp start'
+        inc rgs, 14 '\\'     'punct escape regexp'
+        inc rgs, 17 '/'      'punct regexp end'
+        inc rgs, 19 ';'      'punct'
         
         rgs = ranges "a = 1 / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
+        inc rgs, 6 '/',     'punct'
+        inc rgs, 8 '2',     'number'
 
         rgs = ranges "(1+1) / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
+        inc rgs, 6 '/',     'punct'
+        inc rgs, 8 '2',     'number'
 
         rgs = ranges "a[10] / 2"
-        inc rgs, 6 '/', 'punct'
-        inc rgs, 8 '2', 'number'
+        inc rgs, 6 '/',     'punct'
+        inc rgs, 8 '2',     'number'
+
+        rgs = ranges "if / aa /.test s"
+        inc rgs, 3 '/'      'punct regexp start'
+        inc rgs, 8 '/'      'punct regexp end'
+        inc rgs, 9 '.'      'punct property'
+        inc rgs, 10 'test'  'function call'
+        inc rgs, 15 's'     'text'
+        
+        rgs = ranges "if / 😡 /.test s"
+        inc rgs, 3 '/'      'punct regexp start'
+        inc rgs, 8 '/'      'punct regexp end'
+        inc rgs, 9 '.'      'punct property'
+        inc rgs, 10 'test'  'function call'
+        inc rgs, 15 's'     'text'
         
     # 000000000  00000000   000  00000000   000      00000000  
     #    000     000   000  000  000   000  000      000       
