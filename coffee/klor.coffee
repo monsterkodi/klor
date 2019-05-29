@@ -6,12 +6,13 @@
 000   000  0000000   0000000   000   000  
 ###
 
-{ slash, noon, kstr, last } = require 'kxk'
-
+noon = require 'noon'
+path = require 'path'
 exts = ['txt''log''koffee'] 
 lang = {}
     
-for names, keywords of noon.load slash.join __dirname,'..''coffee''lang.noon'
+for names, keywords of noon.load path.join __dirname,'..''coffee''lang.noon'
+    
     for ext in names.split /\s/
         exts.push(ext) if ext not in exts
         lang[ext] ?= {}
@@ -75,7 +76,7 @@ chunked = (lines, ext) ->
             number: lineno
             ext:    ext
 
-        chunks = kstr.replaceTabs(text).split SPACE
+        chunks = replaceTabs(text).split SPACE
         
         if chunks.length == 1 and chunks[0] == ''
             return line # empty line
@@ -1119,6 +1120,21 @@ blocked = (lines) ->
             if chunkIndex == beforeIndex
                 chunkIndex++
     lines
+
+pad = (l) ->
+    s = ''
+    while l > 0
+        s += ' '
+        l--
+    s
+    
+replaceTabs = (s) ->
+    i = 0
+    while i < s.length
+        if s[i] == '\t'
+            s = s.splice i, 1, pad 4-(i%4)
+        i += 1
+    s
     
 # 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
 # 000        000 000   000   000  000   000  000   000     000     000       

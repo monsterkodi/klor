@@ -1,5 +1,5 @@
 name            klor
-version         0.43.0
+version         0.44.0
 description     syntax highlighting
 keywords
                 syntax
@@ -17,7 +17,7 @@ scripts
                 test    ./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee
                 watch   ./node_modules/.bin/onchange coffee/test.coffee coffee/klor.coffee -- npm run test
 dependencies
-                kxk  ^0.294.0
+                noon  ^2.3.0
 devDependencies
                 assert    ^2.0.0
                 chai      ^4.2.0
