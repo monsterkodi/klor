@@ -104,6 +104,7 @@ chunked = (lines, ext) ->
                     pi = 0
                     advance = 1
                     value = 'punct'
+                    
                     while pi < punct.length-1
                         pc = punct[pi]
                         advance = 1
@@ -119,7 +120,7 @@ chunked = (lines, ext) ->
                         turd = turd[advance..]
                         
                     if pi < punct.length
-                        line.chunks.push start:c, length:advance, match:punct[pi..], value:value
+                        line.chunks.push start:c, length:advance, match:punct[pi..], value:'punct'
                         c += advance
                                         
                 if c < sc+l        # check for remaining non-punct
@@ -590,7 +591,7 @@ tripleRegexp = ->
 # 0000000      000     000   000  000  000   000   0000000   
     
 simpleString = ->
-    
+        
     return if topType == 'regexp'
             
     if getChunk(-1)?.escape then return stacked()
@@ -1085,6 +1086,7 @@ blocked = (lines) ->
         while chunkIndex < line.chunks.length
             
             chunk = line.chunks[chunkIndex]
+            
             beforeIndex = chunkIndex
             
             if chunk.value == 'punct'

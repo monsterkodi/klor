@@ -28,6 +28,7 @@ coffee js ts
         instanceof
         __dirname
         __filename
+        Infinity
         valid
         empty
         clamp
