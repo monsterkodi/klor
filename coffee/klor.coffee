@@ -6,19 +6,34 @@
 000   000  0000000   0000000   000   000  
 ###
 
-noon = require 'noon'
-path = require 'path'
-exts = ['txt''log''koffee'] 
-lang = {}
+▸if opts.lang # koffee --lang klor.coffee
     
-for names, keywords of noon.load path.join __dirname,'..''coffee''lang.noon'
+    fs   = require 'fs'
+    noon = require 'noon'
+    path = require 'path'
     
-    for ext in names.split /\s/
-        exts.push(ext) if ext not in exts
-        lang[ext] ?= {}
-        for value,words of keywords
-            for word in words
-                lang[ext][word] = value
+    noonFile = path.join __dirname, 'lang.noon'
+    jsonFile = path.join __dirname, '..' 'js' 'lang.json'
+    
+    log 'compile:' noonFile
+    log 'output:'  jsonFile
+
+    lang = {}
+    exts = ['txt''log''koffee'] 
+    for names, keywords of noon.load noonFile
+        
+        for ext in names.split /\s/
+            exts.push(ext) if ext not in exts
+            lang[ext] ?= {}
+            for value,words of keywords
+                for word in words
+                    lang[ext][word] = value
+                    
+    json = JSON.stringify {exts:exts, lang:lang}, null, '    '
+    fs.writeFileSync jsonFile, json, 'utf8'
+   
+{ exts, lang } = require './lang.json'
+    
 swtch = 
     coffee: 
         doc: turd:'▸' to:'md' indent: 1
