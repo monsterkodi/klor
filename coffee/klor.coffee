@@ -1147,7 +1147,7 @@ replaceTabs = (s) ->
     i = 0
     while i < s.length
         if s[i] == '\t'
-            s = s.splice i, 1, pad 4-(i%4)
+            s = s[...i] + pad(4-(i%4)) + s[i+1..]
         i += 1
     s
     
