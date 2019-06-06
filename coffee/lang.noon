@@ -584,7 +584,14 @@ sh bash
         esac
         exit
         echo
+        head
+        tail
+        krep
+        noon
         mkdir
+        konrad
+        color-ls
+        colorcat
         
     module
         getopts

@@ -445,7 +445,7 @@ urlPunct = ->
                 if next = getChunk 1
                     if next.start == chunk.start+chunk.length
                         fileext = next.match
-                        if fileext not in '\\./'
+                        if fileext not in '\\./*+'
                             setValue -1 fileext + ' file'
                             addValue  0 fileext
                             setValue  1 fileext + ' ext'
@@ -911,6 +911,8 @@ cppMacro = ->
 # 0000000   000   000
 
 shPunct = ->
+    
+    return if notCode
     
     if chunk.match == '/' and getChunk(-1)?.start + getChunk(-1)?.length == chunk.start
         return addValue -1 'dir'
