@@ -193,8 +193,9 @@ exports.globalize = ->
             bg = fg.toUpperCase()
             global[fg+i] = exports[fg+i] 
             global[bg+i] = exports[bg+i] 
-            for n in ['underline''bold''italic''inverse']
-                global[n] = exports[n]
+        for n in ['underline''bold''italic''inverse''reset'
+                  'black''red''green''yellow''blue''magenta''cyan''white''gray']
+            global[n] = exports[n]
         
 #  0000000  000000000  00000000   000  00000000   
 # 000          000     000   000  000  000   000  
