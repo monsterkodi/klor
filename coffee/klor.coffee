@@ -32,7 +32,7 @@
     json = JSON.stringify {exts:exts, lang:lang}, null, '    '
     fs.writeFileSync jsonFile, json, 'utf8'
    
-{ exts, lang } = require './lang.json'
+{ exts, lang } = require "#{__dirname}/../js/lang.json"
     
 swtch = 
     coffee: 
@@ -868,7 +868,7 @@ interpolation = ->
 keyword = ->
     
     return if notCode
-    
+        
     if not lang[ext]
         # log "no lang for ext? #{ext}"
         return

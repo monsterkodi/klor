@@ -1841,7 +1841,14 @@
             "esac": "keyword",
             "exit": "keyword",
             "echo": "keyword",
+            "head": "keyword",
+            "tail": "keyword",
+            "krep": "keyword",
+            "noon": "keyword",
             "mkdir": "keyword",
+            "konrad": "keyword",
+            "color-ls": "keyword",
+            "colorcat": "keyword",
             "getopts": "module"
         },
         "bash": {
@@ -1865,7 +1872,14 @@
             "esac": "keyword",
             "exit": "keyword",
             "echo": "keyword",
+            "head": "keyword",
+            "tail": "keyword",
+            "krep": "keyword",
+            "noon": "keyword",
             "mkdir": "keyword",
+            "konrad": "keyword",
+            "color-ls": "keyword",
+            "colorcat": "keyword",
             "getopts": "module"
         },
         "fish": {
