@@ -1,13 +1,17 @@
 {
   "name": "klor",
-  "version": "0.47.0",
+  "version": "0.48.0",
   "description": "syntax highlighting",
   "keywords": [
     "syntax",
-    "highlighting",
-    "coffeescript"
+    "highlighting"
   ],
   "main": "js/klor.js",
+  "files": [
+    "js/klor.js",
+    "js/kolor.js",
+    "js/lang.json"
+  ],
   "author": "monsterkodi",
   "license": "Unlicense",
   "repository": {
@@ -26,7 +30,7 @@
   "devDependencies": {
     "assert": "^2.0.0",
     "koffee": "^0.56.0",
-    "kxk": "^0.300.0",
+    "kxk": "^0.304.0",
     "mocha": "^6.1.4",
     "noon": "^2.5.0",
     "onchange": "^6.0.0"
