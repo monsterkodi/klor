@@ -185,7 +185,7 @@ for fg in FG_COLORS
     exports[fg] = eval fg
     for i in [1..8]
         exports[fg+i] = F256 exports[fg] i
-        exports.FG_NAMES.push bg+i
+        exports.FG_NAMES.push fg+i
 
 #  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
 # 000        000      000   000  000   000  000   000  000      000     000   000       
