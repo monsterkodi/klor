@@ -170,15 +170,22 @@ exports.cyan      = init 36 39
 exports.white     = init 37 39
 exports.gray      = init 90 39
 
+exports.BG_COLORS = BG_COLORS 
+exports.FG_COLORS = FG_COLORS 
+exports.BG_NAMES  = []
+exports.FG_NAMES  = []
+
 for bg in BG_COLORS
     exports[bg] = eval bg
     for i in [1..8]
         exports[bg+i] = B256 exports[bg] i
+        exports.BG_NAMES.push bg+i
 
 for fg in FG_COLORS
     exports[fg] = eval fg
     for i in [1..8]
         exports[fg+i] = F256 exports[fg] i
+        exports.FG_NAMES.push bg+i
 
 #  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
 # 000        000      000   000  000   000  000   000  000      000     000   000       
@@ -189,10 +196,12 @@ for fg in FG_COLORS
 exports.globalize = ->
     
     for fg in FG_COLORS
+        
         for i in [1..8]
             bg = fg.toUpperCase()
             global[fg+i] = exports[fg+i] 
             global[bg+i] = exports[bg+i] 
+            
         for n in ['underline''bold''dim''italic''inverse''reset''strip'
                   'black''red''green''yellow''blue''magenta''cyan''white''gray']
             global[n] = exports[n]

@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "0.54.0",
+  "version": "0.55.0",
   "description": "syntax highlighting",
   "keywords": [
     "syntax",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "koffee": ">=0.56.0",
     "kxk": ">=0.304.0",
-    "noon": ">=2.6.0",
+    "noon": ">=2.10.0",
     "mocha": "^6.1.4",
     "onchange": "^6.0.0"
   }

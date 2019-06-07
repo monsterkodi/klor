@@ -9,7 +9,7 @@
 ▸if opts.lang # koffee --lang klor.coffee
     
     fs   = require 'fs'
-    noon = require 'noon'
+    noon_load = require 'noon/js/load'
     path = require 'path'
     
     noonFile = path.join __dirname, 'lang.noon'
@@ -20,7 +20,7 @@
 
     lang = {}
     exts = ['txt''log''koffee'] 
-    for names, keywords of noon.load noonFile
+    for names, keywords of noon_load noonFile
         
         for ext in names.split /\s/
             exts.push(ext) if ext not in exts
