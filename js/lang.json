@@ -8,6 +8,8 @@
         "ts",
         "json",
         "noon",
+        "yml",
+        "yaml",
         "cpp",
         "hpp",
         "cxx",
@@ -242,6 +244,16 @@
             "false": "nil"
         },
         "noon": {
+            "true": "keyword",
+            "null": "nil",
+            "false": "nil"
+        },
+        "yml": {
+            "true": "keyword",
+            "null": "nil",
+            "false": "nil"
+        },
+        "yaml": {
             "true": "keyword",
             "null": "nil",
             "false": "nil"
@@ -1781,6 +1793,7 @@
             "line": "keyword",
             "defs": "keyword",
             "text": "keyword",
+            "title": "keyword",
             "tspan": "keyword",
             "circle": "keyword",
             "ellipse": "keyword",

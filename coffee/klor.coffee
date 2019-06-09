@@ -958,13 +958,13 @@ shPunct = ->
     if chunk.match == '/' and getChunk(-1)?.start + getChunk(-1)?.length == chunk.start
         return addValue -1 'dir'
     
-    if chunk.turd == '--' and getChunk(2)?.start == chunk.start+2
+    if chunk.turd == '--' and getChunk(2)?.start == chunk.start+2 and getChunk(-1)?.start+getChunk(-1)?.length < chunk.start
         addValue 0 'argument'
         addValue 1 'argument'
         setValue 2 'argument'
         return 3
         
-    if chunk.match == '-' and getChunk(1)?.start == chunk.start+1
+    if chunk.match == '-' and getChunk(1)?.start == chunk.start+1 and getChunk(-1)?.start+getChunk(-1)?.length < chunk.start
         addValue 0 'argument'
         setValue 1 'argument'
         return 2
@@ -1055,6 +1055,7 @@ handlers =
     htm:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     sh:   punct:[ hashComment,  simpleString, urlPunct, shPunct                              ], word:[ keyword, urlWord, number           ]
     json: punct:[               simpleString, jsonPunct, urlPunct                            ], word:[ keyword, jsonWord, urlWord, number ]
+    yml:  punct:[ hashComment,  simpleString, dict, urlPunct, shPunct                        ], word:[ keyword, urlWord, number, property ]
     log:  punct:[               simpleString, urlPunct, dict                                 ], word:[ urlWord, number                    ]
     md:   punct:[                    mdPunct, urlPunct, xmlPunct                             ], word:[ urlWord, number                    ]
     fish: punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]

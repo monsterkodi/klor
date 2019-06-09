@@ -38,6 +38,7 @@ exports.map =
     'punct url tld':                    'b1'
     'punct coffee':                     'y1'
     'punct dir':                        'g1'
+    'punct obj':                        'y1'
     'punct js':                         'm1'
     'punct git':                        'w1'
     'punct li1':                        'g1'
@@ -121,6 +122,7 @@ exports.map =
     'git ext':                          'w2'
     'important':                        'w4'
     'template':                         'm3'
+    'struct':                           'c3'
     'comment':                          'w3'
     'comment triple':                   'w4'
     'comment header':                   ['g1' 'G1']
