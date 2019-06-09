@@ -1235,6 +1235,22 @@ kolorize = (chunk) ->
             kolorize match:chunk.match, value:chunk.value.replace LI, ' '
         else
             chunk.match
+
+kolorizeChunks = (chunks:[], number:) ->
+    
+    clrzd = ''
+    if number
+        numstr = String number
+        clrzd += w2(numstr) + rpad '', 4-numstr.length
+        
+    c = 0
+    for i in [0...chunks.length]
+        while c < chunks[i].start 
+            clrzd += ' '
+            c++
+        clrzd += kolorize chunks[i]
+        c += chunks[i].length
+    clrzd
             
 #  0000000  000   000  000   000  000000000   0000000   000   000  
 # 000        000 000   0000  000     000     000   000   000 000   
@@ -1252,23 +1268,7 @@ syntax = (text:text, ext:'coffee', numbers:false) ->
         line = lines[index]
         if line.startsWith '//# sourceMappingURL'
             continue
-
-        clrzd = ''
-        if numbers
-            numstr = String index+1
-            clrzd += w2(numstr) + rpad '', 4-numstr.length
-            
-        c = 0
-        r = rngs[index]
-    
-        for i in [0...r.length]
-            while c < r[i].start 
-                clrzd += ' '
-                c++
-            clrzd += kolorize r[i]
-            c += r[i].length
-            
-        clines.push clrzd
+        clines.push kolorizeChunks chunks:rngs[index], number:numbers and index+1
     clines.join '\n'
 
 # 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
@@ -1286,6 +1286,7 @@ module.exports =
     ranges:     (line, ext='coffee')  -> parse([line], ext)[0].chunks
     dissect:    (lines, ext='coffee') -> parse(lines, ext).map (l) -> l.chunks
     kolorize:   kolorize
+    kolorizeChunks: kolorizeChunks
     syntax:     syntax
 
 # 00000000   00000000    0000000   00000000  000  000      00000000
