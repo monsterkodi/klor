@@ -60,6 +60,7 @@ exports.map =
     'punct h3':                         'b3'
     'punct h4':                         'b2'
     'punct h5':                         'b1'
+    'punct template':                   'm1'
     'text':                             'w8' 
     'text h1':                          'y4'
     'text h2':                          'r4'
@@ -119,6 +120,7 @@ exports.map =
     'git file':                         'w8'
     'git ext':                          'w2'
     'important':                        'w4'
+    'template':                         'm3'
     'comment':                          'w3'
     'comment triple':                   'w4'
     'comment header':                   ['g1' 'G1']

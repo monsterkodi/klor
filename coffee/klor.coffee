@@ -368,7 +368,7 @@ coffeeWord = ->
             return thisCall()
            
 property = -> # word
-        
+   
     return if notCode
     
     if getmatch(-1) == '.'
@@ -383,6 +383,47 @@ property = -> # word
                     setValue -2 'obj'
             return 1
 
+cppWord = ->
+    
+    return if notCode
+    
+    if p = property() then return p
+    
+    if getChunk(-2)?.turd == '::'
+        
+        if prevPrev = getChunk -3
+            setValue -3 'punct obj'
+            addValue -2 'obj'
+            addValue -1 'obj'
+            setValue  0 'method'
+            return 1
+            
+    if getmatch(-1) == '<' and getmatch(1) in ',>' or getmatch(1) == '>' and getmatch(-1) in ','
+        
+        setValue -1 'punct template'
+        setValue  0 'template'
+        setValue  1 'punct template'
+        return 2
+        
+    if /[A-Z]/.test chunk.match[1]
+        switch chunk.match[0]
+            when 'T'
+                if getmatch(1) == '<'
+                    setValue 0 'keyword type'
+                    return 1
+    
+            when 'F'
+                setValue 0 'struct'
+                return 1
+    
+            when 'A'
+                setValue 0 'obj'
+                return 1
+            
+    if chunk.value == 'text' and getmatch(1) == '('
+        setValue 0 'function call'
+        return 1
+            
 # 000   000   0000000    0000000   000   000  
 # 0000  000  000   000  000   000  0000  000  
 # 000 0 000  000   000  000   000  000 0 000  
@@ -999,10 +1040,10 @@ handlers =
     ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     ini:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[          number                    ]
-    cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
-    hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
-    c:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
-    h:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float             ]
+    cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    c:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    h:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
     cs:   punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     pug:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     styl: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
@@ -1178,17 +1219,16 @@ module.exports =
 
 ▸test 'profile'
     
+    {slash} = require 'kxk'
     text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
     text1 = slash.readText "#{__dirname}/test.coffee"
 
-    ▸average 2
-        lines0 = text0.split '\n'
-    ▸average 2
-        lines1 = text1.split '\n'
+    lines0 = text0.split '\n'
+    lines1 = text1.split '\n'
 
     for i in [0..5]
         parse lines0
         
-    ▸average 50
+    ▸average 100
         parse lines0
      

@@ -1179,30 +1179,51 @@ describe 'ranges' ->
         lang 'cpp'
         
         rgs = ranges "#include"      
-        inc rgs, 0 "#"        'punct define'
-        inc rgs, 1 "include"  'define'
+        inc rgs, 0 "#"          'punct define'
+        inc rgs, 1 "include"    'define'
 
         rgs = ranges "#if"            
-        inc rgs, 0 "#"        'punct define'
-        inc rgs, 1 "if"       'define'
+        inc rgs, 0 "#"          'punct define'
+        inc rgs, 1 "if"         'define'
 
         rgs = ranges "#  if"            
-        inc rgs, 0 "#"        'punct define'
-        inc rgs, 3 "if"       'define'
+        inc rgs, 0 "#"          'punct define'
+        inc rgs, 3 "if"         'define'
             
         rgs = ranges "if (true) {} else {}"    
-        inc rgs, 0 "if"    'keyword'
-        inc rgs, 4 "true"  'keyword'
-        inc rgs, 13 "else" 'keyword'
+        inc rgs, 0 "if"         'keyword'
+        inc rgs, 4 "true"       'keyword'
+        inc rgs, 13 "else"      'keyword'
             
         rgs = ranges "1.0f"
-        inc rgs, 0 "1"  'number float'
-        inc rgs, 1 "."  'punct number float'
-        inc rgs, 2 "0f" 'number float'
+        inc rgs, 0 "1"          'number float'
+        inc rgs, 1 "."          'punct number float'
+        inc rgs, 2 "0f"         'number float'
 
         rgs = ranges "0.0000f"
-        inc rgs, 2 "0000f" 'number float'
-                       
+        inc rgs, 2 "0000f"      'number float'
+        
+        rgs = ranges "obj.value = obj.another.value;"
+        inc rgs, 0  "obj"       'obj'
+        inc rgs, 4  "value"     'property'
+        inc rgs, 12 "obj"       'obj'
+        inc rgs, 16 "another"   'property'
+        inc rgs, 24 "value"     'property'
+        
+        rgs = ranges "Cast<targ>"
+        inc rgs, 4 '<'          'punct template'
+        inc rgs, 5 'targ'       'template'
+        inc rgs, 9 '>'          'punct template'
+        
+        rgs = ranges "TMap<FGrid, FRoute>"
+        inc rgs, 0 'TMap'       'keyword type'
+        inc rgs, 4 '<'          'punct template'
+        inc rgs, 5 'FGrid'      'template'
+        inc rgs, 10 ','         'punct template'
+        inc rgs, 12 'FRoute'    'template'
+        inc rgs, 18 '>'         'punct template'
+        
+        
     #  0000000  000   000  
     # 000       000   000  
     # 0000000   000000000  
