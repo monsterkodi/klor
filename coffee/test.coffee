@@ -1132,6 +1132,11 @@ describe 'ranges' ->
         rgs = ranges "1s" 
         inc rgs, 0 "1s"  'number'
 
+        rgs = ranges "1.0" 
+        inc rgs, 0 "1"  'number float'
+        inc rgs, 1 "."  'punct number float'
+        inc rgs, 2 "0"  'number float'
+        
         rgs = ranges ".clss" 
         inc rgs, 0 "."     'punct class'
         inc rgs, 1 "clss"  'class'
@@ -1167,6 +1172,22 @@ describe 'ranges' ->
         rgs = ranges "#f0f0f0"
         inc rgs, 0 "#"      'punct number hex'
         inc rgs, 1 "f0f0f0" 'number hex'
+        
+    #  0000000   0000000   0000000  
+    # 000       000       000       
+    # 000       0000000   0000000   
+    # 000            000       000  
+    #  0000000  0000000   0000000   
+    
+    it 'css' ->
+        
+        lang 'css'
+        
+        rgs = ranges "0.5" 
+        inc rgs, 0 "0"  'number float'
+        inc rgs, 1 "."  'punct number float'
+        inc rgs, 2 "5"  'number float'
+        
         
     #  0000000  00000000   00000000 
     # 000       000   000  000   000
