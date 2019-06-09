@@ -579,7 +579,7 @@ jsonPunct = ->
 
 jsonWord = ->
 
-    if topType == 'string double' and prev = getChunk -1
+    if (topType == 'string double' or topType == 'string single') and prev = getChunk -1
         if prev.match in '"^~='
             if NUMBER.test(getmatch(0)) and getmatch(1) == '.' and NUMBER.test(getmatch(2)) and getmatch(3) == '.' and NUMBER.test(getmatch(4))
                 if prev.match in '^~='
@@ -1065,7 +1065,8 @@ handlers =
     htm:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     sh:   punct:[ hashComment,  simpleString, urlPunct, shPunct                              ], word:[ keyword, urlWord, number           ]
     json: punct:[               simpleString, jsonPunct, urlPunct                            ], word:[ keyword, jsonWord, urlWord, number ]
-    yml:  punct:[ hashComment,  simpleString, dict, urlPunct, shPunct                        ], word:[ keyword, urlWord, number, property ]
+    yml:  punct:[ hashComment,  simpleString, urlPunct, shPunct, dict                        ], word:[ keyword, jsonWord, urlWord, number, property ]
+    yaml: punct:[ hashComment,  simpleString, urlPunct, shPunct, dict                        ], word:[ keyword, jsonWord, urlWord, number, property ]
     log:  punct:[               simpleString, urlPunct, dict                                 ], word:[ urlWord, number                    ]
     md:   punct:[                    mdPunct, urlPunct, xmlPunct                             ], word:[ urlWord, number                    ]
     fish: punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]
@@ -1271,7 +1272,7 @@ syntax = (text:text, ext:'coffee', numbers:false) ->
     clines = []
     for index in [0...lines.length]
         line = lines[index]
-        if line.startsWith '//# sourceMappingURL'
+        if ext == 'js' and line.startsWith '//# sourceMappingURL'
             continue
         clines.push kolorizeChunks chunks:rngs[index], number:numbers and index+1
     clines.join '\n'
