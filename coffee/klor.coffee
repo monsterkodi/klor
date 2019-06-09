@@ -83,6 +83,7 @@ codeTypes = ['interpolation' 'code triple']
 
 chunked = (lines, ext) ->
 
+    ext = ext[1..] if ext[0] == '.'
     ext = 'coffee' if ext == 'koffee'
     ext = 'txt' if ext not in exts
 
@@ -579,9 +580,11 @@ jsonPunct = ->
 jsonWord = ->
 
     if topType == 'string double' and prev = getChunk -1
-        if prev.match in '"^~'
+        if prev.match in '"^~='
             if NUMBER.test(getmatch(0)) and getmatch(1) == '.' and NUMBER.test(getmatch(2)) and getmatch(3) == '.' and NUMBER.test(getmatch(4))
-                setValue -1 'punct semver' if prev.match in '^~'
+                if prev.match in '^~='
+                    setValue -1 'punct semver' 
+                    setValue -2 'punct semver' if getmatch(-2) == '>'
                 setValue 0 'semver'
                 setValue 1 'punct semver'
                 setValue 2 'semver'
@@ -716,7 +719,9 @@ number = ->
         if getmatch(-1) == '.'
 
             if getValue(-4) == 'number float' and getValue(-2) == 'number float'
-                setValue -5 'punct semver' if getmatch(-5) in '^~'
+                if getmatch(-5) in '^~='
+                    setValue -5 'punct semver' 
+                    setValue -6 'punct semver' if getmatch(-6) == '>'
                 setValue -4 'semver'
                 setValue -3 'punct semver'
                 setValue -2 'semver'

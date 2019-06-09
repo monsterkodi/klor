@@ -32,11 +32,14 @@ describe 'ranges' ->
           
     it 'fallback' ->
         
-        rgs = ranges 'text', 'unknown'
-        inc rgs, 0 'text', 'text'
+        rgs = ranges 'text' 'unknown'
+        inc rgs, 0 'text' 'text'
 
-        rgs = ranges 'text', 'fish'
-        inc rgs, 0 'text', 'text'
+        rgs = ranges 'text' 'fish'
+        inc rgs, 0 'text' 'text'
+        
+        rgs = ranges "###" '.coffee' 
+        inc rgs, 0 "#" 'punct comment triple'
         
     # 000   000  000   000  000   0000000   0000000   0000000    00000000  
     # 000   000  0000  000  000  000       000   000  000   000  000       
@@ -216,6 +219,17 @@ describe 'ranges' ->
         inc rgs, 1 "1" 'semver'
         inc rgs, 3 "0" 'semver'
         inc rgs, 5 "0" 'semver'
+        
+        # lang 'noon'
+        
+        rgs = ranges ">=6.7.9"
+        inc rgs, 0 ">" 'punct semver'
+        inc rgs, 1 "=" 'punct semver'
+        inc rgs, 2 "6" 'semver'
+        inc rgs, 3 "." 'punct semver'
+        inc rgs, 4 "7" 'semver'
+        inc rgs, 5 "." 'punct semver'
+        inc rgs, 6 "9" 'semver'
         
     #  0000000  000000000  00000000   000  000   000   0000000    0000000  
     # 000          000     000   000  000  0000  000  000        000       
@@ -790,6 +804,15 @@ describe 'ranges' ->
         inc rgs, 4 "0" 'semver'
         inc rgs, 6 "0" 'semver'
         
+        rgs = ranges '">=6.7.8"'
+        inc rgs, 1 ">" 'punct semver'
+        inc rgs, 2 "=" 'punct semver'
+        inc rgs, 3 "6" 'semver'
+        inc rgs, 4 "."  'punct semver'
+        inc rgs, 5 "7" 'semver'
+        inc rgs, 6 "."  'punct semver'
+        inc rgs, 7 "8"  'semver'
+
     # 00000000   00000000   0000000   00000000  000   000  00000000   
     # 000   000  000       000        000        000 000   000   000  
     # 0000000    0000000   000  0000  0000000     00000    00000000   
