@@ -33,6 +33,7 @@
     fs.writeFileSync jsonFile, json, 'utf8'
 
 { exts, lang } = require "#{__dirname}/../js/lang.json"
+kolor = require './kolor'
 
 swtch =
     coffee:
@@ -46,13 +47,15 @@ swtch =
 for ext in exts
     swtch.md[ext] = turd:'```' to:ext, end:'```' add:'code triple'
 
-SPACE  = /\s/
-HEADER = /^0+$/
-PUNCT  = /\W+/g
-NUMBER = /^\d+$/
-FLOAT  = /^\d+f$/
-HEXNUM = /^0x[a-fA-F\d]+$/
-HEX    = /^[a-fA-F\d]+$/
+SPACE   = /\s/
+HEADER  = /^0+$/
+PUNCT   = /\W+/g
+NUMBER  = /^\d+$/
+FLOAT   = /^\d+f$/
+HEXNUM  = /^0x[a-fA-F\d]+$/
+HEX     = /^[a-fA-F\d]+$/
+NEWLINE = /\r?\n/
+LI      = /(\sli\d\s|\sh\d\s)/
 
 codeTypes = ['interpolation' 'code triple']
 
@@ -1184,13 +1187,13 @@ blocked = (lines) ->
                 chunkIndex++
     lines
 
-pad = (l) ->
-    s = ''
-    while l > 0
-        s += ' '
-        l--
+rpad = (s, l) ->
+    s = String s
+    while s.length < l then s += ' '
     s
 
+pad = (l) -> rpad '', l
+    
 replaceTabs = (s) ->
     i = 0
     while i < s.length
@@ -1199,22 +1202,91 @@ replaceTabs = (s) ->
         i += 1
     s
 
-# 00000000  000   000  00000000    0000000   00000000   000000000   0000000
-# 000        000 000   000   000  000   000  000   000     000     000
-# 0000000     00000    00000000   000   000  0000000       000     0000000
-# 000        000 000   000        000   000  000   000     000          000
-# 00000000  000   000  000         0000000   000   000     000     0000000
-
 parse = (lines, ext='coffee') -> blocked chunked lines, ext
+
+# 000   000   0000000   000       0000000   00000000   000  0000000  00000000  
+# 000  000   000   000  000      000   000  000   000  000     000   000       
+# 0000000    000   000  000      000   000  0000000    000    000    0000000   
+# 000  000   000   000  000      000   000  000   000  000   000     000       
+# 000   000   0000000   0000000   0000000   000   000  000  0000000  00000000  
+
+kolorize = (chunk) -> 
+    
+    if cn = kolor.map[chunk.value]
+        if cn instanceof Array
+            v = chunk.match
+            for cr in cn
+                v = kolor[cr] v
+            return v
+        else
+            return kolor[cn] chunk.match
+            
+    if chunk.value.endsWith 'file'
+        w8 chunk.match
+    else if chunk.value.endsWith 'ext'
+        w3 chunk.match
+    else if chunk.value.startsWith 'punct'
+        if LI.test chunk.value
+            kolorize match:chunk.match, value:chunk.value.replace LI, ' '
+        else
+            w2 chunk.match
+    else
+        if LI.test chunk.value
+            kolorize match:chunk.match, value:chunk.value.replace LI, ' '
+        else
+            chunk.match
+            
+#  0000000  000   000  000   000  000000000   0000000   000   000  
+# 000        000 000   0000  000     000     000   000   000 000   
+# 0000000     00000    000 0 000     000     000000000    00000    
+#      000     000     000  0000     000     000   000   000 000   
+# 0000000      000     000   000     000     000   000  000   000  
+
+syntax = (text:text, ext:'coffee', numbers:false) ->
+    
+    lines = text.split NEWLINE
+    rngs  = parse(lines, ext).map (l) -> l.chunks
+    
+    clines = []
+    for index in [0...lines.length]
+        line = lines[index]
+        if line.startsWith '//# sourceMappingURL'
+            continue
+
+        clrzd = ''
+        if numbers
+            numstr = String index+1
+            clrzd += w2(numstr) + rpad '', 4-numstr.length
+            
+        c = 0
+        r = rngs[index]
+    
+        for i in [0...r.length]
+            while c < r[i].start 
+                clrzd += ' '
+                c++
+            clrzd += kolorize r[i]
+            c += r[i].length
+            
+        clines.push clrzd
+    clines.join '\n'
+
+# 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
+# 000        000 000   000   000  000   000  000   000     000     000       
+# 0000000     00000    00000000   000   000  0000000       000     0000000   
+# 000        000 000   000        000   000  000   000     000          000  
+# 00000000  000   000  000         0000000   000   000     000     0000000   
 
 module.exports =
 
-    kolor:   require './kolor'
-    exts:    exts
-    parse:   parse
-    chunked: chunked
-    ranges:  (line, ext='coffee')  -> parse([line], ext)[0].chunks
-    dissect: (lines, ext='coffee') -> parse(lines, ext).map (l) -> l.chunks
+    kolor:      kolor
+    exts:       exts
+    parse:      parse
+    chunked:    chunked
+    ranges:     (line, ext='coffee')  -> parse([line], ext)[0].chunks
+    dissect:    (lines, ext='coffee') -> parse(lines, ext).map (l) -> l.chunks
+    kolorize:   kolorize
+    syntax:     syntax
 
 # 00000000   00000000    0000000   00000000  000  000      00000000
 # 000   000  000   000  000   000  000       000  000      000
