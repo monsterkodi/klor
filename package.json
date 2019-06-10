@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "syntax highlighting",
   "keywords": [
     "syntax",
@@ -21,6 +21,7 @@
   "bugs": {
     "url": "https://github.com/monsterkodi/klor/issues"
   },
+  "homepage": "https://www.npmjs.com/package/klor",
   "scripts": {
     "test": "./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee",
     "watch": "./node_modules/.bin/onchange coffee/test.coffee coffee/klor.coffee -- npm run test",
