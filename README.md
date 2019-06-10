@@ -57,7 +57,7 @@ log y8 'bright yellow' + R1 'on dark red'
 [![downloads][downloads-image]][downloads-url] 
 [![Dependencies Status][david-image]][david-url]
 
-[npm-image]:https://img.shields.io/npm/v/noon.svg
+[npm-image]:https://img.shields.io/npm/v/klor.svg
 [npm-url]:http://npmjs.org/package/klor
 [travis-image]:https://travis-ci.org/monsterkodi/klor.svg?branch=master
 [travis-url]:https://travis-ci.org/monsterkodi/klor
