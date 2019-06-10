@@ -51,3 +51,17 @@ klor = require 'klor'
 klor.kolor.globalize() # hoist color functions into the global scope
 log y8 'bright yellow' + R1 'on dark red'
 ```
+
+[![npm package][npm-image]][npm-url] 
+[![Build Status][travis-image]][travis-url] 
+[![downloads][downloads-image]][downloads-url] 
+[![Dependencies Status][david-image]][david-url]
+
+[npm-image]:https://img.shields.io/npm/v/noon.svg
+[npm-url]:http://npmjs.org/package/klor
+[travis-image]:https://travis-ci.org/monsterkodi/klor.svg?branch=master
+[travis-url]:https://travis-ci.org/monsterkodi/klor
+[david-image]:https://david-dm.org/monsterkodi/klor/status.svg
+[david-url]:https://david-dm.org/monsterkodi/klor
+[downloads-image]:https://img.shields.io/npm/dm/klor.svg
+[downloads-url]:http://npmjs.org/package/klor
