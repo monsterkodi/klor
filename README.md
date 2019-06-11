@@ -64,4 +64,4 @@ log y8 'bright yellow' + R1 'on dark red'
 [david-image]:https://david-dm.org/monsterkodi/klor/status.svg
 [david-url]:https://david-dm.org/monsterkodi/klor
 [downloads-image]:https://img.shields.io/npm/dm/klor.svg
-[downloads-url]:http://npmjs.org/package/klor
+[downloads-url]:https://www.npmtrends.com/klor
