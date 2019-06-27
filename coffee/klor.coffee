@@ -1070,6 +1070,7 @@ handlers =
     log:  punct:[               simpleString, urlPunct, dict                                 ], word:[ urlWord, number                    ]
     md:   punct:[                    mdPunct, urlPunct, xmlPunct                             ], word:[ urlWord, number                    ]
     fish: punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]
+    py:   punct:[                hashComment, simpleString                                   ], word:[ keyword, number                    ]
 
 for ext in exts
     if not handlers[ext]?
