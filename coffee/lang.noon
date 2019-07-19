@@ -195,6 +195,9 @@ cpp hpp cxx c h cs
         using
         template
         inline
+        cerr
+        cout
+        endl
                         
     keyword type                        
         int
@@ -216,6 +219,7 @@ cpp hpp cxx c h cs
         int64
         uint64
         size_t
+        wchar_t
 
     punct
         const
@@ -226,6 +230,7 @@ cpp hpp cxx c h cs
         err
         null
         nullptr
+        NULL
         false
         error
         
