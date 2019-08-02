@@ -1063,6 +1063,7 @@ handlers =
     svg:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     html: punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     htm:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
+    xml:  punct:[               simpleString, xmlPunct                                       ], word:[ number                             ]
     sh:   punct:[ hashComment,  simpleString, urlPunct, shPunct                              ], word:[ keyword, urlWord, number           ]
     json: punct:[               simpleString, jsonPunct, urlPunct                            ], word:[ keyword, jsonWord, urlWord, number ]
     yml:  punct:[ hashComment,  simpleString, urlPunct, shPunct, dict                        ], word:[ keyword, jsonWord, urlWord, number, property ]
