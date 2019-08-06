@@ -1060,6 +1060,7 @@ handlers =
     css:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
     sass: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
     scss: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
+    swift: punct:[ starComment,  slashComment, simpleString, dict                            ], word:[ keyword, number, property          ]
     svg:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     html: punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
     htm:  punct:[               simpleString, xmlPunct                                       ], word:[ keyword, number                    ]
