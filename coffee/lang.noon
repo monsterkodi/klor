@@ -159,6 +159,7 @@ swift
         class
         return
         switch
+        struct
         break
         continue
         print
@@ -169,6 +170,12 @@ swift
         let
         String
         Bool
+        UInt
+        Int
+        Int64
+        Int32
+        UInt64
+        UInt32
 
     function
         func
