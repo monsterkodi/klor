@@ -164,6 +164,8 @@ swift
         continue
         print
         true
+        extension
+        subscript
 
     keyword type
         var
@@ -176,6 +178,7 @@ swift
         Int32
         UInt64
         UInt32
+        mutating
 
     function
         func
