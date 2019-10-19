@@ -29,10 +29,10 @@
     "lang": "./node_modules/.bin/koffee --lang coffee/klor.coffee"
   },
   "devDependencies": {
-    "koffee": "^1.3.0",
-    "kxk": "^0.334.0",
+    "koffee": "^1.4.0",
+    "kxk": "^0.339.0",
     "noon": "^3.0.0",
-    "mocha": "^6.2.0",
-    "onchange": "^6.0.0"
+    "mocha": "^6.2.2",
+    "onchange": "^6.1.0"
   }
 }
