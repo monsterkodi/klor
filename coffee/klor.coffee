@@ -978,6 +978,10 @@ shPunct = ->
         addValue 0 'argument'
         setValue 1 'argument'
         return 2
+        
+    if chunk.match == '~' and (not getChunk(-1) or getChunk(-1).start + getChunk(-1).length < chunk.start)
+        setValue 0 'text dir'
+        return 1
 
 #  0000000  000000000   0000000    0000000  000   000
 # 000          000     000   000  000       000  000

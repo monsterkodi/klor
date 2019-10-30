@@ -1290,7 +1290,15 @@ describe 'ranges' ->
         inc rgs, 6 'arg1' 'argument'
         inc rgs, 11 '-' 'punct argument'
         inc rgs, 12 'arg2' 'argument'
-    
+        
+        rgs = ranges "cd ~"
+        inc rgs, 3 '~' 'text dir'
+
+        rgs = ranges "~/home"
+        inc rgs, 0 '~' 'text dir'
+        inc rgs, 1 '/' 'punct dir'
+        inc rgs, 2 'home' 'text file'
+        
     # 000       0000000    0000000   
     # 000      000   000  000        
     # 000      000   000  000  0000  

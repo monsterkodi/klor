@@ -670,6 +670,7 @@ sh bash
         in
         fi
         do
+        pwd
         npm
         git
         done
@@ -686,6 +687,7 @@ sh bash
         noon
         mkdir
         konrad
+        dirname
         color-ls
         colorcat
         
@@ -701,6 +703,7 @@ sh bash
 fish
 
     keyword
+        ~
         if
         else
         end
@@ -715,6 +718,7 @@ fish
         for
         in
         set
+        pwd
         alias
         test
         function
