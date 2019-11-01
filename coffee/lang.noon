@@ -660,36 +660,39 @@ py
 sh bash
 
     keyword
-        cd 
-        rm
-        cp
-        open
-        while
-        ls
-        if
-        in
-        fi
-        do
-        pwd
-        npm
-        git
-        done
-        then
-        elif
-        else
         case
-        esac
-        exit
-        echo
-        head
-        tail
-        krep
-        noon
-        mkdir
-        konrad
-        dirname
+        cat
+        cd 
         color-ls
         colorcat
+        cp
+        dirname
+        do
+        done
+        echo
+        elif
+        else
+        esac
+        exit
+        fi
+        git
+        grep
+        head
+        if
+        in
+        konrad
+        krep
+        ls
+        mkdir
+        noon
+        npm
+        open
+        pwd
+        rm
+        sort
+        tail
+        then
+        while
         
     module
         getopts
