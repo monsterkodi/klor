@@ -11,8 +11,8 @@ kxk = require 'kxk'
 kxk.chai()
 _ = kxk._
 
-inc = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.deep.include     start:start, match:match, value:value
-nut = (rgs, start, match, value) -> rgs.map((r) -> _.pick r, ['start''match''value'] ).should.not.deep.include start:start, match:match, value:value
+inc = (rgs, start, match, clss) -> rgs.map((r) -> _.pick r, ['start''match''clss'] ).should.deep.include     start:start, match:match, clss:clss
+nut = (rgs, start, match, clss) -> rgs.map((r) -> _.pick r, ['start''match''clss'] ).should.not.deep.include start:start, match:match, clss:clss
 
 ext = 'coffee'
 lang    = (l) -> ext = l
@@ -102,7 +102,7 @@ describe 'ranges' ->
             
         rgs = ranges "(^\s*#\s*)(.*)$"
         for rng in rgs
-            rng.should.not.have.property 'value' 'comment'
+            rng.should.not.have.property 'clss' 'comment'
             
     it 'triple comment' ->
         
@@ -1352,14 +1352,14 @@ describe 'parse' ->
         lang 'coffee'
         
         parse("##").should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:"#" value:'punct comment' turd:"##"} 
-                    {start:1 length:1 match:"#" value:'comment'} 
+                    {start:0 length:1 match:"#" clss:'punct comment' turd:"##"} 
+                    {start:1 length:1 match:"#" clss:'comment'} 
                     ]]
     
         parse(",#a").should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:"," value:'punct' turd: ",#"} 
-                    {start:1 length:1 match:"#" value:'punct comment'} 
-                    {start:2 length:1 match:"a" value:'comment'} 
+                    {start:0 length:1 match:"," clss:'punct' turd: ",#"} 
+                    {start:1 length:1 match:"#" clss:'punct comment'} 
+                    {start:2 length:1 match:"a" clss:'comment'} 
                     ]]
                 
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
@@ -1371,19 +1371,19 @@ describe 'parse' ->
     it 'function' ->
     
         parse('->').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:'-' value:'punct function tail' turd: '->'} 
-                    {start:1 length:1 match:'>' value:'punct function head'} 
+                    {start:0 length:1 match:'-' clss:'punct function tail' turd: '->'} 
+                    {start:1 length:1 match:'>' clss:'punct function head'} 
                     ]]
         parse('=>').should.eql [ext:'coffee' chars:2 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:'=' value:'punct function bound tail' turd: '=>'} 
-                    {start:1 length:1 match:'>' value:'punct function bound head'} 
+                    {start:0 length:1 match:'=' clss:'punct function bound tail' turd: '=>'} 
+                    {start:1 length:1 match:'>' clss:'punct function bound head'} 
                     ]]
         parse('f=->1').should.eql [ext:'coffee' chars:5 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:'f' value:'function'} 
-                    {start:1 length:1 match:'=' value:'punct function'      turd:'=->' } 
-                    {start:2 length:1 match:'-' value:'punct function tail' turd:'->'} 
-                    {start:3 length:1 match:'>' value:'punct function head'} 
-                    {start:4 length:1 match:'1' value:'number'} 
+                    {start:0 length:1 match:'f' clss:'function'} 
+                    {start:1 length:1 match:'=' clss:'punct function'      turd:'=->' } 
+                    {start:2 length:1 match:'-' clss:'punct function tail' turd:'->'} 
+                    {start:3 length:1 match:'>' clss:'punct function head'} 
+                    {start:4 length:1 match:'1' clss:'number'} 
                     ]]
                     
     # 00     00  000  000   000  000  00     00   0000000   000      
@@ -1394,28 +1394,28 @@ describe 'parse' ->
     
     it 'minimal' ->
                     
-        parse('1').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' value:'number'} ]]
-        parse('a').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' value:'text'} ]]
-        parse('.').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' value:'punct'} ]]
+        parse('1').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' clss:'number'} ]]
+        parse('a').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' clss:'text'} ]]
+        parse('.').should.eql [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' clss:'punct'} ]]
     
         parse('1.a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                     {start:0  length:1 match:'1' value:'number'} 
-                     {start:1  length:1 match:'.' value:'punct property'} 
-                     {start:2  length:1 match:'a' value:'property'} 
+                     {start:0  length:1 match:'1' clss:'number'} 
+                     {start:1  length:1 match:'.' clss:'punct property'} 
+                     {start:2  length:1 match:'a' clss:'property'} 
                      ]]
                      
         parse('++a').should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                     {start:0  length:1 match:'+' value:'punct' turd:'++'} 
-                     {start:1  length:1 match:'+' value:'punct'} 
-                     {start:2  length:1 match:'a' value:'text'} 
+                     {start:0  length:1 match:'+' clss:'punct' turd:'++'} 
+                     {start:1  length:1 match:'+' clss:'punct'} 
+                     {start:2  length:1 match:'a' clss:'text'} 
                      ]]
                      
         parse("▸doc 'hello'").should.eql [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
-                      {start:0  length:1 match:'▸'     value:'punct meta'} 
-                      {start:1  length:3 match:'doc'   value:'meta'} 
-                      {start:5  length:1 match:"'"     value:'punct string single'} 
-                      {start:6  length:5 match:"hello" value:'string single'} 
-                      {start:11 length:1 match:"'"     value:'punct string single'} 
+                      {start:0  length:1 match:'▸'     clss:'punct meta'} 
+                      {start:1  length:3 match:'doc'   clss:'meta'} 
+                      {start:5  length:1 match:"'"     clss:'punct string single'} 
+                      {start:6  length:5 match:"hello" clss:'string single'} 
+                      {start:11 length:1 match:"'"     clss:'punct string single'} 
                       ]]
                       
     #  0000000  00000000    0000000    0000000  00000000  

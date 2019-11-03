@@ -71,8 +71,8 @@ codeTypes = ['interpolation' 'code triple']
 
         chunks: [
                     turd:   s
+                    clss:   s
                     match:  s
-                    value:  s
                     start:  n
                     length: n
                 ]
@@ -118,37 +118,37 @@ chunked = (lines, ext) ->
                     if m.index > 0
                         wl = m.index-(c-sc)
                         w = s[c-sc...m.index]
-                        line.chunks.push start:c, length:wl, match:w, value:'text'
+                        line.chunks.push start:c, length:wl, match:w, clss:'text'
                         c += wl
 
                     turd = punct = m[0]
 
                     pi = 0
                     advance = 1
-                    value = 'punct'
+                    clss = 'punct'
 
                     while pi < punct.length-1
                         pc = punct[pi]
                         advance = 1
                         if 0xD800 <= punct.charCodeAt(pi) <= 0xDBFF and 0xDC00 <= punct.charCodeAt(pi+1) <= 0xDFFF
                             advance = 2
-                            value = 'text'
+                            clss = 'text'
                             pc += punct[pi+1]
                         else
-                            value = 'punct'
+                            clss = 'punct'
                         pi += advance
-                        line.chunks.push start:c, length:advance, match:pc, turd:turd, value:value
+                        line.chunks.push start:c, length:advance, match:pc, turd:turd, clss:clss
                         c += advance
                         turd = turd[advance..]
 
                     if pi < punct.length
-                        line.chunks.push start:c, length:advance, match:punct[pi..], value:'punct'
+                        line.chunks.push start:c, length:advance, match:punct[pi..], clss:'punct'
                         c += advance
 
                 if c < sc+l        # check for remaining non-punct
                     rl = sc+l-c    # length of remainder
                     w = s[l-rl..]  # text   of remainder
-                    line.chunks.push start:c, length:rl, match:w, value:'text'
+                    line.chunks.push start:c, length:rl, match:w, clss:'text'
                     c += rl
 
         if line.chunks.length
@@ -191,12 +191,12 @@ fillComment = (n) ->
         restChunks = line.chunks[chunkIndex+n..]
         mightBeHeader = true
         for c in restChunks
-            c.value = 'comment'
+            c.clss = 'comment'
             if mightBeHeader and not HEADER.test c.match
                 mightBeHeader = false
         if mightBeHeader
             for c in restChunks
-                c.value += ' header'
+                c.clss += ' header'
     line.chunks.length - chunkIndex + n
 
 hashComment = ->
@@ -263,13 +263,13 @@ dashArrow = ->
     return if notCode
 
     markFunc = ->
-        if line.chunks[0].value == 'text'
+        if line.chunks[0].clss == 'text'
             if line.chunks[1].match == '=' and line.chunks[2].match != '>'
-                line.chunks[0].value = 'function'
-                line.chunks[1].value += ' function'
+                line.chunks[0].clss = 'function'
+                line.chunks[1].clss += ' function'
             else if line.chunks[1].match == ':'
-                line.chunks[0].value = 'method'
-                line.chunks[1].value += ' method'
+                line.chunks[0].clss = 'method'
+                line.chunks[1].clss += ' method'
 
     if chunk.turd
 
@@ -277,29 +277,29 @@ dashArrow = ->
             markFunc()
             addValue 0 'function tail'
             addValue 1 'function head'
-            if line.chunks[0].value == 'dictionary key' or line.chunks[0].turd?[..1] == '@:'
-                line.chunks[0].value = 'method'
-                line.chunks[1].value = 'punct method'
-            else if line.chunks[0].match == '@' and line.chunks[1].value == 'dictionary key'
-                line.chunks[0].value = 'punct method class'
-                line.chunks[1].value = 'method class'
-                line.chunks[2].value = 'punct method class'
+            if line.chunks[0].clss == 'dictionary key' or line.chunks[0].turd?[..1] == '@:'
+                line.chunks[0].clss = 'method'
+                line.chunks[1].clss = 'punct method'
+            else if line.chunks[0].match == '@' and line.chunks[1].clss == 'dictionary key'
+                line.chunks[0].clss = 'punct method class'
+                line.chunks[1].clss = 'method class'
+                line.chunks[2].clss = 'punct method class'
             return 2
 
         if chunk.turd.startsWith '=>'
             markFunc()
             addValue 0 'function bound tail'
             addValue 1 'function bound head'
-            if line.chunks[0].value == 'dictionary key'
-                line.chunks[0].value = 'method'
-                line.chunks[1].value = 'punct method'
+            if line.chunks[0].clss == 'dictionary key'
+                line.chunks[0].clss = 'method'
+                line.chunks[1].clss = 'punct method'
             return 2
 
 commentHeader = ->
 
     if topType == 'comment triple'
         if HEADER.test chunk.match
-            chunk.value = 'comment triple header'
+            chunk.clss = 'comment triple header'
             return 1
 
 #  0000000   0000000   00000000  00000000  00000000  00000000
@@ -333,7 +333,7 @@ coffeePunct = ->
             if chunk.turd[3] != '.'
                 return addValues 3 'range'
 
-        if prev.value.startsWith('text') or prev.value == 'property'
+        if prev.clss.startsWith('text') or prev.clss == 'property'
 
             prevEnd = prev.start+prev.length
             if chunk.match == '(' and prevEnd == chunk.start
@@ -352,7 +352,7 @@ coffeeWord = ->
 
     if prev = getChunk -1
 
-        if prev.value == 'punct meta'
+        if prev.clss == 'punct meta'
             if chunk.start == prev.start+1
                 setValue 0 'meta'
                 return 0 # give switch a chance
@@ -361,7 +361,7 @@ coffeeWord = ->
             setValue 0 'class'
             return 1
 
-        if chunk.value.startsWith 'keyword'
+        if chunk.clss.startsWith 'keyword'
 
             return 1 # we are done with the keyword
 
@@ -370,7 +370,7 @@ coffeeWord = ->
             addValue  0 'this'
             return 1
 
-        if (prev.value.startsWith('text') or prev.value == 'property') and prev.start+prev.length < chunk.start # spaced
+        if (prev.clss.startsWith('text') or prev.clss == 'property') and prev.start+prev.length < chunk.start # spaced
             return thisCall()
 
 property = -> # word
@@ -385,7 +385,7 @@ property = -> # word
             addValue -1 'property'
             setValue 0 'property'
             if prevPrev
-                if prevPrev.value not in ['property', 'number'] and not prevPrev.value.startsWith 'punct'
+                if prevPrev.clss not in ['property', 'number'] and not prevPrev.clss.startsWith 'punct'
                     setValue -2 'obj'
             return 1
 
@@ -426,7 +426,7 @@ cppWord = ->
                 setValue 0 'obj'
                 return 1
 
-    if chunk.value == 'text' and getmatch(1) == '('
+    if chunk.clss == 'text' and getmatch(1) == '('
         setValue 0 'function call'
         return 1
 
@@ -440,14 +440,14 @@ noonProp = ->
 
     if prev = getChunk -1
         if prev.start+prev.length+1 < chunk.start
-            if prev.value != 'obj'
+            if prev.clss != 'obj'
                 for i in [chunkIndex-1..0]
                     if i < chunkIndex-1 and line.chunks[i].start+line.chunks[i].length+1 < line.chunks[i+1].start
                         break
-                    if line.chunks[i].value == 'text' or line.chunks[i].value == 'obj'
-                        line.chunks[i].value = 'property'
-                    else if line.chunks[i].value == 'punct'
-                        line.chunks[i].value = 'punct property'
+                    if line.chunks[i].clss == 'text' or line.chunks[i].clss == 'obj'
+                        line.chunks[i].clss = 'property'
+                    else if line.chunks[i].clss == 'punct'
+                        line.chunks[i].clss = 'punct property'
                     else
                         break
     0
@@ -488,7 +488,7 @@ urlPunct = ->
                 return 6
 
         if chunk.match == '.'
-            if not prev.value.startsWith('number') and prev.value != 'semver' and prev.match not in '\\./'
+            if not prev.clss.startsWith('number') and prev.clss != 'semver' and prev.match not in '\\./'
                 if next = getChunk 1
                     if next.start == chunk.start+chunk.length
                         fileext = next.match
@@ -502,13 +502,13 @@ urlPunct = ->
 
             for i in [chunkIndex..0]
                 break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1]?.start
-                break if line.chunks[i].value.endsWith 'dir'
-                break if line.chunks[i].value.startsWith 'url'
+                break if line.chunks[i].clss.endsWith 'dir'
+                break if line.chunks[i].clss.startsWith 'url'
                 break if line.chunks[i].match == '"'
-                if line.chunks[i].value.startsWith 'punct'
-                    line.chunks[i].value = 'punct dir'
+                if line.chunks[i].clss.startsWith 'punct'
+                    line.chunks[i].clss = 'punct dir'
                 else
-                    line.chunks[i].value = 'text dir'
+                    line.chunks[i].clss = 'text dir'
 
             return 1
     0
@@ -533,13 +533,13 @@ jsPunct = ->
 
     if prev = getChunk -1
         if chunk.match == '('
-            if prev.value.startsWith('text') or prev.value == 'property'
+            if prev.clss.startsWith('text') or prev.clss == 'property'
                 setValue -1 'function call'
                 return 1
 
 jsWord = ->
 
-    if chunk.value == 'keyword function'
+    if chunk.clss == 'keyword function'
         if getmatch(-1) == '=' and getValue(-2).startsWith 'text'
             setValue -2 'function'
     0 # we need this here
@@ -550,7 +550,7 @@ dict = ->
 
     if chunk.match == ':' and not chunk.turd?.startsWith '::'
         if prev = getChunk -1
-            if prev.value.split(' ')[0] in ['string', 'number', 'text', 'keyword']
+            if prev.clss.split(' ')[0] in ['string' 'number' 'text' 'keyword']
                 setValue -1 'dictionary key'
                 setValue  0 'punct dictionary'
                 return 1
@@ -569,10 +569,10 @@ jsonPunct = ->
         if prev = getChunk -1
             if prev.match == '"'
                 for i in [chunkIndex-2..0]
-                    if line.chunks[i].value == 'punct string double'
-                        line.chunks[i].value = 'punct dictionary'
+                    if line.chunks[i].clss == 'punct string double'
+                        line.chunks[i].clss = 'punct dictionary'
                         break
-                    line.chunks[i].value = 'dictionary key'
+                    line.chunks[i].clss = 'dictionary key'
                 setValue -1 'punct dictionary'
                 setValue  0 'punct dictionary'
                 return 1
@@ -616,19 +616,19 @@ regexp = ->
     if chunk.match == '/'
 
         if topType == 'regexp'
-            chunk.value += ' regexp end'
+            chunk.clss += ' regexp end'
             popStack()
             return 1
 
         if chunkIndex
             prev = getChunk -1
             next = getChunk +1
-            if not prev.value.startsWith('punct') and not prev.value.startsWith('keyword') or prev.match in ")]"
+            if not prev.clss.startsWith('punct') and not prev.clss.startsWith('keyword') or prev.match in ")]"
                 return if (prev.start+prev.length <  chunk.start) and next?.start >  chunk.start+1
                 return if (prev.start+prev.length == chunk.start) and next?.start == chunk.start+1
 
             return if next?.match == '='
-            return if prev.value.startsWith 'number'
+            return if prev.clss.startsWith 'number'
 
         pushStack type:'regexp'
         return addValue 0 'regexp start'
@@ -735,12 +735,12 @@ number = ->
                 setValue  0 'number float'
                 return 1
 
-        chunk.value = 'number'
+        chunk.clss = 'number'
         return 1
 
     if HEXNUM.test chunk.match
 
-        chunk.value = 'number hex'
+        chunk.clss = 'number hex'
         return 1
 
 # 00000000  000       0000000    0000000   000000000
@@ -760,7 +760,7 @@ float = ->
                 setValue  0 'number float'
                 return 1
 
-        chunk.value = 'number float'
+        chunk.clss = 'number float'
         return 1
 
 #  0000000   0000000   0000000
@@ -781,7 +781,7 @@ cssWord = ->
 
     if prev = getChunk -1
 
-        if prev.match == '.' and getChunk(-2)?.value != 'number'
+        if prev.match == '.' and getChunk(-2)?.clss != 'number'
             addValue -1 'class'
             setValue  0 'class'
             return 1
@@ -800,9 +800,9 @@ cssWord = ->
 
         if prev.match == '-'
             if prevPrev = getChunk -2
-                if prevPrev.value in ['class''function']
-                    addValue -1 prevPrev.value
-                    setValue  0 prevPrev.value
+                if prevPrev.clss in ['class''function']
+                    addValue -1 prevPrev.clss
+                    setValue  0 prevPrev.clss
                     return 1
 
 # 00     00  0000000
@@ -925,7 +925,7 @@ keyword = ->
         return
 
     if lang[ext].hasOwnProperty(chunk.match)
-        chunk.value = lang[ext][chunk.match]
+        chunk.clss = lang[ext][chunk.match]
         return # give coffeeFunc a chance, number bails for us
 
 # 000   000  00     00  000
@@ -994,9 +994,9 @@ stacked = ->
     if stackTop
         return if stackTop.weak
         if stackTop.strong
-            chunk.value = topType
+            chunk.clss = topType
         else
-            chunk.value += ' ' + topType
+            chunk.clss += ' ' + topType
         return 1
 
 pushExt = (mtch) ->
@@ -1032,12 +1032,12 @@ popStack = ->
     notCode = stackTop and topType not in codeTypes
 
 getChunk = (d) -> line.chunks[chunkIndex+d]
-setValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].value = value
-getValue = (d) -> getChunk(d)?.value ? ''
+setValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].clss = value
+getValue = (d) -> getChunk(d)?.clss ? ''
 getmatch = (d) -> getChunk(d)?.match ? ''
 addValue = (d, value) ->
     if 0 <= chunkIndex+d < line.chunks.length
-        line.chunks[chunkIndex+d].value += ' ' + value
+        line.chunks[chunkIndex+d].clss += ' ' + value
     1
 
 addValues = (n,value) ->
@@ -1135,7 +1135,7 @@ blocked = (lines) ->
                         break
                 if mightBeHeader
                     for chunk in line.chunks
-                        chunk.value = 'comment triple header'
+                        chunk.clss = 'comment triple header'
                     continue
 
             if stackTop.fill then popStack()
@@ -1167,7 +1167,7 @@ blocked = (lines) ->
 
             beforeIndex = chunkIndex
 
-            if chunk.value == 'punct'
+            if chunk.clss == 'punct'
 
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
@@ -1225,7 +1225,7 @@ parse = (lines, ext='coffee') -> blocked chunked lines, ext
 
 kolorize = (chunk) -> 
     
-    if cn = kolor.map[chunk.value]
+    if cn = kolor.map[chunk.clss]
         if cn instanceof Array
             v = chunk.match
             for cr in cn
@@ -1234,18 +1234,18 @@ kolorize = (chunk) ->
         else
             return kolor[cn] chunk.match
             
-    if chunk.value.endsWith 'file'
+    if chunk.clss.endsWith 'file'
         w8 chunk.match
-    else if chunk.value.endsWith 'ext'
+    else if chunk.clss.endsWith 'ext'
         w3 chunk.match
-    else if chunk.value.startsWith 'punct'
-        if LI.test chunk.value
-            kolorize match:chunk.match, value:chunk.value.replace LI, ' '
+    else if chunk.clss.startsWith 'punct'
+        if LI.test chunk.clss
+            kolorize match:chunk.match, clss:chunk.clss.replace LI, ' '
         else
             w2 chunk.match
     else
-        if LI.test chunk.value
-            kolorize match:chunk.match, value:chunk.value.replace LI, ' '
+        if LI.test chunk.clss
+            kolorize match:chunk.match, clss:chunk.clss.replace LI, ' '
         else
             chunk.match
 

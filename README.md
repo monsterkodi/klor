@@ -26,7 +26,7 @@ It exports the following function:
     number: index+1 
     chunks: [
                 match:  string  # without whitespace characters
-                value:  string  # description of match
+                clss:   string  # value of match
                 turd:   string  # following punctuation characters
                 start:  number  # character index of match in line
                 length: number  # length of match
