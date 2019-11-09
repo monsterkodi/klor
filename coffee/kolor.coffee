@@ -6,6 +6,119 @@
 000   000   0000000   0000000   0000000   000   000
 ###
 
+f = (r, g, b) -> '\x1b[38;5;' + (16 + 36*r + 6*g + b) + 'm'
+F = (r, g, b) -> '\x1b[48;5;' + (16 + 36*r + 6*g + b) + 'm'
+
+r = (i=4) -> (i < 6) and f(i, 0, 0) or f(  5, i-5, i-5)
+R = (i=4) -> (i < 6) and F(i, 0, 0) or F(  5, i-5, i-5)
+g = (i=4) -> (i < 6) and f(0, i, 0) or f(i-5,   5, i-5)
+G = (i=4) -> (i < 6) and F(0, i, 0) or F(i-5,   5, i-5)
+b = (i=4) -> (i < 6) and f(0, 0, i) or f(i-5, i-5,   5)
+B = (i=4) -> (i < 6) and F(0, 0, i) or F(i-5, i-5,   5)
+y = (i=4) -> (i < 6) and f(i, i, 0) or f(  5,   5, i-5)
+Y = (i=4) -> (i < 6) and F(i, i, 0) or F(  5,   5, i-5)
+m = (i=4) -> (i < 6) and f(i, 0, i) or f(  5, i-5,   5)
+M = (i=4) -> (i < 6) and F(i, 0, i) or F(  5, i-5,   5)
+c = (i=4) -> (i < 6) and f(0, i, i) or f(i-5,  5,    5)
+C = (i=4) -> (i < 6) and F(0, i, i) or F(i-5,  5,    5)
+w = (i=4) -> '\x1b[38;5;' + (232+(i-1)*3) + 'm'
+W = (i=4) -> '\x1b[48;5;' + (232+(i-1)*3+2) + 'm'
+
+FG_COLORS = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
+BG_COLORS = ['R' 'M' 'B' 'Y' 'G' 'C' 'W']
+
+wrap = (open, close, searchRegex, replaceValue) ->
+    (s) -> open + (~(s += "").indexOf(close, 4) and s.replace(searchRegex, replaceValue) or s) + close
+
+init = (open, close) -> wrap "\x1b[#{open}m", "\x1b[#{close}m", new RegExp("\\x1b\\[#{close}m", "g"), "\x1b[#{open}m"
+
+F256 = (open) -> wrap open, "\x1b[39m", new RegExp("\\x1b\\[39m", "g"), open
+B256 = (open) -> wrap open, "\x1b[49m", new RegExp("\\x1b\\[49m", "g"), open
+
+exports.bold      = wrap "\x1b[1m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[1m"
+exports.dim       = wrap "\x1b[2m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[2m"
+exports.reset     = init 0  0
+exports.italic    = init 3  23
+exports.underline = init 4  24
+exports.inverse   = init 7  27
+exports.hidden    = init 8  28
+exports.black     = init 30 39
+exports.red       = init 31 39
+exports.green     = init 32 39
+exports.yellow    = init 33 39
+exports.blue      = init 34 39
+exports.magenta   = init 35 39
+exports.cyan      = init 36 39
+exports.white     = init 37 39
+exports.gray      = init 90 39
+
+exports.BG_COLORS = BG_COLORS 
+exports.FG_COLORS = FG_COLORS 
+exports.BG_NAMES  = []
+exports.FG_NAMES  = []
+
+for bg in BG_COLORS
+    exports[bg] = eval bg
+    for i in [1..8]
+        exports[bg+i] = B256 exports[bg] i
+        exports.BG_NAMES.push bg+i
+
+for fg in FG_COLORS
+    exports[fg] = eval fg
+    for i in [1..8]
+        exports[fg+i] = F256 exports[fg] i
+        exports.FG_NAMES.push fg+i
+
+#  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
+# 000        000      000   000  000   000  000   000  000      000     000   000       
+# 000  0000  000      000   000  0000000    000000000  000      000    000    0000000   
+# 000   000  000      000   000  000   000  000   000  000      000   000     000       
+#  0000000   0000000   0000000   0000000    000   000  0000000  000  0000000  00000000  
+
+exports.globalize = ->
+    
+    for fg in FG_COLORS
+        
+        for i in [1..8]
+            bg = fg.toUpperCase()
+            global[fg+i] = exports[fg+i] 
+            global[bg+i] = exports[bg+i] 
+            
+        for n in ['underline''bold''dim''italic''inverse''reset''strip'
+                  'black''red''green''yellow''blue''magenta''cyan''white''gray']
+            global[n] = exports[n]
+        
+#  0000000  000000000  00000000   000  00000000   
+# 000          000     000   000  000  000   000  
+# 0000000      000     0000000    000  00000000   
+#      000     000     000   000  000  000        
+# 0000000      000     000   000  000  000        
+
+STRIPANSI = /\x1B[[(?);]{0,2}(;?\d)*./g
+exports.strip = (s) -> String(s).replace STRIPANSI, ''
+                
+# 00     00   0000000   000  000   000  
+# 000   000  000   000  000  0000  000  
+# 000000000  000000000  000  000 0 000  
+# 000 0 000  000   000  000  000  0000  
+# 000   000  000   000  000  000   000  
+
+if require.main == module
+
+    reset = '\x1b[0m'
+    bold  = '\x1b[1m'
+                
+    for bg in BG_COLORS
+        for i in [1..8]
+            s  = reset
+            fg = bg.toLowerCase()
+            s += module.exports[fg+i]("#{fg+i} #{bg+i} ")
+            for fg in FG_COLORS
+                s += module.exports[bg+i] module.exports[fg+(9-i)] ' ' + fg + ' '
+            log s + reset
+            
+    log " "
+    
 exports.map =
     'punct':                            'w3'
     'punct this':                       'b3'
@@ -127,117 +240,5 @@ exports.map =
     'comment triple':                   'w4'
     'comment header':                   ['g1' 'G1']
     'comment triple header':            ['g2' 'G2']
-
-f = (r, g, b) -> '\x1b[38;5;' + (16 + 36*r + 6*g + b) + 'm'
-F = (r, g, b) -> '\x1b[48;5;' + (16 + 36*r + 6*g + b) + 'm'
-
-r = (i=4) -> (i < 6) and f(i, 0, 0) or f(  5, i-5, i-5)
-R = (i=4) -> (i < 6) and F(i, 0, 0) or F(  5, i-5, i-5)
-g = (i=4) -> (i < 6) and f(0, i, 0) or f(i-5,   5, i-5)
-G = (i=4) -> (i < 6) and F(0, i, 0) or F(i-5,   5, i-5)
-b = (i=4) -> (i < 6) and f(0, 0, i) or f(i-5, i-5,   5)
-B = (i=4) -> (i < 6) and F(0, 0, i) or F(i-5, i-5,   5)
-y = (i=4) -> (i < 6) and f(i, i, 0) or f(  5,   5, i-5)
-Y = (i=4) -> (i < 6) and F(i, i, 0) or F(  5,   5, i-5)
-m = (i=4) -> (i < 6) and f(i, 0, i) or f(  5, i-5,   5)
-M = (i=4) -> (i < 6) and F(i, 0, i) or F(  5, i-5,   5)
-c = (i=4) -> (i < 6) and f(0, i, i) or f(i-5,  5,    5)
-C = (i=4) -> (i < 6) and F(0, i, i) or F(i-5,  5,    5)
-w = (i=4) -> '\x1b[38;5;' + (232+(i-1)*3) + 'm'
-W = (i=4) -> '\x1b[48;5;' + (232+(i-1)*3+2) + 'm'
-
-FG_COLORS = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
-BG_COLORS = ['R' 'M' 'B' 'Y' 'G' 'C' 'W']
-
-wrap = (open, close, searchRegex, replaceValue) ->
-    (s) -> open + (~(s += "").indexOf(close, 4) and s.replace(searchRegex, replaceValue) or s) + close
-
-init = (open, close) -> wrap "\x1b[#{open}m", "\x1b[#{close}m", new RegExp("\\x1b\\[#{close}m", "g"), "\x1b[#{open}m"
-
-F256 = (open) -> wrap open, "\x1b[39m", new RegExp("\\x1b\\[39m", "g"), open
-B256 = (open) -> wrap open, "\x1b[49m", new RegExp("\\x1b\\[49m", "g"), open
-
-exports.bold      = wrap "\x1b[1m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[1m"
-exports.dim       = wrap "\x1b[2m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[2m"
-exports.reset     = init 0  0
-exports.italic    = init 3  23
-exports.underline = init 4  24
-exports.inverse   = init 7  27
-exports.hidden    = init 8  28
-exports.black     = init 30 39
-exports.red       = init 31 39
-exports.green     = init 32 39
-exports.yellow    = init 33 39
-exports.blue      = init 34 39
-exports.magenta   = init 35 39
-exports.cyan      = init 36 39
-exports.white     = init 37 39
-exports.gray      = init 90 39
-
-exports.BG_COLORS = BG_COLORS 
-exports.FG_COLORS = FG_COLORS 
-exports.BG_NAMES  = []
-exports.FG_NAMES  = []
-
-for bg in BG_COLORS
-    exports[bg] = eval bg
-    for i in [1..8]
-        exports[bg+i] = B256 exports[bg] i
-        exports.BG_NAMES.push bg+i
-
-for fg in FG_COLORS
-    exports[fg] = eval fg
-    for i in [1..8]
-        exports[fg+i] = F256 exports[fg] i
-        exports.FG_NAMES.push fg+i
-
-#  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
-# 000        000      000   000  000   000  000   000  000      000     000   000       
-# 000  0000  000      000   000  0000000    000000000  000      000    000    0000000   
-# 000   000  000      000   000  000   000  000   000  000      000   000     000       
-#  0000000   0000000   0000000   0000000    000   000  0000000  000  0000000  00000000  
-
-exports.globalize = ->
     
-    for fg in FG_COLORS
-        
-        for i in [1..8]
-            bg = fg.toUpperCase()
-            global[fg+i] = exports[fg+i] 
-            global[bg+i] = exports[bg+i] 
-            
-        for n in ['underline''bold''dim''italic''inverse''reset''strip'
-                  'black''red''green''yellow''blue''magenta''cyan''white''gray']
-            global[n] = exports[n]
-        
-#  0000000  000000000  00000000   000  00000000   
-# 000          000     000   000  000  000   000  
-# 0000000      000     0000000    000  00000000   
-#      000     000     000   000  000  000        
-# 0000000      000     000   000  000  000        
-
-STRIPANSI = /\x1B[[(?);]{0,2}(;?\d)*./g
-exports.strip = (s) -> String(s).replace STRIPANSI, ''
-                
-# 00     00   0000000   000  000   000  
-# 000   000  000   000  000  0000  000  
-# 000000000  000000000  000  000 0 000  
-# 000 0 000  000   000  000  000  0000  
-# 000   000  000   000  000  000   000  
-
-if require.main == module
-
-    reset = '\x1b[0m'
-    bold  = '\x1b[1m'
-                
-    for bg in BG_COLORS
-        for i in [1..8]
-            s  = reset
-            fg = bg.toLowerCase()
-            s += module.exports[fg+i]("#{fg+i} #{bg+i} ")
-            for fg in FG_COLORS
-                s += module.exports[bg+i] module.exports[fg+(9-i)] ' ' + fg + ' '
-            log s + reset
-            
-    log " "
     
