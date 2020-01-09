@@ -209,7 +209,7 @@ json noon yml yaml
 # 000       000        000      
 #  0000000  000        000      
 
-cpp hpp cxx c h cs
+cpp hpp cxx c h cs frag vert
 
     define
         ifdef
@@ -219,6 +219,10 @@ cpp hpp cxx c h cs
         endif
         include
         pragma
+        uniform
+        precision
+        varying
+        attribute
         
     keyword
         if
@@ -275,11 +279,19 @@ cpp hpp cxx c h cs
         uint64
         size_t
         wchar_t
+        vec2
+        vec3
+        vec4
+        mat2
+        mat3
+        mat4
 
     punct
         const
         override
         static
+        out
+        in
 
     nil
         err
@@ -288,6 +300,11 @@ cpp hpp cxx c h cs
         NULL
         false
         error
+        
+    module
+        iTime
+        iMouse
+        iResolution
         
 # 000   000  000000000  00     00  000      
 # 000   000     000     000   000  000      

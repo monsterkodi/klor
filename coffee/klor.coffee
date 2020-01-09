@@ -1055,6 +1055,8 @@ handlers =
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     ini:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[          number                    ]
     cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    frag: punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    vert: punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
     hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
     c:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
     h:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
@@ -1310,7 +1312,7 @@ module.exports =
 
 ▸test 'profile'
 
-    {slash} = require 'kxk'
+    { slash } = require 'kxk'
     text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
     text1 = slash.readText "#{__dirname}/test.coffee"
 
