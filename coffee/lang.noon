@@ -85,6 +85,10 @@ coffee
         unless
         super
         extends
+        yes
+        
+    nil
+        no
                         
 #       000   0000000  
 #       000  000       
@@ -230,6 +234,7 @@ cpp hpp cxx c h cs frag vert
         for 
         while
         switch
+        default
         case
         break
         continue
@@ -282,6 +287,9 @@ cpp hpp cxx c h cs frag vert
         vec2
         vec3
         vec4
+        ivec2
+        ivec3
+        ivec4
         mat2
         mat3
         mat4
@@ -305,6 +313,10 @@ cpp hpp cxx c h cs frag vert
         iTime
         iMouse
         iResolution
+        iChannel0
+        iChannel1
+        iChannel2
+        iChannel3
         
 # 000   000  000000000  00     00  000      
 # 000   000     000     000   000  000      
