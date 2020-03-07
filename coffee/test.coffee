@@ -656,9 +656,9 @@ describe 'ranges' ->
     # 000  000   000   000  000       000       000       000       
     # 000   000   0000000   000       000       00000000  00000000  
     
-    it 'koffee' ->
+    it 'koffee constructor' ->
         
-        lang 'koffee'
+        lang 'coffee'
         
         rgs = ranges " @: ->"
         inc rgs, 1 "@" 'method'
@@ -671,6 +671,10 @@ describe 'ranges' ->
         inc rgs, 2 ":" 'punct method'
         inc rgs, 3 "-" 'punct function tail'
         inc rgs, 4 ">" 'punct function head'
+
+    it 'koffee meta if then else' ->
+        
+        lang 'coffee'
         
         rgs = ranges "▸if ▸then ▸elif ▸else"
         inc rgs, 0  "▸"    'punct meta'
@@ -682,6 +686,10 @@ describe 'ranges' ->
         inc rgs, 16 "▸"    'punct meta'
         inc rgs, 17 "else" 'meta'
 
+    it 'koffee no comma' ->
+        
+        lang 'coffee'
+        
         rgs = ranges "[1 'x' a:1 c:d]"
         inc rgs, 1  "1"   'number'
         inc rgs, 4  "x"   'string single'
@@ -852,7 +860,7 @@ describe 'ranges' ->
         inc rgs, 10 '/'      'punct regexp start'
         inc rgs, 14 '\\'     'punct escape regexp'
         inc rgs, 17 '/'      'punct regexp end'
-        inc rgs, 19 ';'      'punct'
+        inc rgs, 19 ';'      'punct minor'
         
         rgs = ranges "a = 1 / 2"
         inc rgs, 6 '/',     'punct'
@@ -917,7 +925,7 @@ describe 'ranges' ->
         inc dss[0], 0  "/"  'punct regexp triple'
         inc dss[0], 1  "/"  'punct regexp triple'
         inc dss[0], 2  "/"  'punct regexp triple'
-        inc dss[1], 4  "("  'punct regexp triple'
+        inc dss[1], 4  "("  'punct minor regexp triple'
         inc dss[1], 6  "\\" 'punct escape regexp triple'
         inc dss[1], 12 "#"  'punct comment'
         inc dss[1], 14 "comment" 'comment'
@@ -1357,7 +1365,7 @@ describe 'parse' ->
                     ]]
     
         parse(",#a").should.eql [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                    {start:0 length:1 match:"," clss:'punct' turd: ",#"} 
+                    {start:0 length:1 match:"," clss:'punct minor' turd: ",#"} 
                     {start:1 length:1 match:"#" clss:'punct comment'} 
                     {start:2 length:1 match:"a" clss:'comment'} 
                     ]]

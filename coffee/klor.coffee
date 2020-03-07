@@ -19,7 +19,7 @@
     log 'output:'  jsonFile
 
     lang = {}
-    exts = ['txt''log''koffee']
+    exts = ['txt''log']
     for names, keywords of noon_load noonFile
 
         for ext in names.split /\s/
@@ -84,7 +84,6 @@ codeTypes = ['interpolation' 'code triple']
 chunked = (lines, ext) ->
 
     ext = ext[1..] if ext[0] == '.'
-    ext = 'coffee' if ext == 'koffee'
     ext = 'txt' if ext not in exts
 
     lineno = 0
@@ -136,13 +135,18 @@ chunked = (lines, ext) ->
                             pc += punct[pi+1]
                         else
                             clss = 'punct'
+                            if pc in [','';''{''}''('')']
+                                clss += ' minor'
                         pi += advance
                         line.chunks.push start:c, length:advance, match:pc, turd:turd, clss:clss
                         c += advance
                         turd = turd[advance..]
 
                     if pi < punct.length
-                        line.chunks.push start:c, length:advance, match:punct[pi..], clss:'punct'
+                        clss = 'punct'
+                        if punct[pi..] in [','';''{''}''('')']
+                            clss += ' minor'
+                        line.chunks.push start:c, length:advance, match:punct[pi..], clss:clss
                         c += advance
 
                 if c < sc+l        # check for remaining non-punct
@@ -385,7 +389,7 @@ property = -> # word
             addValue -1 'property'
             setValue 0 'property'
             if prevPrev
-                if prevPrev.clss not in ['property', 'number'] and not prevPrev.clss.startsWith 'punct'
+                if prevPrev.clss not in ['property' 'number'] and not prevPrev.clss.startsWith 'punct'
                     setValue -2 'obj'
             return 1
 
@@ -1169,7 +1173,7 @@ blocked = (lines) ->
 
             beforeIndex = chunkIndex
 
-            if chunk.clss == 'punct'
+            if chunk.clss.startsWith 'punct'
 
                 if extTop
                     if extTop.switch.end? and extTop.switch.end == chunk.turd
