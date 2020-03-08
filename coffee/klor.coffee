@@ -96,6 +96,8 @@ chunked = (lines, ext) ->
             number: lineno
             ext:    ext
 
+        return line if not text instanceof String
+        
         chunks = replaceTabs(text).split SPACE
 
         if chunks.length == 1 and chunks[0] == ''
