@@ -301,6 +301,16 @@ dashArrow = ->
                 line.chunks[1].clss = 'punct method'
             return 2
 
+cppPointer = ->
+    
+    return if notCode
+    
+    if chunk.turd
+        if chunk.turd.startsWith '->'
+            addValue 0 'arrow tail'
+            addValue 1 'arrow head'
+            return 2
+            
 commentHeader = ->
 
     if topType == 'comment triple'
@@ -428,7 +438,7 @@ cppWord = ->
                 setValue 0 'struct'
                 return 1
 
-            when 'A'
+            when 'A' 'U'
                 setValue 0 'obj'
                 return 1
 
@@ -1059,13 +1069,13 @@ handlers =
     js:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
-    ini:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[          number                    ]
-    cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
-    frag: punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
-    vert: punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
-    hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
-    c:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
-    h:    punct:[ starComment,  slashComment, simpleString, cppMacro                         ], word:[ keyword, number, float, cppWord    ]
+    ini:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[          number                    ]
+    cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    frag: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    vert: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    c:    punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    h:    punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     cs:   punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     pug:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
     styl: punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, cssWord, number           ]
