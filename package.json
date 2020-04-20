@@ -14,10 +14,7 @@
   ],
   "author": "monsterkodi",
   "license": "Unlicense",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/monsterkodi/klor.git"
-  },
+  "repository": "github:monsterkodi/klor",
   "bugs": {
     "url": "https://github.com/monsterkodi/klor/issues"
   },
