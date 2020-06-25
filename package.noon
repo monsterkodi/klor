@@ -1,5 +1,5 @@
 name            klor
-version         2.9.0
+version         2.10.0
 description     syntax highlighting
 keywords
                 syntax
@@ -22,7 +22,7 @@ scripts
                 lang    ./node_modules/.bin/koffee --lang ./coffee/klor.coffee
 devDependencies
                 koffee    ^1.12.0
-                kxk       ^0.389.0
-                noon      ^3.0.0
-                mocha     ^7.1.1
-                onchange  ^6.1.0
+                kxk       ^0.391.0
+                noon      ^3.0.3
+                mocha     ^8.0.1
+                onchange  ^7.0.2

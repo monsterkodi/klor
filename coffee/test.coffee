@@ -325,6 +325,14 @@ describe 'ranges' ->
         rgs = ranges '"#{__dirname}/../"'
         inc rgs, 12, '}' 'punct string interpolation end'
         inc rgs, 13, '/' 'string double'
+        
+        lang 'txt'
+        
+        rgs = ranges "it's all we'll ever need. we'd never do that!"
+        inc rgs, 2  "'" 'punct'
+        inc rgs, 3  "s" 'text'
+        inc rgs, 11 "'" 'punct'
+        inc rgs, 28 "'" 'punct'
 
     # 000   000   0000000    0000000   000   000  
     # 0000  000  000   000  000   000  0000  000  

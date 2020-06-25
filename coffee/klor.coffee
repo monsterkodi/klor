@@ -683,6 +683,11 @@ simpleString = ->
             when '"' then 'string double'
             when "'" then 'string single'
 
+        if chunk.match == "'"
+            next = getChunk 1
+            if next?.match in ['s''ll''d']
+                return stacked()
+            
         if topType == type
             addValue 0 type
             popStack()
