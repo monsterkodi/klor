@@ -333,6 +333,13 @@ describe 'ranges' ->
         inc rgs, 3  "s" 'text'
         inc rgs, 11 "'" 'punct'
         inc rgs, 28 "'" 'punct'
+        
+        rgs = ranges "['s' 'll' 'd' 't']"
+        inc rgs, 1  "'" 'punct string single'
+        inc rgs, 2  "s" 'string single'
+        inc rgs, 3  "'" 'punct string single'
+        inc rgs, 5  "'" 'punct string single'
+        inc rgs, 8  "'" 'punct string single'
 
     # 000   000   0000000    0000000   000   000  
     # 0000  000  000   000  000   000  0000  000  

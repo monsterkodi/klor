@@ -685,8 +685,11 @@ simpleString = ->
 
         if chunk.match == "'"
             next = getChunk 1
-            if next?.match in ['s''ll''d']
-                return stacked()
+            
+            if next?.match in ['s' 'll' 'd' 't']
+                scnd = getChunk 2
+                if not scnd or scnd.match != "'"
+                    return stacked()
             
         if topType == type
             addValue 0 type
