@@ -584,11 +584,11 @@ jsonPunct = ->
     if chunk.match == ':'
         if prev = getChunk -1
             if prev.match == '"'
-                for i in [chunkIndex-2..0]
-                    if line.chunks[i].clss == 'punct string double'
+                for i in [Math.max(0,chunkIndex-2)..0]
+                    if line.chunks[i]?.clss == 'punct string double'
                         line.chunks[i].clss = 'punct dictionary'
                         break
-                    line.chunks[i].clss = 'dictionary key'
+                    line.chunks[i]?.clss = 'dictionary key'
                 setValue -1 'punct dictionary'
                 setValue  0 'punct dictionary'
                 return 1
@@ -686,7 +686,7 @@ simpleString = ->
         if chunk.match == "'"
             next = getChunk 1
             
-            if next?.match in ['s' 'll' 'd' 't']
+            if next?.match in ['s' 'd' 't' 'll' 're']
                 scnd = getChunk 2
                 if not scnd or scnd.match != "'"
                     return stacked()
