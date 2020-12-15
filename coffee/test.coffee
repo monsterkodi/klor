@@ -334,6 +334,14 @@ describe 'ranges' ->
         inc rgs, 11 "'" 'punct'
         inc rgs, 28 "'" 'punct'
         
+        rgs = ranges "'it' s, 'we' ll"
+        inc rgs, 0  "'" 'punct string single'
+        inc rgs, 3  "'" 'punct string single'
+        inc rgs, 5  "s" 'text'
+        inc rgs, 8  "'" 'punct string single'
+        inc rgs, 11  "'" 'punct string single'
+        inc rgs, 13  "ll" 'text'
+        
         rgs = ranges "['s' 'll' 'd' 't']"
         inc rgs, 1  "'" 'punct string single'
         inc rgs, 2  "s" 'string single'
