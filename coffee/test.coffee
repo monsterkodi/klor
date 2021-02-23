@@ -1545,4 +1545,25 @@ describe 'parse' ->
         b[2].should.include.property 'ext' 'md'
         b[3].should.include.property 'ext' 'md'
         b[4].should.include.property 'ext' 'js'
-            
+        
+#  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
+# 000        000      000   000  000   000  000   000  000      000     000   000       
+# 000  0000  000      000   000  0000000    000000000  000      000    000    0000000   
+# 000   000  000      000   000  000   000  000   000  000      000   000     000       
+#  0000000   0000000   0000000   0000000    000   000  0000000  000  0000000  00000000  
+
+describe 'globalize' ->
+
+    it 'before' ->   
+        global['red'].should.not.eql klor.kolor.red
+
+    it 'after' ->  
+        klor.kolor.globalize()
+        global['red'].should.eql klor.kolor.red
+        
+    it 'disable' ->  
+        klor.kolor.globalize 'disable'
+        global['red'].should.not.eql klor.kolor.red
+        global['red']('txt').should.eql 'txt'
+        
+        
