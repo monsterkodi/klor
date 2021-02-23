@@ -27,6 +27,7 @@ W = (i=4) -> '\x1b[48;5;' + (232+(i-1)*3+2) + 'm'
 FG_COLORS = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
 BG_COLORS = ['R' 'M' 'B' 'Y' 'G' 'C' 'W']
 
+noop = (s) -> s
 wrap = (open, close, searchRegex, replaceValue) ->
     (s) -> open + (~(s += "").indexOf(close, 4) and s.replace(searchRegex, replaceValue) or s) + close
 
@@ -75,18 +76,24 @@ for fg in FG_COLORS
 # 000   000  000      000   000  000   000  000   000  000      000   000     000       
 #  0000000   0000000   0000000   0000000    000   000  0000000  000  0000000  00000000  
 
-exports.globalize = ->
+exports.globalize = (disabled) ->
+    
+    if disabled
+        exp = noop
+    else
+        exp = (n) -> exports[n]
     
     for fg in FG_COLORS
         
+            
         for i in [1..8]
             bg = fg.toUpperCase()
-            global[fg+i] = exports[fg+i] 
-            global[bg+i] = exports[bg+i] 
+            global[fg+i] = exp [fg+i] 
+            global[bg+i] = exp [bg+i] 
             
         for n in ['underline''bold''dim''italic''inverse''reset''strip'
                   'black''red''green''yellow''blue''magenta''cyan''white''gray']
-            global[n] = exports[n]
+            global[n] = exp [n]
         
 #  0000000  000000000  00000000   000  00000000   
 # 000          000     000   000  000  000   000  
