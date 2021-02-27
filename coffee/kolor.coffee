@@ -92,7 +92,7 @@ exports.globalize = (enabled=true) ->
             
         for n in ['underline''bold''dim''italic''inverse''reset''strip'
                   'black''red''green''yellow''blue''magenta''cyan''white''gray']
-            global[n] = exp [n]
+            global[n] = exp n
         
 #  0000000  000000000  00000000   000  00000000   
 # 000          000     000   000  000  000   000  
