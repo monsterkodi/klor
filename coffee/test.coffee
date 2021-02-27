@@ -1562,7 +1562,7 @@ describe 'globalize' ->
         global['red'].should.eql klor.kolor.red
         
     it 'disable' ->  
-        klor.kolor.globalize 'disable'
+        klor.kolor.globalize false
         global['red'].should.not.eql klor.kolor.red
         global['red']('txt').should.eql 'txt'
         
