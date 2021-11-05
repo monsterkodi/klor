@@ -22,7 +22,7 @@ scripts
                 lang    ./node_modules/.bin/koffee --lang ./coffee/klor.coffee
 devDependencies
                 koffee    ^1.14.0
-                kxk       ^0.396.0
-                mocha     ^8.2.1
+                kxk       ^0.419.0
+                mocha     ^9.1.3
                 noon      ^3.1.0
                 onchange  ^7.1.0
