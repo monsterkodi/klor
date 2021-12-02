@@ -5,7 +5,7 @@
 # 000       000   000  000       000       000       000             000   000       000  
 #  0000000   0000000   000       000       00000000  00000000         0000000   0000000   
 
-coffee js ts
+coffee kode js ts
     
     keyword
         if
@@ -89,7 +89,28 @@ coffee
         
     nil
         no
-                        
+
+kode
+      
+    keyword
+        of
+        in
+        ei
+        is
+        by
+        or
+        and
+        not
+        when
+        super
+        extends
+        empty
+        valid
+        yes
+        
+    nil
+        no
+        
 #       000   0000000  
 #       000  000       
 #       000  0000000   

@@ -1074,6 +1074,9 @@ handlers =
     coffee:
           punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
           word: [ keyword, coffeeWord, number, property ]
+    kode:
+          punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
+          word: [ keyword, coffeeWord, number, property ]
     noon: punct:[ noonComment,  noonPunct, urlPunct                                          ], word:[ noonWord, urlWord, number          ]
     js:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
