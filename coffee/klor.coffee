@@ -1309,7 +1309,7 @@ syntax = (text:text, ext:'coffee', numbers:false) ->
     clines = []
     for index in [0...lines.length]
         line = lines[index]
-        if ext == 'js' and line.startsWith '//# sourceMappingURL'
+        if ext == 'js' and line.startsWith '//# source'
             continue
         clines.push kolorizeChunks chunks:rngs[index], number:numbers and index+1
     clines.join '\n'
