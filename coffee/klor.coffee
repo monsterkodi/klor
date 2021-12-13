@@ -683,6 +683,8 @@ simpleString = ->
 
     return if topType == 'regexp'
 
+    if getChunk(-1)?.escape then return stacked()
+    
     if chunk.match in '"\''
 
         type = switch chunk.match

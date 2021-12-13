@@ -343,23 +343,29 @@ describe 'ranges' ->
         inc rgs, 5  "'" 'punct string single'
         inc rgs, 8  "'" 'punct string single'
         
-        rgs = ranges "p = 'c:\\path\\'; 1"
+        lang 'coffee'
+        
+        rgs = ranges "p = 'c:\\\\path\\\\'; 1"
         inc rgs, 4  "'" 'punct string single'
         inc rgs, 5  "c" 'string single'
         inc rgs, 6  ":" 'string single'
         inc rgs, 7  "\\" 'string single'
-        inc rgs, 8  "path" 'string single'
-        inc rgs, 12  "\\" 'string single'
-        inc rgs, 13  "'" 'punct string single'
-        inc rgs, 14  ";" 'punct minor'
-        inc rgs, 16  "1" 'number'
+        inc rgs, 8  "\\" 'string single'
+        inc rgs, 9  "path" 'string single'
+        inc rgs, 13  "\\" 'string single'
+        inc rgs, 14  "\\" 'string single'
+        inc rgs, 15  "'" 'punct string single'
+        inc rgs, 16  ";" 'punct minor'
+        inc rgs, 18  "1" 'number'
         
-        # rgs = ranges 'a="\"X\""'
-        # inc rgs, 2 '"'    'punct string double'
-        # inc rgs, 3 '"'    'string double'
-        # inc rgs, 4 'X'    'string double'
-        # inc rgs, 5 '"'    'string double'
-        # inc rgs, 6 '"'    'punct string double'
+        rgs = ranges 'a="\\"X\\""'
+        inc rgs, 2 '"'    'punct string double'
+        inc rgs, 3 '\\'   'string double'
+        inc rgs, 4 '"'    'string double'
+        inc rgs, 5 'X'    'string double'
+        inc rgs, 6 '\\'   'string double'
+        inc rgs, 7 '"'    'string double'
+        inc rgs, 8 '"'    'punct string double'
 
     # 000   000   0000000    0000000   000   000  
     # 0000  000  000   000  000   000  0000  000  

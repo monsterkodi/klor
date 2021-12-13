@@ -809,11 +809,14 @@
     };
 
     simpleString = function() {
-        var next, ref1, ref2, scnd, type;
+        var next, ref1, ref2, ref3, scnd, type;
         if (topType === 'regexp') {
             return;
         }
-        if (ref1 = chunk.match, indexOf.call('"\'', ref1) >= 0) {
+        if ((ref1 = getChunk(-1)) != null ? ref1.escape : void 0) {
+            return stacked();
+        }
+        if (ref2 = chunk.match, indexOf.call('"\'', ref2) >= 0) {
             type = (function() {
                 switch (chunk.match) {
                     case '"':
@@ -824,7 +827,7 @@
             })();
             if (chunk.match === "'") {
                 next = getChunk(1);
-                if ((ref2 = next != null ? next.match : void 0) === 's' || ref2 === 'd' || ref2 === 't' || ref2 === 'll' || ref2 === 're') {
+                if ((ref3 = next != null ? next.match : void 0) === 's' || ref3 === 'd' || ref3 === 't' || ref3 === 'll' || ref3 === 're') {
                     if (next.start === chunk.start + chunk.length) {
                         scnd = getChunk(2);
                         if (!scnd || scnd.match !== "'") {
@@ -1469,11 +1472,11 @@
                 actExt();
                 handl = handlers[ext = line.ext];
                 if (!handl) {
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1195[39m', line);
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1196[39m', handlers);
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1197[39m', line);
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1198[39m', handlers);
                 }
                 if (!(handl)) {
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1197[39m', '[1m[97massertion failure![39m[22m');
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1199[39m', '[1m[97massertion failure![39m[22m');
 
                     process.exit(666);
                 };
