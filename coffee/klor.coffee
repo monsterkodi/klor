@@ -621,6 +621,14 @@ escape = ->
             if getChunk(1)?.start == chunk.start+1
                 chunk.escape = true
                 addValue 0 'escape'
+                
+                if topType == 'string single' and getChunk(1)?.match == "'"
+                    setValue 0 topType
+                    return 1
+                if topType == 'string double' and getChunk(1)?.match == '"'
+                    setValue 0 topType
+                    return 1
+                
                 return stacked()
 
 regexp = ->
@@ -674,8 +682,6 @@ tripleRegexp = ->
 simpleString = ->
 
     return if topType == 'regexp'
-
-    if getChunk(-1)?.escape then return stacked()
 
     if chunk.match in '"\''
 
