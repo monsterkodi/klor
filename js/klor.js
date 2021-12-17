@@ -549,6 +549,9 @@
                         }
                     }
                 }
+            } else if (prev.clss === 'obj') {
+                setValue(0, 'obj');
+                return 1;
             }
         }
         return 0;
@@ -1472,11 +1475,11 @@
                 actExt();
                 handl = handlers[ext = line.ext];
                 if (!handl) {
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1197[39m', line);
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1198[39m', handlers);
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1200[39m', line);
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1201[39m', handlers);
                 }
                 if (!(handl)) {
-                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1199[39m', '[1m[97massertion failure![39m[22m');
+                    console.log('[33m[93mklor[33m[2m.[22m[2mcoffee[22m[39m[2m[34m:[39m[22m[94m1202[39m', '[1m[97massertion failure![39m[22m');
 
                     process.exit(666);
                 };

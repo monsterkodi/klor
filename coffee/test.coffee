@@ -241,6 +241,11 @@ describe 'ranges' ->
         
         lang 'coffee'
                 
+        rgs = ranges "slash = require 'kslash'"
+        inc rgs, 16 "'"  'punct string single'
+        inc rgs, 17 "kslash"  'string single'
+        inc rgs, 23 "'"  'punct string single'
+        
         rgs = ranges 'a="\'X\'"'
         inc rgs, 2 '"'   'punct string double'
         inc rgs, 3 "'"   'string double'
@@ -384,6 +389,10 @@ describe 'ranges' ->
         rgs = ranges "top"
         inc rgs, 0 'top'  'obj'
 
+        rgs = ranges "tip top"
+        inc rgs, 0 'tip'  'obj'
+        inc rgs, 4 'top'  'obj'
+        
         rgs = ranges "top  prop"
         inc rgs, 0 'top'  'obj'
         inc rgs, 5 'prop' 'text'
@@ -393,56 +402,56 @@ describe 'ranges' ->
         inc rgs, 9 '^' 'punct semver'
         inc rgs, 10 '0' 'semver'
         
-        rgs = ranges "some-package-name  1"
-        inc rgs, 0  'some'    'property'
-        inc rgs, 5  'package' 'property'
-        inc rgs, 13 'name'    'property'
+        rgs = ranges "    some-package-name  1"
+        inc rgs, 4  'some'    'property'
+        inc rgs, 9  'package' 'property'
+        inc rgs, 17 'name'    'property'
 
-        rgs = ranges "some-package-name  ^1.2.3"
-        inc rgs, 0  'some'    'property'
-        inc rgs, 5  'package' 'property'
-        inc rgs, 13 'name'    'property'
+        rgs = ranges "    some-package-name  ^1.2.3"
+        inc rgs, 4  'some'    'property'
+        inc rgs, 9  'package' 'property'
+        inc rgs, 17 'name'    'property'
         
         rgs = ranges "top  prop  value"
         inc rgs, 0  'top'   'obj'
         inc rgs, 5  'prop'  'property'
         inc rgs, 11 'value' 'text'
         
-        rgs = ranges "http://domain.com"
-        inc rgs, 0 'http' 'url protocol'
-        inc rgs, 4 ':' 'punct url'
-        inc rgs, 5 '/' 'punct url'
-        inc rgs, 6 '/' 'punct url'
-        inc rgs, 7 'domain' 'url domain'
-        inc rgs, 13 '.' 'punct url tld'
-        inc rgs, 14 'com' 'url tld'
+        rgs = ranges "    http://domain.com"
+        inc rgs, 4 'http' 'url protocol'
+        inc rgs, 8 ':' 'punct url'
+        inc rgs, 9 '/' 'punct url'
+        inc rgs, 10 '/' 'punct url'
+        inc rgs, 11 'domain' 'url domain'
+        inc rgs, 17 '.' 'punct url tld'
+        inc rgs, 18 'com' 'url tld'
 
-        rgs = ranges "http://domain.com/dir/page.html"
-        inc rgs, 0 'http' 'url protocol'
-        inc rgs, 4 ':' 'punct url'
-        inc rgs, 5 '/' 'punct url'
-        inc rgs, 6 '/' 'punct url'
-        inc rgs, 7 'domain' 'url domain'
-        inc rgs, 13 '.' 'punct url tld'
-        inc rgs, 14 'com' 'url tld'
-        inc rgs, 17 '/' 'punct dir'
+        rgs = ranges "    http://domain.com/dir/page.html"
+        inc rgs, 4 'http' 'url protocol'
+        inc rgs, 8 ':' 'punct url'
+        inc rgs, 9 '/' 'punct url'
+        inc rgs, 10 '/' 'punct url'
+        inc rgs, 11 'domain' 'url domain'
+        inc rgs, 17 '.' 'punct url tld'
+        inc rgs, 18 'com' 'url tld'
+        inc rgs, 21 '/' 'punct dir'
         
-        rgs = ranges "file.coffee"
-        inc rgs, 0 'file' 'coffee file'
-        inc rgs, 4 '.' 'punct coffee'
-        inc rgs, 5 'coffee' 'coffee ext'
+        rgs = ranges "    file.coffee"
+        inc rgs, 4 'file' 'coffee file'
+        inc rgs, 8 '.' 'punct coffee'
+        inc rgs, 9 'coffee' 'coffee ext'
 
-        rgs = ranges "/some/path"
-        inc rgs, 1 'some'   'text dir'
-        inc rgs, 5 '/'      'punct dir'
-        inc rgs, 6 'path'   'text file'
+        rgs = ranges "    /some/path"
+        inc rgs, 5 'some'   'text dir'
+        inc rgs, 9 '/'      'punct dir'
+        inc rgs, 10 'path'   'text file'
         
-        rgs = ranges '/some\\path/file.txt:10'
-        inc rgs, 0  '/'    'punct dir'
-        inc rgs, 1  'some' 'text dir'
-        inc rgs, 5  '\\' 'punct dir'
-        inc rgs, 15 '.'  'punct txt'
-        inc rgs, 19 ':'  'punct'
+        rgs = ranges '    /some\\path/file.txt:10'
+        inc rgs, 4  '/'    'punct dir'
+        inc rgs, 5  'some' 'text dir'
+        inc rgs, 9  '\\' 'punct dir'
+        inc rgs, 19 '.'  'punct txt'
+        inc rgs, 23 ':'  'punct'
         
         rgs = ranges "    test  ./node_modules/.bin/mocha"
         inc rgs, 4 'test' 'property'

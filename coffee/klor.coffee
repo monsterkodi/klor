@@ -466,6 +466,9 @@ noonProp = ->
                         line.chunks[i].clss = 'punct property'
                     else
                         break
+        else if prev.clss == 'obj'
+            setValue 0 'obj'
+            return 1
     0
 
 noonPunct = ->
