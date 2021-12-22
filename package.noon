@@ -1,28 +1,25 @@
 name            klor
 version         2.21.0
 description     syntax highlighting
+author          monsterkodi
+license         Unlicense
 keywords
                 syntax
                 highlighting
-main            js/klor.js
+repository      github:monsterkodi/klor
 files
                 js/klor.js
                 js/kolor.js
                 js/lang.json
-author          monsterkodi
-license         Unlicense
-repository      github:monsterkodi/klor
-bugs
-                url  https://github.com/monsterkodi/klor/issues
-homepage        https://www.npmjs.com/package/klor
+main            js/klor.js
 scripts
                 test    ./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee
-                watch   ./node_modules/.bin/onchange ./coffee/test.coffee ./coffee/klor.coffee -- npm run test
-                build   ./node_modules/.bin/koffee -o js ./coffee && npm run lang
+                build   ./node_modules/.bin/kode -Ho js ./kode/*.kode 
                 lang    ./node_modules/.bin/koffee --lang ./coffee/klor.coffee
 devDependencies
-                koffee    ^1.20.0
-                kxk       ^0.423.0
+                koffee    monsterkodi/koffee
+                kode      monsterkodi/kode
+                kxk       monsterkodi/kxk
+                noon      monsterkodi/noon
                 mocha     ^9.1.3
-                noon      ^3.5.0
                 onchange  ^7.1.0

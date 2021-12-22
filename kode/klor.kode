@@ -5,7 +5,7 @@
 000  000   000      000   000  000   000
 000   000  0000000   0000000   000   000
 ###
-
+###
 ▸if opts.lang # koffee --lang klor.coffee
 
     fs   = require 'fs'
@@ -31,13 +31,12 @@
 
     json = JSON.stringify {exts:exts, lang:lang}, null, '    '
     fs.writeFileSync jsonFile, json, 'utf8'
+###
 
 { exts, lang } = require "#{__dirname}/../js/lang.json"
 kolor = require './kolor'
 
 swtch =
-    coffee:
-        doc: turd:'▸' to:'md' indent:1
     pug:
         script: next:'.' to:'js' indent:1
     md:
@@ -65,8 +64,7 @@ codeTypes = ['interpolation' 'code triple']
 # 000       000   000  000   000  000  0000  000  000   000       000   000
 #  0000000  000   000   0000000   000   000  000   000  00000000  0000000
 
-▸doc 'chunked lines, ext'
-
+###
     returns array of
 
         chunks: [
@@ -80,6 +78,7 @@ codeTypes = ['interpolation' 'code triple']
         chars:  n
         index:  n
         number: n+1
+###
 
 chunked = (lines, ext) ->
 
@@ -457,13 +456,16 @@ noonProp = ->
     if prev = getChunk -1
         if prev.start+prev.length+1 < chunk.start
             if prev.clss != 'obj'
-                for i in [chunkIndex-1..0]
+                i = chunkIndex-1
+                while i >= 0
                     if i < chunkIndex-1 and line.chunks[i].start+line.chunks[i].length+1 < line.chunks[i+1].start
                         break
                     if line.chunks[i].clss == 'text' or line.chunks[i].clss == 'obj'
                         line.chunks[i].clss = 'property'
+                        i--
                     else if line.chunks[i].clss == 'punct'
                         line.chunks[i].clss = 'punct property'
+                        i--
                     else
                         break
         else if prev.clss == 'obj'
@@ -591,7 +593,7 @@ jsonPunct = ->
                     if line.chunks[i]?.clss == 'punct string double'
                         line.chunks[i].clss = 'punct dictionary'
                         break
-                    line.chunks[i]?.clss = 'dictionary key'
+                    line.chunks[i].clss = 'dictionary key' if line.chunks[i]
                 setValue -1 'punct dictionary'
                 setValue  0 'punct dictionary'
                 return 1
@@ -1068,7 +1070,9 @@ popStack = ->
     notCode = stackTop and topType not in codeTypes
 
 getChunk = (d) -> line.chunks[chunkIndex+d]
-setValue = (d, value) -> if 0 <= chunkIndex+d < line.chunks.length then line.chunks[chunkIndex+d].clss = value
+setValue = (d, value) -> 
+    if 0 <= chunkIndex+d < line.chunks.length 
+        line.chunks[chunkIndex+d].clss = value
 getValue = (d) -> getChunk(d)?.clss ? ''
 getmatch = (d) -> getChunk(d)?.match ? ''
 addValue = (d, value) ->
@@ -1083,12 +1087,12 @@ addValues = (n,value) ->
 
 handlers =
     coffee:
-          punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
-          word: [ keyword, coffeeWord, number, property ]
+        punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
+        word: [ keyword, coffeeWord, number, property ]
     kode:
-          punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
-          word: [ keyword, coffeeWord, number, property ]
-    noon: punct:[ noonComment,  noonPunct, urlPunct                                          ], word:[ noonWord, urlWord, number          ]
+        punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
+        word: [ keyword, coffeeWord, number, property ]
+    noon: punct:[ noonComment,  noonPunct, urlPunct ],                                          word:[ noonWord, urlWord, number          ]
     js:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
@@ -1134,14 +1138,13 @@ for ext,obj of handlers
 000   000  000      000   000  000       000  000   000       000   000
 0000000    0000000   0000000    0000000  000   000  00000000  0000000
 ###
-
-▸doc 'blocked lines'
-
+###
     lines: array of chunked lines
 
     returns lines with
     - 'ext' switched in some lines
     - 'value' changed in chunks that match language patterns
+###
 
 blocked = (lines) ->
 
@@ -1190,10 +1193,11 @@ blocked = (lines) ->
         if ext != line.ext                      # either at start of file or we switched extension
             actExt()
             handl = handlers[ext = line.ext]    # install new handlers
+            # ▴ handl
             if not handl
-                ▸dbg line
-                ▸dbg handlers
-            ▸assert handl
+                dbg ext
+                dbg line
+                dbg handlers[ext]
 
         #  0000000  000   000  000   000  000   000  000   000   0000000
         # 000       000   000  000   000  0000  000  000  000   000
@@ -1215,7 +1219,7 @@ blocked = (lines) ->
                         addValues chunk.turd.length, extTop.switch.add if extTop.switch.add
                         popExt() # end of extension block reached that is terminated by turd
 
-                for hnd in handl.punct ? []
+                for hnd in handl.punct
                     if advance = hnd()
                         chunkIndex += advance
                         break
@@ -1232,7 +1236,7 @@ blocked = (lines) ->
                         else if mtch.next and getChunk(1).match == mtch.next
                             pushExt mtch
                 
-                for hnd in handl.word ? []
+                for hnd in handl.word
                     if advance = hnd()
                         chunkIndex += advance
                         break
@@ -1246,7 +1250,7 @@ rpad = (s, l) ->
     while s.length < l then s += ' '
     s
 
-pad = (l) -> rpad '', l
+pad = (l) -> rpad '' l
     
 replaceTabs = (s) ->
     i = 0
@@ -1255,6 +1259,12 @@ replaceTabs = (s) ->
             s = s[...i] + pad(4-(i%4)) + s[i+1..]
         i += 1
     s
+
+# 00000000    0000000   00000000    0000000  00000000  
+# 000   000  000   000  000   000  000       000       
+# 00000000   000000000  0000000    0000000   0000000   
+# 000        000   000  000   000       000  000       
+# 000        000   000  000   000  0000000   00000000  
 
 parse = (lines, ext='coffee') -> blocked chunked lines, ext
 
@@ -1267,7 +1277,7 @@ parse = (lines, ext='coffee') -> blocked chunked lines, ext
 kolorize = (chunk) -> 
     
     if cn = kolor.map[chunk.clss]
-        if cn instanceof Array
+        if cn is Array
             v = chunk.match
             for cr in cn
                 v = kolor[cr] v
@@ -1290,12 +1300,12 @@ kolorize = (chunk) ->
         else
             chunk.match
 
-kolorizeChunks = (chunks:[], number:) ->
+kolorizeChunks = (chunks=[], number) ->
     
     clrzd = ''
     if number
         numstr = String number
-        clrzd += w2(numstr) + rpad '', 4-numstr.length
+        clrzd += w2(numstr) + rpad '' 4-numstr.length
         
     c = 0
     for i in [0...chunks.length]
@@ -1312,8 +1322,11 @@ kolorizeChunks = (chunks:[], number:) ->
 #      000     000     000  0000     000     000   000   000 000   
 # 0000000      000     000   000     000     000   000  000   000  
 
-syntax = (text:text, ext:'coffee', numbers:false) ->
-    
+syntax = (arg) ->
+    arg ?= {}
+    text = arg.text
+    ext  = arg.ext ? 'coffee'
+    numbers = arg.numers ? false
     lines = text.split NEWLINE
     rngs  = parse(lines, ext).map (l) -> l.chunks
     
@@ -1322,7 +1335,7 @@ syntax = (text:text, ext:'coffee', numbers:false) ->
         line = lines[index]
         if ext == 'js' and line.startsWith '//# source'
             continue
-        clines.push kolorizeChunks chunks:rngs[index], number:numbers and index+1
+        clines.push kolorizeChunks rngs[index], numbers and index+1
     clines.join '\n'
 
 # 00000000  000   000  00000000    0000000   00000000   000000000   0000000  
@@ -1342,24 +1355,3 @@ module.exports =
     kolorize:   kolorize
     kolorizeChunks: kolorizeChunks
     syntax:     syntax
-
-# 00000000   00000000    0000000   00000000  000  000      00000000
-# 000   000  000   000  000   000  000       000  000      000
-# 00000000   0000000    000   000  000000    000  000      0000000
-# 000        000   000  000   000  000       000  000      000
-# 000        000   000   0000000   000       000  0000000  00000000
-
-▸test 'profile'
-
-    { slash } = require 'kxk'
-    text0 = slash.readText "#{__dirname}/../../koffee/coffee/nodes.coffee"
-    text1 = slash.readText "#{__dirname}/test.coffee"
-
-    lines0 = text0.split '\n'
-    lines1 = text1.split '\n'
-
-    for i in [0..5]
-        parse lines0
-
-    ▸average 100
-        parse lines0
