@@ -16,9 +16,8 @@
     ],
     "main": "js/klor.js",
     "scripts": {
-        "test": "./node_modules/.bin/mocha -c --require koffee/js/register ./coffee/test.coffee",
-        "build": "./node_modules/.bin/kode -Ho js ./kode/*.kode",
-        "lang": "./node_modules/.bin/koffee --lang ./coffee/klor.coffee"
+        "build": "./node_modules/.bin/kode -Ho js kode/*.kode",
+        "test": "./node_modules/.bin/kode -t kode/test.kode"
     },
     "devDependencies": {
         "koffee": "monsterkodi/koffee",
