@@ -36,7 +36,7 @@ init = (open, close) -> wrap "\x1b[#{open}m", "\x1b[#{close}m", new RegExp("\\x1
 F256 = (open) -> wrap open, "\x1b[39m", new RegExp("\\x1b\\[39m", "g"), open
 B256 = (open) -> wrap open, "\x1b[49m", new RegExp("\\x1b\\[49m", "g"), open
 
-exports = module.exports
+exports = {}
 
 exports.bold      = wrap "\x1b[1m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[1m"
 exports.dim       = wrap "\x1b[2m" "\x1b[22m", /\x1b\[22m/g, "\x1b[22m\x1b[2m"
@@ -92,8 +92,7 @@ exports.globalize = (enabled=true) ->
             global[fg+i] = exp fg+i
             global[bg+i] = exp bg+i
             
-        for n in ['underline''bold''dim''italic''inverse''reset''strip'
-                  'black''red''green''yellow''blue''magenta''cyan''white''gray']
+        for n in ['underline''bold''dim''italic''inverse''reset''strip' 'black''red''green''yellow''blue''magenta''cyan''white''gray']
             global[n] = exp n
         
 #  0000000  000000000  00000000   000  00000000   
@@ -248,6 +247,6 @@ exports.map =
     'comment triple':                   'w4'
     'comment header':                   ['g1' 'G1']
     'comment triple header':            ['g2' 'G2']
-    
-exports
+
+module.exports = exports
     

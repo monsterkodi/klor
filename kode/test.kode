@@ -8,9 +8,6 @@
 
 klor = require '../'
 
-# inc = (rgs, start, match, clss) -> rgs.map((r) -> _.pick r, ['start''match''clss'] ).should.deep.include     start:start, match:match, clss:clss
-# nut = (rgs, start, match, clss) -> rgs.map((r) -> _.pick r, ['start''match''clss'] ).should.not.deep.include start:start, match:match, clss:clss
-
 inc = (rgs, start, match) -> for r in rgs then if r.start == start and r.match == match ➜ return r.clss
 
 ext = 'coffee'
@@ -1098,13 +1095,6 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 12 'in'        ▸ 'text'
         inc rgs, 15 'then'      ▸ 'text'
 
-        # dss = dissect "▸doc\n    if is empty in then" 'coffee'
-        # inc dss[1], 4  'if'    'text'
-        # inc dss[1], 7  'is'    'text'
-        # inc dss[1], 10  'empty' 'text'
-        # inc dss[1], 16 'in'    'text'
-        # inc dss[1], 19 'then'  'text'
-        
         rgs = ranges 'text files. bla'
         inc rgs, 0, 'text'  ▸ 'text'
         inc rgs, 10, '.'    ▸ 'punct'
@@ -1501,81 +1491,6 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         b[0].chunks[0].start ▸ 4
         b[0].chunks[1].start ▸ 6
         b[0].chunks[2].start ▸ 9
-    
-    #  0000000  000   000  000  000000000   0000000  000   000  00000000   0000000  
-    # 000       000 0 000  000     000     000       000   000  000       000       
-    # 0000000   000000000  000     000     000       000000000  0000000   0000000   
-    #      000  000   000  000     000     000       000   000  000            000  
-    # 0000000   00     00  000     000      0000000  000   000  00000000  0000000   
-    
-    ▸ switches
-        
-        # b = parse """
-            # ▸doc 'hello'
-                # x    
-                # y
-            # if 1 then false"""
-        # b[0].should.include.property 'ext' 'coffee'
-        # b[1].should.include.property 'ext' 'md'
-        # b[2].should.include.property 'ext' 'md'
-        # b[3].should.include.property 'ext' 'coffee'
-        
-        # b = parse """
-            # ▸doc 'hello'
-                # x  
-                # ```coffeescript
-                    # 1+1
-                # ```
-                # y
-            # 1"""
-        # b[0].should.include.property 'ext' 'coffee'
-        # b[1].should.include.property 'ext' 'md'
-        # b[2].should.include.property 'ext' 'md'
-        # b[3].should.include.property 'ext' 'coffee'
-        # b[4].should.include.property 'ext' 'md'
-        # b[5].should.include.property 'ext' 'md'
-        # b[6].should.include.property 'ext' 'coffee'
-    
-        # b = parse """                    
-            # ▸doc 'hello'                  
-                # x                         
-                # ```coffeescript           
-                    # 1+1                   
-                    # ▸doc 'again'          
-                        # some **docs**     
-                # ```                       
-                # y                         
-            # 1"""
-        # b[0].should.include.property 'ext' 'coffee'
-        # b[1].should.include.property 'ext' 'md'
-        # b[2].should.include.property 'ext' 'md'
-        # b[3].should.include.property 'ext' 'coffee'
-        # b[4].should.include.property 'ext' 'coffee'
-        # b[5].should.include.property 'ext' 'md'
-        # b[6].should.include.property 'ext' 'md'
-        # b[7].should.include.property 'ext' 'md'
-        # b[8].should.include.property 'ext' 'coffee'
-        
-        # b = parse """
-            # ▸dooc 'hello'
-                # x  
-            # """
-        # b[0].should.include.property 'ext' 'coffee'
-        # b[1].should.include.property 'ext' 'coffee'
-#     
-        # b = parse """
-            # ```coffeescript
-                # 1+1
-            # ```
-            # ```javascript
-                # 1+1;
-            # ```
-            # """, 'md'
-        # b[0].should.include.property 'ext' 'md'
-        # b[1].should.include.property 'ext' 'coffee'
-        # b[2].should.include.property 'ext' 'md'
-        # b[3].should.include.property 'ext' 'md'
-        # b[4].should.include.property 'ext' 'js'
         
 #  0000000   000       0000000   0000000     0000000   000      000  0000000  00000000  
 # 000        000      000   000  000   000  000   000  000      000     000   000       
@@ -1583,18 +1498,15 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
 # 000   000  000      000   000  000   000  000   000  000      000   000     000       
 #  0000000   0000000   0000000   0000000    000   000  0000000  000  0000000  00000000  
 
-# ▸ globalize
+▸ globalize
 
-    # ▸ before   
-        # global['red'].should.not.eql klor.kolor.red
+    ▸ enable
+        klor.kolor.globalize()
+        global['red'] ▸ klor.kolor.red
+        global['red']('txt') ▸ klor.kolor.red 'txt'
 
-    # ▸ after  
-        # klor.kolor.globalize()
-        # global['red'].should.eql klor.kolor.red
-#         
-    # ▸ disable  
-        # klor.kolor.globalize false
-        # global['red'].should.not.eql klor.kolor.red
-        # global['red']('txt').should.eql 'txt'
+    ▸ disable  
+        klor.kolor.globalize false
+        global['red']('txt') ▸ 'txt'
         
         

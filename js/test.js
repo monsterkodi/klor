@@ -1,6 +1,6 @@
-// monsterkodi/kode 0.180.0
+// monsterkodi/kode 0.181.0
 
-var _k_ = {list: function (l) {return (l != null ? typeof l.length === 'number' ? l : [] : [])}, dbg: function (f,l,c,m,...a) { console.log(f + ':' + l + ':' + c + (m ? ' ' + m + '\n' : '\n') + a.map(function (a) { return _k_.noon(a) }).join(' '))}, noon: function (obj) { var pad = function (s, l) { while (s.length < l) { s += ' ' }; return s }; var esc = function (k, arry) { var es, sp; if (0 <= k.indexOf('\n')) { sp = k.split('\n'); es = sp.map(function (s) { return esc(s,arry) }); es.unshift('...'); es.push('...'); return es.join('\n') } if (k === '' || k === '...' || _k_.in(k[0],[' ','#','|']) || _k_.in(k[k.length - 1],[' ','#','|'])) { k = '|' + k + '|' } else if (arry && /  /.test(k)) { k = '|' + k + '|' }; return k }; var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { v = o[k]; if (o.hasOwnProperty(k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = `|${k}|` } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { v = o[k]; if (o.hasOwnProperty(k)) { l.push(keyValue(k,v)) } }; return l.join('\n') }; var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; return toStr(obj) }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {list: function (l) {return (l != null ? typeof l.length === 'number' ? l : [] : [])}}
 
 var b, dissect, dss, ext, i, inc, klor, lang, parse, ranges, rgs
 
@@ -11,9 +11,9 @@ inc = function (rgs, start, match)
     var r
 
     var list = _k_.list(rgs)
-    for (var _14_35_ = 0; _14_35_ < list.length; _14_35_++)
+    for (var _11_35_ = 0; _11_35_ < list.length; _11_35_++)
     {
-        r = list[_14_35_]
+        r = list[_11_35_]
         if (r.start === start && r.match === match)
         {
             return r.clss
@@ -46,7 +46,6 @@ module.exports["ranges"] = function ()
     section("fallback", function ()
     {
         rgs = ranges('text','unknown')
-        _k_.dbg("kode/test.kode", 35, 8, "rgs", rgs)
         compare(inc(rgs,0,'text'),'text')
         rgs = ranges('text','fish')
         compare(inc(rgs,0,'text'),'text')
@@ -207,17 +206,17 @@ module.exports["ranges"] = function ()
         compare(inc(rgs,13,'"'),'punct string double')
         rgs = ranges('a="";b=" ";c="X"')
         var list = [2,3,7,9,13,15]
-        for (var _269_14_ = 0; _269_14_ < list.length; _269_14_++)
+        for (var _265_14_ = 0; _265_14_ < list.length; _265_14_++)
         {
-            i = list[_269_14_]
+            i = list[_265_14_]
             compare(inc(rgs,i,'"'),'punct string double')
         }
         compare(inc(rgs,14,'X'),'string double')
         rgs = ranges("a='';b=' ';c='Y'")
         var list1 = [2,3,7,9,13,15]
-        for (var _274_14_ = 0; _274_14_ < list1.length; _274_14_++)
+        for (var _270_14_ = 0; _270_14_ < list1.length; _270_14_++)
         {
-            i = list1[_274_14_]
+            i = list1[_270_14_]
             compare(inc(rgs,i,"'"),'punct string single')
         }
         compare(inc(rgs,14,'Y'),'string single')
@@ -303,13 +302,10 @@ module.exports["ranges"] = function ()
     {
         lang('noon')
         rgs = ranges("    property  value")
-        compare(inc(rgs,4),'property')
-        'property'
-        compare(inc(rgs,14),'value')
-        'text'
+        compare(inc(rgs,4,'property'),'property')
+        compare(inc(rgs,14,'value'),'text')
         rgs = ranges("top",'noon')
-        compare(inc(rgs,0),'top')
-        'obj'
+        compare(inc(rgs,0,'top'),'obj')
         rgs = ranges("tip top")
         compare(inc(rgs,0,'tip'),'obj')
         compare(inc(rgs,4,'top'),'obj')
@@ -684,7 +680,7 @@ module.exports["ranges"] = function ()
         rgs = ranges("/^#include/")
         compare(inc(rgs,0,'/'),'punct regexp start')
         compare(inc(rgs,2,"#"),'punct regexp')
-        compare(inc(rgs,3,"include"),'text r    ▸ egexp')
+        compare(inc(rgs,3,"include"),'text regexp')
         rgs = ranges("/\\'hello\\'/ ")
         compare(inc(rgs,0,'/'),'punct regexp start')
         compare(inc(rgs,1,"\\"),'punct escape regexp')
@@ -700,14 +696,14 @@ module.exports["ranges"] = function ()
         compare(inc(rgs,17,'/'),'punct regexp end')
         compare(inc(rgs,19,';'),'punct minor')
         rgs = ranges("a = 1 / 2")
-        inc(rgs,6,'/',▸,'punct')
-        inc(rgs,8,'2',▸,'number')
+        compare(inc(rgs,6,'/'),'punct')
+        compare(inc(rgs,8,'2'),'number')
         rgs = ranges("(1+1) / 2")
-        inc(rgs,6,'/',▸,'punct')
-        inc(rgs,8,'2',▸,'number')
+        compare(inc(rgs,6,'/'),'punct')
+        compare(inc(rgs,8,'2'),'number')
         rgs = ranges("a[10] / 2")
-        inc(rgs,6,'/',▸,'punct')
-        inc(rgs,8,'2',▸,'number')
+        compare(inc(rgs,6,'/'),'punct')
+        compare(inc(rgs,8,'2'),'number')
         rgs = ranges("if / aa /.test s")
         compare(inc(rgs,3,'/'),'punct regexp start')
         compare(inc(rgs,8,'/'),'punct regexp end')
@@ -764,19 +760,19 @@ module.exports["ranges"] = function ()
     {
         lang('coffee')
         rgs = ranges('a / b - c / d')
-        compare(inc(rgs,2,'/'),'punct regexp start')
+        compare(inc(rgs,2,'/'),'punct')
         rgs = ranges('f a/b, c/d')
-        compare(inc(rgs,3,'/'),'punct regexp start')
+        compare(inc(rgs,3,'/'),'punct')
         rgs = ranges("m = '/'")
-        compare(inc(rgs,5,'/'),'punct regexp start')
+        compare(inc(rgs,5,'/'),'string single')
         rgs = ranges("m a, '/''/'")
-        compare(inc(rgs,6,'/'),'punct regexp start')
+        compare(inc(rgs,6,'/'),'string single')
         rgs = ranges("s = '/some\\path/file.txt:12'")
-        compare(inc(rgs,5,'/'),'punct regexp start')
-        compare(inc(rgs,9,'/'),'punct regexp start')
+        compare(inc(rgs,5,'/'),'string single')
+        compare(inc(rgs,15,'/'),'string single')
         rgs = ranges("num /= 10")
-        compare(inc(rgs,4,'/'),'punct regexp start')
-        compare(inc(rgs,7,'10'),'text regexp')
+        compare(inc(rgs,4,'/'),'punct')
+        compare(inc(rgs,7,'10'),'number')
         rgs = ranges("4 / 2 / 1")
         compare(inc(rgs,2,'/'),'punct')
         compare(inc(rgs,6,'/'),'punct')
@@ -1068,10 +1064,22 @@ module.exports["parse"] = function ()
         compare(b[0].chunks[1].start,6)
         compare(b[0].chunks[2].start,9)
     })
-    section("switches", function ()
-    {
-    })
 }
 module.exports["parse"]._section_ = true
+module.exports["globalize"] = function ()
+{
+    section("enable", function ()
+    {
+        klor.kolor.globalize()
+        compare(global['red'],klor.kolor.red)
+        compare(global['red']('txt'),klor.kolor.red('txt'))
+    })
+    section("disable", function ()
+    {
+        klor.kolor.globalize(false)
+        compare(global['red']('txt'),'txt')
+    })
+}
+module.exports["globalize"]._section_ = true
 module.exports._test_ = true
 module.exports
