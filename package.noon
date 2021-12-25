@@ -1,20 +1,20 @@
-name            klor
-version         2.23.0
-description     syntax highlighting
-author          monsterkodi
-license         Unlicense
+name                klor
+version             2.24.0
+description         syntax highlighting
+author              monsterkodi
+license             Unlicense
 keywords
-                syntax
-                highlighting
-repository      github:monsterkodi/klor
+                    syntax
+                    highlighting
+repository          github:monsterkodi/klor
 files
-                js/klor.js
-                js/kolor.js
-                js/lang.json
-main            js/klor.js
+                    js/klor.js
+                    js/kolor.js
+                    js/lang.json
+main                js/klor.js
 scripts
-                build   ./node_modules/.bin/kode -Ho js kode/*.kode
-                test    ./node_modules/.bin/kode -t kode/test.kode
+                    build   ./node_modules/.bin/kode -Ho js kode/*.kode && ./node_modules/.bin/kode kode/lang.kode
+                    test    ./node_modules/.bin/kode -t kode/test.kode
 devDependencies
-                kode  monsterkodi/kode
-                noon  monsterkodi/noon
+                    kode    monsterkodi/kode
+                    noon    monsterkodi/noon

@@ -551,155 +551,155 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 1 'height'     ▸ 'text this'
         inc rgs, 8 "2"          ▸ 'number'
                 
-    # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
-    # 000       000   000  0000  000  000          000     000  000   000  0000  000  
-    # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  
-    # 000       000   000  000  0000  000          000     000  000   000  000  0000  
-    # 000        0000000   000   000   0000000     000     000   0000000   000   000  
+        # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
+        # 000       000   000  0000  000  000          000     000  000   000  0000  000  
+        # 000000    000   000  000 0 000  000          000     000  000   000  000 0 000  
+        # 000       000   000  000  0000  000          000     000  000   000  000  0000  
+        # 000        0000000   000   000   0000000     000     000   0000000   000   000  
 
-    ▸ coffee function
-
-        lang 'coffee'
-        
-        rgs = ranges "obj.prop.call 1"
-        inc rgs, 0 'obj'        ▸ 'obj'
-        inc rgs, 4 'prop'       ▸ 'property'
-        inc rgs, 9 'call'       ▸ 'function call'
-        
-        rgs = ranges "dolater =>"
-        inc rgs, 8 '='          ▸ 'punct function bound tail'
-        inc rgs, 9 '>'          ▸ 'punct function bound head'
-
-        rgs = ranges "dolater ->"
-        inc rgs, 8 '-'          ▸ 'punct function tail'
-        inc rgs, 9 '>'          ▸ 'punct function head'
-        
-        rgs = ranges "@a @b 'c'"
-        inc rgs, 0 '@'          ▸ 'punct function call'
-        inc rgs, 1 'a'          ▸ 'function call'
-        inc rgs, 3 '@'          ▸ 'punct function call'
-        inc rgs, 4 'b'          ▸ 'function call'
-        
-        rgs = ranges "@a 3 @b '5'"
-        inc rgs, 0 '@'          ▸ 'punct function call'
-        inc rgs, 1 'a'          ▸ 'function call'
-
-        rgs = ranges "fff 1"
-        inc rgs, 0 "fff"        ▸ 'function call'
-                
-        rgs = ranges "f 'a'"
-        inc rgs, 0 "f"          ▸ 'function call'
-        
-        rgs = ranges "ff 'b'"
-        inc rgs, 0 "ff"         ▸ 'function call'
-
-        rgs = ranges "ffff -1"
-        inc rgs, 0 "ffff"       ▸ 'function call'
-
-        rgs = ranges "f [1]"
-        inc rgs, 0 "f"          ▸ 'function call'
-        
-        rgs = ranges "fffff {1}"
-        inc rgs, 0 "fffff"      ▸ 'function call'
-
-        rgs = ranges "i ++a"
-        inc rgs, 0 'i'          ▸ 'function call'
-        
-        rgs = ranges "i +4"
-        inc rgs, 0 'i'          ▸ 'function call'
-
-        rgs = ranges "i -4"
-        inc rgs, 0 'i'          ▸ 'function call'
-        
-        rgs = ranges "pos= (item, p) -> "
-        inc rgs, 0 "pos"        ▸ 'function'
-        
-        rgs = ranges "i != false"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i += 1"
-        inc rgs, 0 'i'              ▸ 'text'
-        
-        rgs = ranges "i -= 1"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i *= 1"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i /= 1"
-        inc rgs, 0 'i'              ▸ 'text'
-        
-        rgs = ranges "i ? false"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i < 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i > 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i + 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i - 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i * 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i / 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i % 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i = 3"
-        inc rgs, 0 'i'              ▸ 'text'
-
-        rgs = ranges "i == 3"
-        inc rgs, 0 'i'              ▸ 'text'
-        
-    # 00     00  00000000  000000000  000   000   0000000   0000000    
-    # 000   000  000          000     000   000  000   000  000   000  
-    # 000000000  0000000      000     000000000  000   000  000   000  
-    # 000 0 000  000          000     000   000  000   000  000   000  
-    # 000   000  00000000     000     000   000   0000000   0000000    
+        ▸ function
     
-    ▸ coffee method
+            lang 'coffee'
+            
+            rgs = ranges "obj.prop.call 1"
+            inc rgs, 0 'obj'        ▸ 'obj'
+            inc rgs, 4 'prop'       ▸ 'property'
+            inc rgs, 9 'call'       ▸ 'function call'
+            
+            rgs = ranges "dolater =>"
+            inc rgs, 8 '='          ▸ 'punct function bound tail'
+            inc rgs, 9 '>'          ▸ 'punct function bound head'
+    
+            rgs = ranges "dolater ->"
+            inc rgs, 8 '-'          ▸ 'punct function tail'
+            inc rgs, 9 '>'          ▸ 'punct function head'
+            
+            rgs = ranges "@a @b 'c'"
+            inc rgs, 0 '@'          ▸ 'punct function call'
+            inc rgs, 1 'a'          ▸ 'function call'
+            inc rgs, 3 '@'          ▸ 'punct function call'
+            inc rgs, 4 'b'          ▸ 'function call'
+            
+            rgs = ranges "@a 3 @b '5'"
+            inc rgs, 0 '@'          ▸ 'punct function call'
+            inc rgs, 1 'a'          ▸ 'function call'
+    
+            rgs = ranges "fff 1"
+            inc rgs, 0 "fff"        ▸ 'function call'
+                    
+            rgs = ranges "f 'a'"
+            inc rgs, 0 "f"          ▸ 'function call'
+            
+            rgs = ranges "ff 'b'"
+            inc rgs, 0 "ff"         ▸ 'function call'
+    
+            rgs = ranges "ffff -1"
+            inc rgs, 0 "ffff"       ▸ 'function call'
+    
+            rgs = ranges "f [1]"
+            inc rgs, 0 "f"          ▸ 'function call'
+            
+            rgs = ranges "fffff {1}"
+            inc rgs, 0 "fffff"      ▸ 'function call'
+    
+            rgs = ranges "i ++a"
+            inc rgs, 0 'i'          ▸ 'function call'
+            
+            rgs = ranges "i +4"
+            inc rgs, 0 'i'          ▸ 'function call'
+    
+            rgs = ranges "i -4"
+            inc rgs, 0 'i'          ▸ 'function call'
+            
+            rgs = ranges "pos= (item, p) -> "
+            inc rgs, 0 "pos"        ▸ 'function'
+            
+            rgs = ranges "i != false"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i += 1"
+            inc rgs, 0 'i'              ▸ 'text'
+            
+            rgs = ranges "i -= 1"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i *= 1"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i /= 1"
+            inc rgs, 0 'i'              ▸ 'text'
+            
+            rgs = ranges "i ? false"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i < 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i > 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i + 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i - 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i * 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i / 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i % 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i = 3"
+            inc rgs, 0 'i'              ▸ 'text'
+    
+            rgs = ranges "i == 3"
+            inc rgs, 0 'i'              ▸ 'text'
         
-        lang 'coffee'
+        # 00     00  00000000  000000000  000   000   0000000   0000000    
+        # 000   000  000          000     000   000  000   000  000   000  
+        # 000000000  0000000      000     000000000  000   000  000   000  
+        # 000 0 000  000          000     000   000  000   000  000   000  
+        # 000   000  00000000     000     000   000   0000000   0000000    
         
-        rgs = ranges " a: =>"
-        inc rgs, 1 "a"      ▸ 'method'
-        inc rgs, 2 ":"      ▸ 'punct method'
-        inc rgs, 4 "="      ▸ 'punct function bound tail'
-        inc rgs, 5 ">"      ▸ 'punct function bound head'
-        
-        rgs = ranges " a: ->"
-        inc rgs, 1 "a"      ▸ 'method'
-        inc rgs, 2 ":"      ▸ 'punct method'
-        inc rgs, 4 "-"      ▸ 'punct function tail'
-        inc rgs, 5 ">"      ▸ 'punct function head'
-        
-        rgs = ranges "mthd:  (arg)    => @member memarg"
-        inc rgs, 0  'mthd'  ▸ 'method'
-        inc rgs, 4  ':'     ▸ 'punct method'
-        inc rgs, 16 '='     ▸ 'punct function bound tail'
-        inc rgs, 17 '>'     ▸ 'punct function bound head'
-        
-        rgs = ranges "@mthd: (arg) ->"
-        inc rgs, 0 '@'      ▸ 'punct method class'
-        inc rgs, 1 'mthd'   ▸ 'method class'
+        ▸ method
+            
+            lang 'coffee'
+            
+            rgs = ranges " a: =>"
+            inc rgs, 1 "a"      ▸ 'method'
+            inc rgs, 2 ":"      ▸ 'punct method'
+            inc rgs, 4 "="      ▸ 'punct function bound tail'
+            inc rgs, 5 ">"      ▸ 'punct function bound head'
+            
+            rgs = ranges " a: ->"
+            inc rgs, 1 "a"      ▸ 'method'
+            inc rgs, 2 ":"      ▸ 'punct method'
+            inc rgs, 4 "-"      ▸ 'punct function tail'
+            inc rgs, 5 ">"      ▸ 'punct function head'
+            
+            rgs = ranges "mthd:  (arg)    => @member memarg"
+            inc rgs, 0  'mthd'  ▸ 'method'
+            inc rgs, 4  ':'     ▸ 'punct method'
+            inc rgs, 16 '='     ▸ 'punct function bound tail'
+            inc rgs, 17 '>'     ▸ 'punct function bound head'
+            
+            rgs = ranges "@mthd: (arg) ->"
+            inc rgs, 0 '@'      ▸ 'punct method class'
+            inc rgs, 1 'mthd'   ▸ 'method class'
                                 
-    # 000   000   0000000   00000000  00000000  00000000  00000000  
-    # 000  000   000   000  000       000       000       000       
-    # 0000000    000   000  000000    000000    0000000   0000000   
-    # 000  000   000   000  000       000       000       000       
-    # 000   000   0000000   000       000       00000000  00000000  
+    # 000   000   0000000   0000000    00000000  
+    # 000  000   000   000  000   000  000       
+    # 0000000    000   000  000   000  0000000   
+    # 000  000   000   000  000   000  000       
+    # 000   000   0000000   0000000    00000000  
     
-    ▸ koffee constructor
+    ▸ kode
         
-        lang 'coffee'
+        lang 'kode'
         
         rgs = ranges " @: ->"
         inc rgs, 1 "@"  ▸ 'method'
@@ -713,29 +713,33 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 3 "-"  ▸ 'punct function tail'
         inc rgs, 4 ">"  ▸ 'punct function head'
 
-    ▸ koffee meta if then else
-        
-        lang 'coffee'
-        
-        rgs = ranges "▸if ▸then ▸elif ▸else"
-        inc rgs, 0  "▸"     ▸ 'punct meta'
-        inc rgs, 1  "if"    ▸ 'meta'
-        inc rgs, 4  "▸"     ▸ 'punct meta'
-        inc rgs, 5  "then"  ▸ 'meta'
-        inc rgs, 10 "▸"     ▸ 'punct meta'
-        inc rgs, 11 "elif"  ▸ 'meta'
-        inc rgs, 16 "▸"     ▸ 'punct meta'
-        inc rgs, 17 "else"  ▸ 'meta'
+        rgs = ranges "empty noon valid "
+        inc rgs, 0 "empty"  ▸ 'keyword'
+        inc rgs, 6 "noon"   ▸ 'keyword'
+        inc rgs, 11 "valid" ▸ 'keyword'
+        # ▸ meta if then
+#             
+            # lang 'coffee'
+#             
+            # rgs = ranges "▸if ▸then ▸elif ▸else"
+            # inc rgs, 0  "▸"     ▸ 'punct meta'
+            # inc rgs, 1  "if"    ▸ 'meta'
+            # inc rgs, 4  "▸"     ▸ 'punct meta'
+            # inc rgs, 5  "then"  ▸ 'meta'
+            # inc rgs, 10 "▸"     ▸ 'punct meta'
+            # inc rgs, 11 "elif"  ▸ 'meta'
+            # inc rgs, 16 "▸"     ▸ 'punct meta'
+            # inc rgs, 17 "else"  ▸ 'meta'
 
-    ▸ koffee no comma
-        
-        lang 'coffee'
-        
-        rgs = ranges "[1 'x' a:1 c:d]"
-        inc rgs, 1  "1"     ▸ 'number'
-        inc rgs, 4  "x"     ▸ 'string single'
-        inc rgs, 7  "a"     ▸ 'dictionary key'
-        inc rgs, 11 "c"     ▸ 'dictionary key'
+        ▸ no comma
+            
+            lang 'kode'
+            
+            rgs = ranges "[1 'x' a:1 c:d]"
+            inc rgs, 1  "1"     ▸ 'number'
+            inc rgs, 4  "x"     ▸ 'string single'
+            inc rgs, 7  "a"     ▸ 'dictionary key'
+            inc rgs, 11 "c"     ▸ 'dictionary key'
 
     #       000   0000000  
     #       000  000       

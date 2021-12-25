@@ -19,28 +19,24 @@ coffee kode js ts
         catch
         throw
         class
+        super
         return
         switch
         break
         continue
         true
         typeof
+        extends
         instanceof
         __dirname
         __filename
         Infinity
-        valid
-        empty
-        clamp
-        kstr
-        kpos
         
     module
         childp
         matchr
         prefs
         slash
-        noon
         args
         post
         module
@@ -50,6 +46,8 @@ coffee kode js ts
         exports
         window
         document
+        kstr
+        kpos
         fs
         os
 
@@ -83,8 +81,6 @@ coffee
         not
         when
         unless
-        super
-        extends
         yes
         
     nil
@@ -93,20 +89,21 @@ coffee
 kode
       
     keyword
+        ➜
+        ▸
         of
         in
-        ei
         is
-        by
         or
         and
         not
+        yes
         when
-        super
-        extends
         empty
         valid
-        yes
+        noon
+        each
+        function
         
     nil
         no

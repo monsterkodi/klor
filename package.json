@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "2.23.0",
+  "version": "2.24.0",
   "description": "syntax highlighting",
   "author": "monsterkodi",
   "license": "Unlicense",
@@ -16,7 +16,7 @@
   ],
   "main": "js/klor.js",
   "scripts": {
-    "build": "./node_modules/.bin/kode -Ho js kode/*.kode",
+    "build": "./node_modules/.bin/kode -Ho js kode/*.kode && ./node_modules/.bin/kode kode/lang.kode",
     "test": "./node_modules/.bin/kode -t kode/test.kode"
   },
   "devDependencies": {
