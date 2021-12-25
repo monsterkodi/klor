@@ -725,21 +725,40 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 20 "last"  ▸ 'keyword'
         
         rgs = ranges "▸ some text"
-        inc rgs, 0 "▸" ▸ 'punct keyword'
-        inc rgs, 2 "some" ▸ 'section'
-        inc rgs, 7 "text" ▸ 'section'
+        inc rgs, 0 "▸"      ▸ 'punct keyword'
+        inc rgs, 2 "some"   ▸ 'section'
+        inc rgs, 7 "text"   ▸ 'section'
 
         rgs = ranges "    ▸ some text"
-        inc rgs, 4 "▸" ▸ 'punct keyword'
-        inc rgs, 6 "some" ▸ 'section'
-        inc rgs, 11 "text" ▸ 'section'
+        inc rgs, 4 "▸"      ▸ 'punct keyword'
+        inc rgs, 6 "some"   ▸ 'section'
+        inc rgs, 11 "text"  ▸ 'section'
 
         rgs = ranges "    some ▸ test"
-        inc rgs, 9 "▸" ▸ 'punct keyword'
-        inc rgs, 11 "test" ▸ 'text'
+        inc rgs, 9 "▸"      ▸ 'punct keyword'
+        inc rgs, 11 "test"  ▸ 'text'
         
         rgs = ranges "➜"
-        inc rgs, 0 "➜"   ▸ 'punct keyword'
+        inc rgs, 0 "➜"      ▸ 'punct keyword'
+        
+        rgs = ranges "a is str"
+        inc rgs, 2 "is"     ▸ 'keyword'
+        inc rgs, 5 "str"    ▸ 'keyword'
+
+        rgs = ranges "a is num"
+        inc rgs, 5 "num"    ▸ 'keyword'
+        
+        rgs = ranges "a is obj"
+        inc rgs, 5 "obj"    ▸ 'keyword'
+        
+        rgs = ranges "a is arr"
+        inc rgs, 5 "arr"    ▸ 'keyword'
+        
+        rgs = ranges "a is func"
+        inc rgs, 5 "func"   ▸ 'keyword'
+        
+        rgs = ranges "a is elem"
+        inc rgs, 5 "elem"   ▸ 'keyword'
         
         # ▸ meta if then
 #             

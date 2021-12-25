@@ -339,6 +339,10 @@ kodeWord = ->
         if prev.match in ['class' 'extends' 'function']
             setValue 0 'class'
             return 1
+            
+        if prev.match == 'is' and chunk.match in ['str''num''obj''arr''func''elem']
+            setValue 0 'keyword'
+            return 1
 
         if chunk.clss.startsWith 'keyword'
 
