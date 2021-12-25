@@ -717,6 +717,30 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 0 "empty"  ▸ 'keyword'
         inc rgs, 6 "noon"   ▸ 'keyword'
         inc rgs, 11 "valid" ▸ 'keyword'
+
+        rgs = ranges "min max clamp first last"
+        inc rgs, 0  "min"   ▸ 'keyword'
+        inc rgs, 4  "max"   ▸ 'keyword'
+        inc rgs, 14 "first" ▸ 'keyword'
+        inc rgs, 20 "last"  ▸ 'keyword'
+        
+        rgs = ranges "▸ some text"
+        inc rgs, 0 "▸" ▸ 'punct keyword'
+        inc rgs, 2 "some" ▸ 'section'
+        inc rgs, 7 "text" ▸ 'section'
+
+        rgs = ranges "    ▸ some text"
+        inc rgs, 4 "▸" ▸ 'punct keyword'
+        inc rgs, 6 "some" ▸ 'section'
+        inc rgs, 11 "text" ▸ 'section'
+
+        rgs = ranges "    some ▸ test"
+        inc rgs, 9 "▸" ▸ 'punct keyword'
+        inc rgs, 11 "test" ▸ 'text'
+        
+        rgs = ranges "➜"
+        inc rgs, 0 "➜"   ▸ 'punct keyword'
+        
         # ▸ meta if then
 #             
             # lang 'coffee'

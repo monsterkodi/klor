@@ -86,14 +86,18 @@ coffee
     nil
         no
 
+# 000   000   0000000   0000000    00000000  
+# 000  000   000   000  000   000  000       
+# 0000000    000   000  000   000  0000000   
+# 000  000   000   000  000   000  000       
+# 000   000   0000000   0000000    00000000  
+
 kode
       
     keyword
-        ➜
-        ▸
-        of
         in
         is
+        of
         or
         and
         not
@@ -102,7 +106,14 @@ kode
         empty
         valid
         noon
+        copy
+        clone
         each
+        min
+        max
+        first
+        last
+        clamp
         function
         
     nil

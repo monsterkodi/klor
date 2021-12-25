@@ -35,7 +35,7 @@ It exports the following function:
 ]
 ```
 
-See [kolor.map](https://github.com/monsterkodi/klor/blob/master/coffee/kolor.coffee) for a list of recognized chunk values.
+See [kolor.map](https://github.com/monsterkodi/klor/blob/master/kode/kolor.kode) for a list of recognized chunk values.
 
 ## 🌈 kolor
 
@@ -53,12 +53,9 @@ log y8 'bright yellow' + R1 'on dark red'
 ```
 
 [![npm package][npm-image]][npm-url] 
-[![Build Status][travis-image]][travis-url] 
 [![downloads][downloads-image]][downloads-url] 
 
 [npm-image]:https://img.shields.io/npm/v/klor.svg
 [npm-url]:http://npmjs.org/package/klor
-[travis-image]:https://travis-ci.org/monsterkodi/klor.svg?branch=master
-[travis-url]:https://travis-ci.org/monsterkodi/klor
 [downloads-image]:https://img.shields.io/npm/dm/klor.svg
 [downloads-url]:https://www.npmtrends.com/klor

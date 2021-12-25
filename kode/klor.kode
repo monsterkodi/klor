@@ -290,6 +290,68 @@ commentHeader = ->
             chunk.clss = 'comment triple header'
             return 1
 
+# 000   000   0000000   0000000    00000000  
+# 000  000   000   000  000   000  000       
+# 0000000    000   000  000   000  0000000   
+# 000  000   000   000  000   000  000       
+# 000   000   0000000   0000000    00000000  
+
+kodePunct = ->
+
+    return if notCode
+
+    if chunk.match in '▸➜'
+        return addValue 0 'keyword'
+
+    if prev = getChunk -1
+
+        if chunk.turd?.startsWith('..') and prev.match != '.'
+            if chunk.turd[2] != '.'
+                return addValues 2 'range'
+            if chunk.turd[3] != '.'
+                return addValues 3 'range'
+
+        if prev.clss.startsWith('text') or prev.clss == 'property'
+
+            prevEnd = prev.start+prev.length
+            if chunk.match == '(' and prevEnd == chunk.start
+                return thisCall()
+            else if prevEnd < chunk.start # spaced
+                if chunk.match in '@[({"\''
+                    return thisCall()
+                else if chunk.match in '+-/'
+                    next = getChunk 1
+                    if not next or next.match != '=' and next.start == chunk.start+1
+                        return thisCall()
+
+kodeWord = ->
+
+    return if notCode
+
+    if prev = getChunk -1
+
+        if prev.match == '▸'
+            if empty getChunk -2
+                for c in line.chunks[chunkIndex..]
+                    c.clss = 'section'
+                return line.chunks.length - chunkIndex
+                
+        if prev.match in ['class' 'extends' 'function']
+            setValue 0 'class'
+            return 1
+
+        if chunk.clss.startsWith 'keyword'
+
+            return 1 # we are done with the keyword
+
+        if prev.match == '@'
+            addValue -1 'this'
+            addValue  0 'this'
+            return 1
+
+        if (prev.clss.startsWith('text') or prev.clss == 'property') and prev.start+prev.length < chunk.start # spaced
+            return thisCall()
+            
 #  0000000   0000000   00000000  00000000  00000000  00000000
 # 000       000   000  000       000       000       000
 # 000       000   000  000000    000000    0000000   0000000
@@ -1063,8 +1125,8 @@ handlers =
         punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
         word: [ keyword, coffeeWord, number, property ]
     kode:
-        punct:[ blockComment, hashComment, tripleRegexp, coffeePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
-        word: [ keyword, coffeeWord, number, property ]
+        punct:[ blockComment, hashComment, tripleRegexp, kodePunct, tripleString, simpleString, interpolation, dashArrow, regexp, dict ]
+        word: [ keyword, kodeWord, number, property ]
     noon: punct:[ noonComment,  noonPunct, urlPunct ],                                          word:[ noonWord, urlWord, number          ]
     js:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
     ts:   punct:[ starComment,  slashComment, jsPunct, simpleString, dashArrow, regexp, dict ], word:[ keyword, jsWord, number, property  ]
