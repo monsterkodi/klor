@@ -1,6 +1,6 @@
-// monsterkodi/kode 0.181.0
+// monsterkodi/kode 0.234.0
 
-var _k_ = {list: function (l) {return (l != null ? typeof l.length === 'number' ? l : [] : [])}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
 var b, dissect, dss, ext, i, inc, klor, lang, parse, ranges, rgs
 
@@ -1055,23 +1055,22 @@ module.exports["parse"] = function ()
     section("comment", function ()
     {
         lang('coffee')
-        compare(parse("##"),[{ext:'coffee',chars:2,index:0,number:1,chunks:[{start:0,length:1,match:"#",clss:'punct comment',turd:"##"},{start:1,length:1,match:"#",clss:'comment'}]}])
-        compare(parse(",#a"),[{ext:'coffee',chars:3,index:0,number:1,chunks:[{start:0,length:1,match:",",clss:'punct minor',turd:",#"},{start:1,length:1,match:"#",clss:'punct comment'},{start:2,length:1,match:"a",clss:'comment'}]}])
+        compare(parse("##"),[{chunks:[{start:0,length:1,match:"#",turd:"##",clss:'punct comment'},{start:1,length:1,match:"#",clss:'comment'}],chars:2,index:0,number:1,ext:'coffee'}])
+        compare(parse(",#a"),[{chunks:[{start:0,length:1,match:",",turd:",#",clss:'punct minor'},{start:1,length:1,match:"#",clss:'punct comment'},{start:2,length:1,match:"a",clss:'comment'}],chars:3,index:0,number:1,ext:'coffee'}])
     })
     section("function", function ()
     {
-        compare(parse('->'),[{ext:'coffee',chars:2,index:0,number:1,chunks:[{start:0,length:1,match:'-',clss:'punct function tail',turd:'->'},{start:1,length:1,match:'>',clss:'punct function head'}]}])
-        compare(parse('=>'),[{ext:'coffee',chars:2,index:0,number:1,chunks:[{start:0,length:1,match:'=',clss:'punct function bound tail',turd:'=>'},{start:1,length:1,match:'>',clss:'punct function bound head'}]}])
-        compare(parse('f=->1'),[{ext:'coffee',chars:5,index:0,number:1,chunks:[{start:0,length:1,match:'f',clss:'function'},{start:1,length:1,match:'=',clss:'punct function',turd:'=->'},{start:2,length:1,match:'-',clss:'punct function tail',turd:'->'},{start:3,length:1,match:'>',clss:'punct function head'},{start:4,length:1,match:'1',clss:'number'}]}])
+        compare(parse('->'),[{chunks:[{start:0,length:1,match:'-',turd:'->',clss:'punct function tail'},{start:1,length:1,match:'>',clss:'punct function head'}],chars:2,index:0,number:1,ext:'coffee'}])
+        compare(parse('=>'),[{chunks:[{start:0,length:1,match:'=',turd:'=>',clss:'punct function bound tail'},{start:1,length:1,match:'>',clss:'punct function bound head'}],chars:2,index:0,number:1,ext:'coffee'}])
+        compare(parse('f=->1'),[{chunks:[{start:0,length:1,match:'f',clss:'function'},{start:1,length:1,match:'=',turd:'=->',clss:'punct function'},{start:2,length:1,match:'-',turd:'->',clss:'punct function tail'},{start:3,length:1,match:'>',clss:'punct function head'},{start:4,length:1,match:'1',clss:'number'}],chars:5,index:0,number:1,ext:'coffee'}])
     })
     section("minimal", function ()
     {
-        compare(parse('1'),[{ext:'coffee',chars:1,index:0,number:1,chunks:[{start:0,length:1,match:'1',clss:'number'}]}])
-        compare(parse('a'),[{ext:'coffee',chars:1,index:0,number:1,chunks:[{start:0,length:1,match:'a',clss:'text'}]}])
-        compare(parse('.'),[{ext:'coffee',chars:1,index:0,number:1,chunks:[{start:0,length:1,match:'.',clss:'punct'}]}])
-        compare(parse('1.a'),[{ext:'coffee',chars:3,index:0,number:1,chunks:[{start:0,length:1,match:'1',clss:'number'},{start:1,length:1,match:'.',clss:'punct property'},{start:2,length:1,match:'a',clss:'property'}]}])
-        compare(parse('++a'),[{ext:'coffee',chars:3,index:0,number:1,chunks:[{start:0,length:1,match:'+',clss:'punct',turd:'++'},{start:1,length:1,match:'+',clss:'punct'},{start:2,length:1,match:'a',clss:'text'}]}])
-        compare(parse("▸doc 'hello'"),[{ext:'coffee',chars:12,index:0,number:1,chunks:[{start:0,length:1,match:'▸',clss:'punct meta'},{start:1,length:3,match:'doc',clss:'meta'},{start:5,length:1,match:"'",clss:'punct string single'},{start:6,length:5,match:"hello",clss:'string single'},{start:11,length:1,match:"'",clss:'punct string single'}]}])
+        compare(parse('1'),[{chunks:[{start:0,length:1,match:'1',clss:'number'}],chars:1,index:0,number:1,ext:'coffee'}])
+        compare(parse('a'),[{chunks:[{start:0,length:1,match:'a',clss:'text'}],chars:1,index:0,number:1,ext:'coffee'}])
+        compare(parse('.'),[{chunks:[{start:0,length:1,match:'.',clss:'punct'}],chars:1,index:0,number:1,ext:'coffee'}])
+        compare(parse('1.a'),[{chunks:[{start:0,length:1,match:'1',clss:'number'},{start:1,length:1,match:'.',clss:'punct property'},{start:2,length:1,match:'a',clss:'property'}],chars:3,index:0,number:1,ext:'coffee'}])
+        compare(parse('++a'),[{chunks:[{start:0,length:1,match:'+',turd:'++',clss:'punct'},{start:1,length:1,match:'+',clss:'punct'},{start:2,length:1,match:'a',clss:'text'}],chars:3,index:0,number:1,ext:'coffee'}])
     })
     section("space", function ()
     {

@@ -1440,20 +1440,20 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
      
         lang 'coffee'
         
-        parse("##") ▸ [
-                        ext:'coffee' chars:2 index:0 number:1 chunks: [ 
-                            {start:0 length:1 match:"#" clss:'punct comment' turd:"##"} 
+        parse("##") ▸ [{
+                        chunks: [ 
+                            {start:0 length:1 match:"#" turd:"##" clss:'punct comment'} 
                             {start:1 length:1 match:"#" clss:'comment'} 
-                        ]
-                    ]
+                        ], chars:2 index:0 number:1 ext:'coffee' 
+                    }]
     
-        parse(",#a") ▸ [
-                        ext:'coffee' chars:3 index:0 number:1 chunks: [ 
-                            {start:0 length:1 match:"," clss:'punct minor' turd: ",#"} 
+        parse(",#a") ▸ [{
+                        chunks: [ 
+                            {start:0 length:1 match:"," turd: ",#" clss:'punct minor'} 
                             {start:1 length:1 match:"#" clss:'punct comment'} 
                             {start:2 length:1 match:"a" clss:'comment'} 
-                        ]
-                    ]
+                        ], chars:3 index:0 number:1 ext:'coffee'
+                    }]
                 
     # 00000000  000   000  000   000   0000000  000000000  000   0000000   000   000  
     # 000       000   000  0000  000  000          000     000  000   000  0000  000  
@@ -1463,27 +1463,30 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
     
     ▸ function
     
-        parse('->') ▸ [
-                        ext:'coffee' chars:2 index:0 number:1 chunks: [ 
-                            {start:0 length:1 match:'-' clss:'punct function tail' turd: '->'} 
+        parse('->') ▸ [{
+                        chunks: [ 
+                            {start:0 length:1 match:'-' turd: '->' clss:'punct function tail'} 
                             {start:1 length:1 match:'>' clss:'punct function head'} 
-                        ]
-                    ]
-        parse('=>') ▸ [
-                        ext:'coffee' chars:2 index:0 number:1 chunks: [ 
-                            {start:0 length:1 match:'=' clss:'punct function bound tail' turd: '=>'} 
+                        ],
+                        chars:2 index:0 number:1 ext:'coffee' 
+                    }]
+        parse('=>') ▸ [{
+                        chunks: [ 
+                            {start:0 length:1 match:'=' turd: '=>' clss:'punct function bound tail'} 
                             {start:1 length:1 match:'>' clss:'punct function bound head'} 
                         ]
-                    ]
-        parse('f=->1') ▸ [
-                        ext:'coffee' chars:5 index:0 number:1 chunks: [ 
+                        chars:2 index:0 number:1 ext:'coffee' 
+                    }]
+        parse('f=->1') ▸ [{
+                        chunks: [ 
                             {start:0 length:1 match:'f' clss:'function'} 
-                            {start:1 length:1 match:'=' clss:'punct function'      turd:'=->' } 
-                            {start:2 length:1 match:'-' clss:'punct function tail' turd:'->'} 
+                            {start:1 length:1 match:'=' turd:'=->' clss:'punct function'     } 
+                            {start:2 length:1 match:'-' turd:'->' clss:'punct function tail' } 
                             {start:3 length:1 match:'>' clss:'punct function head'} 
                             {start:4 length:1 match:'1' clss:'number'} 
-                        ]
-                    ]
+                        ],
+                        chars:5 index:0 number:1 ext:'coffee' 
+                    }]
                     
     # 00     00  000  000   000  000  00     00   0000000   000      
     # 000   000  000  0000  000  000  000   000  000   000  000      
@@ -1493,30 +1496,22 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
     
     ▸ minimal
                     
-        parse('1') ▸ [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'1' clss:'number'} ]]
-        parse('a') ▸ [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'a' clss:'text'} ]]
-        parse('.') ▸ [ext:'coffee' chars:1 index:0 number:1 chunks:[ {start:0 length:1 match:'.' clss:'punct'} ]]
+        parse('1') ▸ [chunks:[{start:0 length:1 match:'1' clss:'number'}], chars:1 index:0 number:1 ext:'coffee' ]
+        parse('a') ▸ [chunks:[{start:0 length:1 match:'a' clss:'text'}],   chars:1 index:0 number:1 ext:'coffee' ]
+        parse('.') ▸ [chunks:[{start:0 length:1 match:'.' clss:'punct'}],  chars:1 index:0 number:1 ext:'coffee' ]
     
-        parse('1.a') ▸ [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                     {start:0  length:1 match:'1' clss:'number'} 
-                     {start:1  length:1 match:'.' clss:'punct property'} 
-                     {start:2  length:1 match:'a' clss:'property'} 
-                     ]]
-                     
-        parse('++a') ▸ [ext:'coffee' chars:3 index:0 number:1 chunks:[ 
-                     {start:0  length:1 match:'+' clss:'punct' turd:'++'} 
-                     {start:1  length:1 match:'+' clss:'punct'} 
-                     {start:2  length:1 match:'a' clss:'text'} 
-                     ]]
-                     
-        parse("▸doc 'hello'") ▸ [ext:'coffee' chars:12 index:0 number:1 chunks:[ 
-                      {start:0  length:1 match:'▸'     clss:'punct meta'} 
-                      {start:1  length:3 match:'doc'   clss:'meta'} 
-                      {start:5  length:1 match:"'"     clss:'punct string single'} 
-                      {start:6  length:5 match:"hello" clss:'string single'} 
-                      {start:11 length:1 match:"'"     clss:'punct string single'} 
-                      ]]
+        parse('1.a') ▸ [{chunks:[ 
+                      {start:0  length:1 match:'1' clss:'number'} 
+                      {start:1  length:1 match:'.' clss:'punct property'} 
+                      {start:2  length:1 match:'a' clss:'property'} 
+                      ], chars:3 index:0 number:1 ext:'coffee' }]
                       
+        parse('++a') ▸ [{chunks:[ 
+                      {start:0  length:1 match:'+' turd:'++' clss:'punct'} 
+                      {start:1  length:1 match:'+' clss:'punct'} 
+                      {start:2  length:1 match:'a' clss:'text'} 
+                      ], chars:3 index:0 number:1 ext:'coffee'}]
+                                            
     #  0000000  00000000    0000000    0000000  00000000  
     # 000       000   000  000   000  000       000       
     # 0000000   00000000   000000000  000       0000000   

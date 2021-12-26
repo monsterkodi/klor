@@ -1283,13 +1283,6 @@ blocked = (lines) ->
             if chunkIndex == beforeIndex
                 chunkIndex++
     lines
-
-rpad = (s, l) ->
-    s = String s
-    while s.length < l then s += ' '
-    s
-
-pad = (l) -> rpad '' l
     
 replaceTabs = (s) ->
     i = 0
@@ -1344,7 +1337,7 @@ kolorizeChunks = (chunks=[], number) ->
     clrzd = ''
     if number
         numstr = String number
-        clrzd += w2(numstr) + rpad '' 4-numstr.length
+        clrzd += w2(numstr) + rpad 4-numstr.length
         
     c = 0
     for i in [0...chunks.length]

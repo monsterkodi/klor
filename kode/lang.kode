@@ -13,8 +13,8 @@ path = require 'path'
 noonFile = path.join __dirname, 'lang.noon'
 jsonFile = path.join __dirname, '..' 'js' 'lang.json'
 
-log 'compile:' noonFile
-log 'output:'  jsonFile
+log Gg3(' compile: ') + g3 noonFile
+log Gg2(' output: ' ) + g2 jsonFile
 
 lang = {}
 exts = ['txt''log']
@@ -29,4 +29,4 @@ for names, keywords of noon_load noonFile
 
 json = JSON.stringify {exts:exts, lang:lang}, null, '    '
 fs.writeFileSync jsonFile, json, 'utf8'
-
+Gg1 ' ok '

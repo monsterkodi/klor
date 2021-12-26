@@ -113,7 +113,14 @@ kode
         max
         first
         last
+        int
+        float
         clamp
+        lpad
+        rpad
+        trim
+        ltrim
+        rtrim
         function
         
     nil
