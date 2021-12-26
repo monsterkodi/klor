@@ -1731,7 +1731,7 @@ replaceTabs = function (s)
     {
         if (s[i] === '\t')
         {
-            s = s.slice(0, typeof i === 'number' ? i : -1) + pad(4 - (i % 4)) + s.slice(i + 1)
+            s = s.slice(0, typeof i === 'number' ? i : -1) + rpad(4 - (i % 4)) + s.slice(i + 1)
         }
         i += 1
     }
