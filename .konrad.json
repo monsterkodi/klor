@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "/coffee/lang.noon$",
+    "/test/"
+  ]
+}
