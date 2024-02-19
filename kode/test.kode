@@ -1356,6 +1356,37 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 12 'FRoute'        ▸ 'template'
         inc rgs, 18 '>'             ▸ 'punct template'
         
+
+    # 00     00  00     00  
+    # 000   000  000   000  
+    # 000000000  000000000  
+    # 000 0 000  000 0 000  
+    # 000   000  000   000  
+    
+    ▸ mm
+        
+        lang 'mm'
+        
+        rgs = ranges "@import"      
+        inc rgs, 0 "@"              ▸ 'punct define'
+        inc rgs, 1 "import"         ▸ 'define'
+
+        rgs = ranges "@implementation"            
+        inc rgs, 0 "@"              ▸ 'punct define'
+        inc rgs, 1 "implementation" ▸ 'define'
+
+        rgs = ranges "@interface"            
+        inc rgs, 0 "@"              ▸ 'punct define'
+        inc rgs, 1 "interface"      ▸ 'define'
+
+        rgs = ranges "@synthesize"            
+        inc rgs, 0 "@"              ▸ 'punct define'
+        inc rgs, 1 "synthesize"     ▸ 'define'
+
+        rgs = ranges "@property"            
+        inc rgs, 0 "@"              ▸ 'punct define'
+        inc rgs, 1 "property"       ▸ 'define'
+        
         
     #  0000000  000   000  
     # 000       000   000  

@@ -1032,6 +1032,19 @@ cppMacro = ->
         setValue 1 'define'
         return 2
 
+# 00     00  00     00  
+# 000   000  000   000  
+# 000000000  000000000  
+# 000 0 000  000 0 000  
+# 000   000  000   000  
+
+mmMacro = ->
+
+    if chunk.match == "@"
+        addValue 0 'define'
+        setValue 1 'define'
+        return 2
+        
 #  0000000  000   000
 # 000       000   000
 # 0000000   000000000
@@ -1137,6 +1150,7 @@ handlers =
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     ini:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[          number                    ]
     cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    mm:   punct:[ starComment,  slashComment, simpleString, mmMacro,  cppPointer             ], word:[ keyword, number, float, cppWord    ]
     frag: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     vert: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]

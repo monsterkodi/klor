@@ -785,7 +785,18 @@
             "iChannelResolution": "module",
             "id": "keyword",
             "self": "keyword",
-            "nil": "nil"
+            "alloc": "keyword",
+            "init": "keyword",
+            "release": "keyword",
+            "autorelease": "keyword",
+            "YES": "keyword",
+            "synthesize": "define",
+            "implementation": "define",
+            "interface": "define",
+            "import": "define",
+            "property": "define",
+            "nil": "nil",
+            "NO": "nil"
         },
         "c": {
             "ifdef": "define",
