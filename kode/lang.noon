@@ -249,7 +249,7 @@ json noon yml yaml
 # 000       000        000      
 #  0000000  000        000      
 
-cpp hpp cxx c h cs frag vert
+cpp hpp cxx mm c h cs frag vert
 
     define
         ifdef
@@ -842,4 +842,12 @@ iss ini md
         true
     nil
         false
+        
+mm
+    keyword
+        id
+        self
+    nil
+        nil
+        
         

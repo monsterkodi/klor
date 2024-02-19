@@ -1,6 +1,6 @@
 {
   "name": "klor",
-  "version": "2.29.0",
+  "version": "2.30.0",
   "description": "syntax highlighting",
   "author": "monsterkodi",
   "license": "Unlicense",
@@ -20,7 +20,7 @@
     "test": "./node_modules/.bin/kode -t kode/test.kode"
   },
   "devDependencies": {
-    "kode": "monsterkodi/kode",
-    "noon": "monsterkodi/noon"
+    "kode": "github:monsterkodi/kode",
+    "noon": "github:monsterkodi/noon"
   }
 }
