@@ -852,6 +852,7 @@ iss ini md
 mm
     keyword
         id
+        in
         self
         alloc
         init
@@ -860,6 +861,7 @@ mm
         YES
         BOOL
     define
+        end
         import
         synthesize
         implementation
@@ -868,5 +870,13 @@ mm
     nil
         nil
         NO
+    module
+        NSString
+        NSArray
+        NSDictionary
+        NSMutableString
+        NSMutableArray
+        NSMutableDictionary
+    
         
         
