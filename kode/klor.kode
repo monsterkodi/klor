@@ -1053,12 +1053,14 @@ mmMacro = ->
 mmString = ->
     
     return if not chunk.turd or chunk.turd.length < 2
-
-    if chunk.turd[..1] == '@"'
     
-        type = 'string double nsstring'
+    type = 'string double nsstring'
+    
+    if chunk.turd[..1] == '@"'
 
-        pushStack strong:true type:type
+        log chunk, topType
+            
+        pushStack strong:true merge:true type:type
 
         return addValues 2 type
 
@@ -1167,7 +1169,7 @@ handlers =
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     ini:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[          number                    ]
     cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
-    mm:   punct:[ starComment,  slashComment, mmString, simpleString, mmMacro,  cppPointer   ], word:[ keyword, number, float, cppWord    ]
+    mm:   punct:[ starComment,  slashComment, simpleString, mmMacro,  cppPointer   ], word:[ keyword, number, float, cppWord    ]
     frag: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     vert: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]

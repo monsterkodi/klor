@@ -1394,6 +1394,12 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
             inc rgs, 1 '"'        ▸ 'punct string double nsstring'
             inc rgs, 2 'X'        ▸ 'string double nsstring'
             inc rgs, 3 '"'        ▸ 'punct string double nsstring'
+            
+            rgs = ranges '@"%@"'
+            inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            inc rgs, 2 '%@'       ▸ 'string double nsstring'
+            inc rgs, 4 '"'        ▸ 'punct string double nsstring'
         
     #  0000000  000   000  
     # 000       000   000  
