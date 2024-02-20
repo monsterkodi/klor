@@ -1386,7 +1386,14 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         rgs = ranges "@property"            
         inc rgs, 0 "@"              ▸ 'punct define'
         inc rgs, 1 "property"       ▸ 'define'
-        
+
+        ▸ NSString
+            
+            rgs = ranges '@"X"'            
+            inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            inc rgs, 2 'X'        ▸ 'string double nsstring'
+            inc rgs, 3 '"'        ▸ 'punct string double nsstring'
         
     #  0000000  000   000  
     # 000       000   000  

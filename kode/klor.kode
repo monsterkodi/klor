@@ -749,7 +749,12 @@ simpleString = ->
             popStack()
             return 1
         else if notCode
-            return stacked()
+            if topType == "string double nsstring"
+                addValue  0 topType
+                popStack()
+                return 1
+            else
+                return stacked()
 
         pushStack strong:true type:type
         addValue 0 type
@@ -1045,6 +1050,18 @@ mmMacro = ->
         setValue 1 'define'
         return 2
         
+mmString = ->
+    
+    return if not chunk.turd or chunk.turd.length < 2
+
+    if chunk.turd[..1] == '@"'
+    
+        type = 'string double nsstring'
+
+        pushStack strong:true type:type
+
+        return addValues 2 type
+
 #  0000000  000   000
 # 000       000   000
 # 0000000   000000000
@@ -1150,7 +1167,7 @@ handlers =
     iss:  punct:[ starComment,  slashComment, simpleString                                   ], word:[ keyword, number                    ]
     ini:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[          number                    ]
     cpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
-    mm:   punct:[ starComment,  slashComment, simpleString, mmMacro,  cppPointer             ], word:[ keyword, number, float, cppWord    ]
+    mm:   punct:[ starComment,  slashComment, mmString, simpleString, mmMacro,  cppPointer   ], word:[ keyword, number, float, cppWord    ]
     frag: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     vert: punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]
     hpp:  punct:[ starComment,  slashComment, simpleString, cppMacro, cppPointer             ], word:[ keyword, number, float, cppWord    ]

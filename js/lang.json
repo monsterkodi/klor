@@ -790,10 +790,11 @@
             "release": "keyword",
             "autorelease": "keyword",
             "YES": "keyword",
+            "BOOL": "keyword",
+            "import": "define",
             "synthesize": "define",
             "implementation": "define",
             "interface": "define",
-            "import": "define",
             "property": "define",
             "nil": "nil",
             "NO": "nil"

@@ -858,11 +858,12 @@ mm
         release
         autorelease
         YES
+        BOOL
     define
+        import
         synthesize
         implementation
         interface
-        import
         property
     nil
         nil
