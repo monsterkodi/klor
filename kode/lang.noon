@@ -859,6 +859,10 @@ mm
         init
         release
         autorelease
+        isKindOfClass
+        sharedApplication
+        mainBundle
+        delegate
         YES
         BOOL
     define
@@ -871,21 +875,42 @@ mm
     nil
         nil
         NO
+        NSNotFound
     module
+        Win
+        View
         NSURL
         CGRect
+        NSData
         NSPoint
         NSArray
         NSImage
         NSObject
         NSString
+        NSNumber
         NSWindow
+        NSBundle
+        WKWebView
+        WKNavigation
+        NSURLRequest
         NSDictionary
         NSApplication
+        NSCharacterSet
         NSNotification
         NSMutableArray
         NSMutableString
+        WKScriptMessage
         NSMutableDictionary
+        NSImageDataBitmapRep
+        WKSnapshotConfiguration
+    type
+        NSApplicationActivationPolicyRegular
+        NSApplicationTerminateReply
+        NSBitmapImageFileTypePNG
+        NSTimeInterval
+        NSUInteger
+        NSInteger
+        NSRect
     
         
         
