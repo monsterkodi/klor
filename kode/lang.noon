@@ -854,6 +854,7 @@ mm
         id
         in
         self
+        super
         alloc
         init
         release
@@ -871,11 +872,19 @@ mm
         nil
         NO
     module
-        NSString
+        NSURL
+        CGRect
+        NSPoint
         NSArray
+        NSImage
+        NSObject
+        NSString
+        NSWindow
         NSDictionary
-        NSMutableString
+        NSApplication
+        NSNotification
         NSMutableArray
+        NSMutableString
         NSMutableDictionary
     
         
