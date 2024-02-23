@@ -39,6 +39,7 @@ coffee kode js ts
         slash
         args
         post
+        elem
         module
         console
         process
@@ -879,6 +880,7 @@ mm
     module
         Win
         View
+        NSSet
         NSURL
         CGRect
         NSData
@@ -891,6 +893,7 @@ mm
         NSWindow
         NSBundle
         WKWebView
+        NSMutableSet
         WKNavigation
         NSURLRequest
         NSDictionary
