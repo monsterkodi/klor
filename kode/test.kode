@@ -760,6 +760,9 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         rgs = ranges "a is elem"
         inc rgs, 5 "elem"   ▸ 'keyword'
         
+        rgs = ranges "use fs"
+        inc rgs, 0 "use"    ▸ 'require'
+        
         # ▸ meta if then
 #             
             # lang 'coffee'
@@ -1363,43 +1366,43 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
     # 000 0 000  000 0 000  
     # 000   000  000   000  
     
-    ▸ mm
-        
-        lang 'mm'
-        
-        rgs = ranges "@import"      
-        inc rgs, 0 "@"              ▸ 'punct define'
-        inc rgs, 1 "import"         ▸ 'define'
+    # ▸ mm
+#         
+        # lang 'mm'
+#         
+        # rgs = ranges "@import"      
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "import"         ▸ 'define'
 
-        rgs = ranges "@implementation"            
-        inc rgs, 0 "@"              ▸ 'punct define'
-        inc rgs, 1 "implementation" ▸ 'define'
+        # rgs = ranges "@implementation"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "implementation" ▸ 'define'
 
-        rgs = ranges "@interface"            
-        inc rgs, 0 "@"              ▸ 'punct define'
-        inc rgs, 1 "interface"      ▸ 'define'
+        # rgs = ranges "@interface"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "interface"      ▸ 'define'
 
-        rgs = ranges "@synthesize"            
-        inc rgs, 0 "@"              ▸ 'punct define'
-        inc rgs, 1 "synthesize"     ▸ 'define'
+        # rgs = ranges "@synthesize"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "synthesize"     ▸ 'define'
 
-        rgs = ranges "@property"            
-        inc rgs, 0 "@"              ▸ 'punct define'
-        inc rgs, 1 "property"       ▸ 'define'
+        # rgs = ranges "@property"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "property"       ▸ 'define'
 
-        ▸ NSString
-            
-            rgs = ranges '@"X"'            
-            inc rgs, 0 "@"        ▸ 'punct string double nsstring'
-            inc rgs, 1 '"'        ▸ 'punct string double nsstring'
-            inc rgs, 2 'X'        ▸ 'string double nsstring'
-            inc rgs, 3 '"'        ▸ 'punct string double nsstring'
-            
-            rgs = ranges '@"%@"'
-            inc rgs, 0 "@"        ▸ 'punct string double nsstring'
-            inc rgs, 1 '"'        ▸ 'punct string double nsstring'
-            inc rgs, 2 '%@'       ▸ 'string double nsstring'
-            inc rgs, 4 '"'        ▸ 'punct string double nsstring'
+        # ▸ NSString
+#             
+            # rgs = ranges '@"X"'            
+            # inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            # inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            # inc rgs, 2 'X'        ▸ 'string double nsstring'
+            # inc rgs, 3 '"'        ▸ 'punct string double nsstring'
+#             
+            # rgs = ranges '@"%@"'
+            # inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            # inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            # inc rgs, 2 '%@'       ▸ 'string double nsstring'
+            # inc rgs, 4 '"'        ▸ 'punct string double nsstring'
         
     #  0000000  000   000  
     # 000       000   000  

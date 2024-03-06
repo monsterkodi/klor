@@ -173,7 +173,8 @@
             "ltrim": "keyword",
             "rtrim": "keyword",
             "function": "keyword",
-            "no": "nil"
+            "no": "nil",
+            "use": "require"
         },
         "js": {
             "if": "keyword",
