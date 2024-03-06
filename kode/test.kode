@@ -761,18 +761,18 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 5 "elem"   ▸ 'keyword'
         
         rgs = ranges "use fs"
-        inc rgs, 0 "use"    ▸ 'require'
+        inc rgs, 0 "use"    ▸ 'keyword require'
         inc rgs, 4 "fs"     ▸ 'require'
 
         rgs = ranges "use ../mod"
-        inc rgs, 0 "use"    ▸ 'require'
+        inc rgs, 0 "use"    ▸ 'keyword require'
         inc rgs, 4 "."      ▸ 'punct require'
         inc rgs, 5 "."      ▸ 'punct require'
         inc rgs, 6 "/"      ▸ 'punct require'
         inc rgs, 7 "mod"    ▸ 'text require string'
 
         rgs = ranges "use ./dir/mod"
-        inc rgs, 0 "use"    ▸ 'require'
+        inc rgs, 0 "use"    ▸ 'keyword require'
         inc rgs, 4 "."      ▸ 'punct require'
         inc rgs, 5 "/"      ▸ 'punct require'
         inc rgs, 6 "dir"    ▸ 'text require'

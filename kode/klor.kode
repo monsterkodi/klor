@@ -331,9 +331,13 @@ kodePunct = ->
 kodeWord = ->
 
     return if notCode
+        
+    if chunk.match == 'use'
+        setValue 0 'keyword require'
+        return 1
 
     if prev = getChunk -1
-
+        
         if prev.match == 'use'
             setValue 0 'require'
             return 1
