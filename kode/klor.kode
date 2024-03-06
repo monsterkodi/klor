@@ -306,7 +306,8 @@ kodePunct = ->
     if prev = getChunk -1
         
         if prev.clss.endsWith('require')
-            return setValue 0 'punct require'
+            setValue 0 'punct require'
+            return 1
 
         if chunk.turd?.startsWith('..') and prev.match != '.'
             if chunk.turd[2] != '.'
@@ -333,6 +334,10 @@ kodeWord = ->
 
     if prev = getChunk -1
 
+        if prev.match == 'use'
+            setValue 0 'require'
+            return 1
+
         if prev.match == '▸'
             if empty getChunk -2
                 for c in line.chunks[chunkIndex..]
@@ -355,11 +360,11 @@ kodeWord = ->
             addValue -1 'this'
             addValue  0 'this'
             return 1
-            
-        if prev.match == 'use'
-            setValue 0 'require'
-            return 1
 
+        if prev.clss.endsWith('require')
+            addValue 0 'require'
+            return 1
+            
         if (prev.clss.startsWith('text') or prev.clss == 'property') and prev.start+prev.length < chunk.start # spaced
             return thisCall()
             
