@@ -363,6 +363,8 @@ kodeWord = ->
 
         if prev.clss.endsWith('require')
             addValue 0 'require'
+            if chunkIndex == line.chunks.length-1
+                addValue 0 'string'
             return 1
             
         if (prev.clss.startsWith('text') or prev.clss == 'property') and prev.start+prev.length < chunk.start # spaced
