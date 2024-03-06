@@ -762,6 +762,11 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         
         rgs = ranges "use fs"
         inc rgs, 0 "use"    ▸ 'require'
+        inc rgs, 4 "fs"     ▸ 'require'
+
+        rgs = ranges "use ../mod"
+        inc rgs, 0 "use"    ▸ 'require'
+        inc rgs, 4 "."      ▸ 'punct require'
         
         # ▸ meta if then
 #             

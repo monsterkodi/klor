@@ -1,4 +1,4 @@
-// monsterkodi/kode 0.249.0
+// monsterkodi/kode 0.257.0
 
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
@@ -584,6 +584,10 @@ module.exports["ranges"] = function ()
         compare(inc(rgs,5,"elem"),'keyword')
         rgs = ranges("use fs")
         compare(inc(rgs,0,"use"),'require')
+        compare(inc(rgs,4,"fs"),'require')
+        rgs = ranges("use ../mod")
+        compare(inc(rgs,0,"use"),'require')
+        compare(inc(rgs,4,"."),'punct require')
         section("no comma", function ()
         {
             lang('kode')

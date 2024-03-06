@@ -1,6 +1,6 @@
-// monsterkodi/kode 0.249.0
+// monsterkodi/kode 0.257.0
 
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, dbg: function (f,l,c,m,...a) { console.log(f + ':' + l + ':' + c + (m ? ' ' + m + '\n' : '\n') + a.map(function (a) { return _k_.noon(a) }).join(' '))}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, noon: function (obj) { var pad = function (s, l) { while (s.length < l) { s += ' ' }; return s }; var esc = function (k, arry) { var es, sp; if (0 <= k.indexOf('\n')) { sp = k.split('\n'); es = sp.map(function (s) { return esc(s,arry) }); es.unshift('...'); es.push('...'); return es.join('\n') } if (k === '' || k === '...' || _k_.in(k[0],[' ','#','|']) || _k_.in(k[k.length - 1],[' ','#','|'])) { k = '|' + k + '|' } else if (arry && /  /.test(k)) { k = '|' + k + '|' }; return k }; var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { if (Object.hasOwn(o,k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = `|${k}|` } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { if (Object.hasOwn(o,k)) { l.push(keyValue(k,o[k])) } }; return l.join('\n') }; var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; return toStr(obj) }};_k_.w2=_k_.k.F256(_k_.k.w(2));_k_.w3=_k_.k.F256(_k_.k.w(3));_k_.w8=_k_.k.F256(_k_.k.w(8))
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, dbg: function (f,l,c,m,...a) { console.log(f + ':' + l + ':' + c + (m ? ' ' + m + '\n' : '\n') + a.map(function (a) { return _k_.noon(a) }).join(' '))}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, noon: function (obj) { var pad = function (s, l) { while (s.length < l) { s += ' ' }; return s }; var esc = function (k, arry) { var es, sp; if (0 <= k.indexOf('\n')) { sp = k.split('\n'); es = sp.map(function (s) { return esc(s,arry) }); es.unshift('...'); es.push('...'); return es.join('\n') } if (k === '' || k === '...' || _k_.in(k[0],[' ','#','|']) || _k_.in(k[k.length - 1],[' ','#','|'])) { k = '|' + k + '|' } else if (arry && /  /.test(k)) { k = '|' + k + '|' }; return k }; var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { if (Object.prototype.hasOwnProperty(o,k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = `|${k}|` } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { if (Object.hasOwn(o,k)) { l.push(keyValue(k,o[k])) } }; return l.join('\n') }; var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; return toStr(obj) }};_k_.w2=_k_.k.F256(_k_.k.w(2));_k_.w3=_k_.k.F256(_k_.k.w(3));_k_.w8=_k_.k.F256(_k_.k.w(8))
 
 var actExt, addValue, addValues, blockComment, blocked, chunk, chunked, chunkIndex, codeTypes, coffeePunct, coffeeWord, commentHeader, cppMacro, cppPointer, cppWord, cssWord, dashArrow, dict, escape, ext, exts, extStack, extTop, fillComment, float, FLOAT, getChunk, getmatch, getValue, handl, handlers, hashComment, HEADER, HEX, HEXNUM, interpolation, jsonPunct, jsonWord, jsPunct, jsWord, keyword, kodePunct, kodeWord, kolor, kolorize, kolorizeChunks, lang, LI, line, mdPunct, mmMacro, mmString, NEWLINE, noonComment, noonProp, noonPunct, noonWord, notCode, number, NUMBER, obj, parse, popExt, popStack, property, PUNCT, pushExt, pushStack, regexp, replaceTabs, setValue, shPunct, simpleString, slashComment, SPACE, stack, stacked, stackTop, starComment, swtch, syntax, thisCall, topType, tripleRegexp, tripleString, urlPunct, urlWord, xmlPunct
 
@@ -365,7 +365,7 @@ commentHeader = function ()
 
 kodePunct = function ()
 {
-    var next, prev, prevEnd, _308_21_
+    var next, prev, prevEnd, _311_21_
 
     if (notCode)
     {
@@ -377,6 +377,10 @@ kodePunct = function ()
     }
     if (prev = getChunk(-1))
     {
+        if (prev.clss.endsWith('require'))
+        {
+            return setValue(0,'punct require')
+        }
         if ((chunk.turd != null ? chunk.turd.startsWith('..') : undefined) && prev.match !== '.')
         {
             if (chunk.turd[2] !== '.')
@@ -429,9 +433,9 @@ kodeWord = function ()
             if (_k_.empty(getChunk(-2)))
             {
                 var list1 = _k_.list(line.chunks.slice(chunkIndex))
-                for (var _335_22_ = 0; _335_22_ < list1.length; _335_22_++)
+                for (var _338_22_ = 0; _338_22_ < list1.length; _338_22_++)
                 {
-                    c = list1[_335_22_]
+                    c = list1[_338_22_]
                     c.clss = 'section'
                 }
                 return line.chunks.length - chunkIndex
@@ -457,6 +461,11 @@ kodeWord = function ()
             addValue(0,'this')
             return 1
         }
+        if (prev.match === 'use')
+        {
+            setValue(0,'require')
+            return 1
+        }
         if ((prev.clss.startsWith('text') || prev.clss === 'property') && prev.start + prev.length < chunk.start)
         {
             return thisCall()
@@ -476,7 +485,7 @@ thisCall = function ()
 
 coffeePunct = function ()
 {
-    var next, prev, prevEnd, _384_21_
+    var next, prev, prevEnd, _391_21_
 
     if (notCode)
     {
@@ -598,7 +607,7 @@ property = function ()
 
 cppWord = function ()
 {
-    var p, prevPrev, _452_19_
+    var p, prevPrev, _459_19_
 
     if (notCode)
     {
@@ -762,7 +771,7 @@ urlPunct = function ()
         }
         if (chunk.match === '/')
         {
-            for (var _563_22_ = i = chunkIndex, _563_34_ = 0; (_563_22_ <= _563_34_ ? i <= 0 : i >= 0); (_563_22_ <= _563_34_ ? ++i : --i))
+            for (var _570_22_ = i = chunkIndex, _570_34_ = 0; (_570_22_ <= _570_34_ ? i <= 0 : i >= 0); (_570_22_ <= _570_34_ ? ++i : --i))
             {
                 if (line.chunks[i].start + line.chunks[i].length < (line.chunks[i + 1] != null ? line.chunks[i + 1].start : undefined))
                 {
@@ -847,7 +856,7 @@ jsWord = function ()
 
 dict = function ()
 {
-    var prev, _611_44_
+    var prev, _618_44_
 
     if (notCode)
     {
@@ -881,7 +890,7 @@ jsonPunct = function ()
         {
             if (prev.match === '"')
             {
-                for (var _631_26_ = i = Math.max(0,chunkIndex - 2), _631_52_ = 0; (_631_26_ <= _631_52_ ? i <= 0 : i >= 0); (_631_26_ <= _631_52_ ? ++i : --i))
+                for (var _638_26_ = i = Math.max(0,chunkIndex - 2), _638_52_ = 0; (_638_26_ <= _638_52_ ? i <= 0 : i >= 0); (_638_26_ <= _638_52_ ? ++i : --i))
                 {
                     if ((line.chunks[i] != null ? line.chunks[i].clss : undefined) === 'punct string double')
                     {
@@ -932,7 +941,7 @@ jsonWord = function ()
 
 escape = function ()
 {
-    var _664_46_, _665_26_, _669_61_, _672_61_
+    var _671_46_, _672_26_, _676_61_, _679_61_
 
     if (chunk.match === '\\' && ((topType != null ? topType.startsWith('regexp') : undefined) || (topType != null ? topType.startsWith('string') : undefined)))
     {
@@ -960,7 +969,7 @@ escape = function ()
 
 regexp = function ()
 {
-    var next, prev, _682_19_
+    var next, prev, _689_19_
 
     if ((topType != null ? topType.startsWith('string') : undefined))
     {
@@ -1037,7 +1046,7 @@ tripleRegexp = function ()
 
 simpleString = function ()
 {
-    var next, scnd, type, _730_19_
+    var next, scnd, type, _737_19_
 
     if (topType === 'regexp')
     {
@@ -1105,7 +1114,7 @@ simpleString = function ()
 
 tripleString = function ()
 {
-    var type, _770_19_
+    var type, _777_19_
 
     if (!chunk.turd || chunk.turd.length < 3)
     {
@@ -1217,7 +1226,7 @@ float = function ()
 
 cssWord = function ()
 {
-    var prev, prevPrev, _866_45_
+    var prev, prevPrev, _873_45_
 
     if (_k_.in(chunk.match.slice(-2),['px','em','ex']) && NUMBER.test(chunk.match.slice(0, -2)))
     {
@@ -1269,7 +1278,7 @@ cssWord = function ()
 
 mdPunct = function ()
 {
-    var type, _900_65_, _925_21_, _950_21_
+    var type, _907_65_, _932_21_, _957_21_
 
     if (chunkIndex === 0)
     {
@@ -1372,7 +1381,7 @@ mdPunct = function ()
 
 interpolation = function ()
 {
-    var _982_21_
+    var _989_21_
 
     if ((topType != null ? topType.startsWith('string double') : undefined))
     {
@@ -1463,7 +1472,7 @@ mmString = function ()
 
 shPunct = function ()
 {
-    var _1077_42_, _1077_64_, _1080_102_, _1080_41_, _1080_82_, _1086_102_, _1086_41_, _1086_82_
+    var _1084_42_, _1084_64_, _1087_102_, _1087_41_, _1087_82_, _1093_102_, _1093_41_, _1093_82_
 
     if (notCode)
     {
@@ -1569,16 +1578,16 @@ setValue = function (d, value)
 
 getValue = function (d)
 {
-    var _1147_29_, _1147_36_
+    var _1154_29_, _1154_36_
 
-    return ((_1147_36_=(getChunk(d) != null ? getChunk(d).clss : undefined)) != null ? _1147_36_ : '')
+    return ((_1154_36_=(getChunk(d) != null ? getChunk(d).clss : undefined)) != null ? _1154_36_ : '')
 }
 
 getmatch = function (d)
 {
-    var _1148_29_, _1148_37_
+    var _1155_29_, _1155_37_
 
-    return ((_1148_37_=(getChunk(d) != null ? getChunk(d).match : undefined)) != null ? _1148_37_ : '')
+    return ((_1155_37_=(getChunk(d) != null ? getChunk(d).match : undefined)) != null ? _1155_37_ : '')
 }
 
 addValue = function (d, value)
@@ -1594,7 +1603,7 @@ addValues = function (n, value)
 {
     var i
 
-    for (var _1155_14_ = i = 0, _1155_18_ = n; (_1155_14_ <= _1155_18_ ? i < n : i > n); (_1155_14_ <= _1155_18_ ? ++i : --i))
+    for (var _1162_14_ = i = 0, _1162_18_ = n; (_1162_14_ <= _1162_18_ ? i < n : i > n); (_1162_14_ <= _1162_18_ ? ++i : --i))
     {
         addValue(i,value)
     }
@@ -1602,9 +1611,9 @@ addValues = function (n, value)
 }
 handlers = {coffee:{punct:[blockComment,hashComment,tripleRegexp,coffeePunct,tripleString,simpleString,interpolation,dashArrow,regexp,dict],word:[keyword,coffeeWord,number,property]},kode:{punct:[blockComment,hashComment,tripleRegexp,kodePunct,tripleString,simpleString,interpolation,dashArrow,regexp,dict],word:[keyword,kodeWord,number,property]},noon:{punct:[noonComment,noonPunct,urlPunct],word:[noonWord,urlWord,number]},js:{punct:[starComment,slashComment,jsPunct,simpleString,dashArrow,regexp,dict],word:[keyword,jsWord,number,property]},ts:{punct:[starComment,slashComment,jsPunct,simpleString,dashArrow,regexp,dict],word:[keyword,jsWord,number,property]},iss:{punct:[starComment,slashComment,simpleString],word:[keyword,number]},ini:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[number]},cpp:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},mm:{punct:[starComment,slashComment,simpleString,cppPointer],word:[keyword,number,float,cppWord]},frag:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},vert:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},hpp:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},c:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},h:{punct:[starComment,slashComment,simpleString,cppMacro,cppPointer],word:[keyword,number,float,cppWord]},cs:{punct:[starComment,slashComment,simpleString],word:[keyword,number]},pug:{punct:[starComment,slashComment,simpleString],word:[keyword,cssWord,number]},styl:{punct:[starComment,slashComment,simpleString],word:[keyword,cssWord,number]},css:{punct:[starComment,slashComment,simpleString],word:[keyword,cssWord,number]},sass:{punct:[starComment,slashComment,simpleString],word:[keyword,cssWord,number]},scss:{punct:[starComment,slashComment,simpleString],word:[keyword,cssWord,number]},swift:{punct:[starComment,slashComment,simpleString,dict],word:[keyword,number,property]},svg:{punct:[simpleString,xmlPunct],word:[keyword,number]},html:{punct:[simpleString,xmlPunct],word:[keyword,number]},htm:{punct:[simpleString,xmlPunct],word:[keyword,number]},xml:{punct:[simpleString,xmlPunct],word:[number]},sh:{punct:[hashComment,simpleString,urlPunct,shPunct],word:[keyword,urlWord,number]},json:{punct:[simpleString,jsonPunct,urlPunct],word:[keyword,jsonWord,urlWord,number]},yml:{punct:[hashComment,simpleString,urlPunct,shPunct,dict],word:[keyword,jsonWord,urlWord,number,property]},yaml:{punct:[hashComment,simpleString,urlPunct,shPunct,dict],word:[keyword,jsonWord,urlWord,number,property]},log:{punct:[simpleString,urlPunct,dict],word:[urlWord,number]},md:{punct:[mdPunct,urlPunct,xmlPunct],word:[urlWord,number]},fish:{punct:[hashComment,simpleString],word:[keyword,number]},py:{punct:[hashComment,simpleString],word:[keyword,number]}}
 var list1 = _k_.list(exts)
-for (var _1198_8_ = 0; _1198_8_ < list1.length; _1198_8_++)
+for (var _1205_8_ = 0; _1205_8_ < list1.length; _1205_8_++)
 {
-    ext = list1[_1198_8_]
+    ext = list1[_1205_8_]
     if (!(handlers[ext] != null))
     {
         handlers[ext] = {punct:[simpleString],word:[number]}
@@ -1619,7 +1628,7 @@ for (ext in handlers)
 
 blocked = function (lines)
 {
-    var advance, beforeIndex, hnd, mightBeHeader, mtch, turdChunk, _1290_40_, _1305_61_
+    var advance, beforeIndex, hnd, mightBeHeader, mtch, turdChunk, _1297_40_, _1312_61_
 
     extStack = []
     stack = []
@@ -1633,18 +1642,18 @@ blocked = function (lines)
     chunk = null
     chunkIndex = 0
     var list2 = _k_.list(lines)
-    for (var _1241_13_ = 0; _1241_13_ < list2.length; _1241_13_++)
+    for (var _1248_13_ = 0; _1248_13_ < list2.length; _1248_13_++)
     {
-        line = list2[_1241_13_]
+        line = list2[_1248_13_]
         if (stackTop)
         {
             if (stackTop.type === 'comment triple')
             {
                 mightBeHeader = true
                 var list3 = _k_.list(line.chunks)
-                for (var _1248_26_ = 0; _1248_26_ < list3.length; _1248_26_++)
+                for (var _1255_26_ = 0; _1255_26_ < list3.length; _1255_26_++)
                 {
-                    chunk = list3[_1248_26_]
+                    chunk = list3[_1255_26_]
                     if (!HEADER.test(chunk.match))
                     {
                         mightBeHeader = false
@@ -1654,9 +1663,9 @@ blocked = function (lines)
                 if (mightBeHeader)
                 {
                     var list4 = _k_.list(line.chunks)
-                    for (var _1253_30_ = 0; _1253_30_ < list4.length; _1253_30_++)
+                    for (var _1260_30_ = 0; _1260_30_ < list4.length; _1260_30_++)
                     {
-                        chunk = list4[_1253_30_]
+                        chunk = list4[_1260_30_]
                         chunk.clss = 'comment triple header'
                     }
                     continue
@@ -1684,9 +1693,9 @@ blocked = function (lines)
             handl = handlers[ext = line.ext]
             if (!handl)
             {
-                _k_.dbg("kode/klor.kode", 1270, 16, "ext", ext)
-                _k_.dbg("kode/klor.kode", 1271, 16, "line", line)
-                _k_.dbg("kode/klor.kode", 1272, 16, null, handlers[ext])
+                _k_.dbg(".", 1277, 16, "ext", ext)
+                _k_.dbg(".", 1278, 16, "line", line)
+                _k_.dbg(".", 1279, 16, null, handlers[ext])
             }
         }
         chunkIndex = 0
@@ -1708,9 +1717,9 @@ blocked = function (lines)
                     }
                 }
                 var list5 = _k_.list(handl.punct)
-                for (var _1294_24_ = 0; _1294_24_ < list5.length; _1294_24_++)
+                for (var _1301_24_ = 0; _1301_24_ < list5.length; _1301_24_++)
                 {
-                    hnd = list5[_1294_24_]
+                    hnd = list5[_1301_24_]
                     if (advance = hnd())
                     {
                         chunkIndex += advance
@@ -1727,7 +1736,7 @@ blocked = function (lines)
                         if (mtch.turd)
                         {
                             turdChunk = getChunk(-mtch.turd.length)
-                            if (mtch.turd === (((_1305_61_=(turdChunk != null ? turdChunk.turd : undefined)) != null ? _1305_61_ : (turdChunk != null ? turdChunk.match : undefined))))
+                            if (mtch.turd === (((_1312_61_=(turdChunk != null ? turdChunk.turd : undefined)) != null ? _1312_61_ : (turdChunk != null ? turdChunk.match : undefined))))
                             {
                                 pushExt(mtch)
                             }
@@ -1739,9 +1748,9 @@ blocked = function (lines)
                     }
                 }
                 var list6 = _k_.list(handl.word)
-                for (var _1311_24_ = 0; _1311_24_ < list6.length; _1311_24_++)
+                for (var _1318_24_ = 0; _1318_24_ < list6.length; _1318_24_++)
                 {
-                    hnd = list6[_1311_24_]
+                    hnd = list6[_1318_24_]
                     if (advance = hnd())
                     {
                         chunkIndex += advance
@@ -1789,9 +1798,9 @@ kolorize = function (chunk)
         {
             v = chunk.match
             var list2 = _k_.list(cn)
-            for (var _1347_19_ = 0; _1347_19_ < list2.length; _1347_19_++)
+            for (var _1354_19_ = 0; _1354_19_ < list2.length; _1354_19_++)
             {
-                cr = list2[_1347_19_]
+                cr = list2[_1354_19_]
                 v = kolor[cr](v)
             }
             return v
@@ -1844,7 +1853,7 @@ kolorizeChunks = function (chunks = [], number)
         clrzd += _k_.w2(numstr) + _k_.rpad(4 - numstr.length)
     }
     c = 0
-    for (var _1376_14_ = i = 0, _1376_18_ = chunks.length; (_1376_14_ <= _1376_18_ ? i < chunks.length : i > chunks.length); (_1376_14_ <= _1376_18_ ? ++i : --i))
+    for (var _1383_14_ = i = 0, _1383_18_ = chunks.length; (_1383_14_ <= _1383_18_ ? i < chunks.length : i > chunks.length); (_1383_14_ <= _1383_18_ ? ++i : --i))
     {
         while (c < chunks[i].start)
         {
@@ -1859,19 +1868,19 @@ kolorizeChunks = function (chunks = [], number)
 
 syntax = function (arg)
 {
-    var clines, index, lines, numbers, rngs, text, _1393_19_, _1394_25_
+    var clines, index, lines, numbers, rngs, text, _1400_19_, _1401_25_
 
     arg = (arg != null ? arg : {})
     text = arg.text
-    ext = ((_1393_19_=arg.ext) != null ? _1393_19_ : 'coffee')
-    numbers = ((_1394_25_=arg.numers) != null ? _1394_25_ : false)
+    ext = ((_1400_19_=arg.ext) != null ? _1400_19_ : 'coffee')
+    numbers = ((_1401_25_=arg.numers) != null ? _1401_25_ : false)
     lines = text.split(NEWLINE)
     rngs = parse(lines,ext).map(function (l)
     {
         return l.chunks
     })
     clines = []
-    for (var _1399_18_ = index = 0, _1399_22_ = lines.length; (_1399_18_ <= _1399_22_ ? index < lines.length : index > lines.length); (_1399_18_ <= _1399_22_ ? ++index : --index))
+    for (var _1406_18_ = index = 0, _1406_22_ = lines.length; (_1406_18_ <= _1406_22_ ? index < lines.length : index > lines.length); (_1406_18_ <= _1406_22_ ? ++index : --index))
     {
         line = lines[index]
         if (ext === 'js' && line.startsWith('//# source'))
