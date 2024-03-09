@@ -573,6 +573,11 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
             rgs = ranges "dolater ->"
             inc rgs, 8 '-'          ▸ 'punct function tail'
             inc rgs, 9 '>'          ▸ 'punct function head'
+
+            rgs = ranges "async ○->"
+            inc rgs, 6 '○'          ▸ 'punct function async'
+            inc rgs, 7 '-'          ▸ 'punct function tail'
+            inc rgs, 8 '>'          ▸ 'punct function head'
             
             rgs = ranges "@a @b 'c'"
             inc rgs, 0 '@'          ▸ 'punct function call'
@@ -778,6 +783,10 @@ dissect = (c,e) -> klor.dissect c.split('\n'), e ? ext
         inc rgs, 6 "dir"    ▸ 'text require'
         inc rgs, 9 "/"      ▸ 'punct require'
         inc rgs, 10 "mod"   ▸ 'text require string'
+        
+        rgs = ranges "use: (n) ->"
+        inc rgs, 0 "use"    ▸ 'method'
+        inc rgs, 3 ":"      ▸ 'punct method'
         
         # ▸ meta if then
 #             

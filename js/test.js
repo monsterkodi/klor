@@ -1,4 +1,4 @@
-// monsterkodi/kode 0.257.0
+// monsterkodi/kode 0.262.0
 
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
@@ -452,6 +452,10 @@ module.exports["ranges"] = function ()
             rgs = ranges("dolater ->")
             compare(inc(rgs,8,'-'),'punct function tail')
             compare(inc(rgs,9,'>'),'punct function head')
+            rgs = ranges("async ○->")
+            compare(inc(rgs,6,'○'),'punct function async')
+            compare(inc(rgs,7,'-'),'punct function tail')
+            compare(inc(rgs,8,'>'),'punct function head')
             rgs = ranges("@a @b 'c'")
             compare(inc(rgs,0,'@'),'punct function call')
             compare(inc(rgs,1,'a'),'function call')
@@ -598,6 +602,9 @@ module.exports["ranges"] = function ()
         compare(inc(rgs,6,"dir"),'text require')
         compare(inc(rgs,9,"/"),'punct require')
         compare(inc(rgs,10,"mod"),'text require string')
+        rgs = ranges("use: (n) ->")
+        compare(inc(rgs,0,"use"),'method')
+        compare(inc(rgs,3,":"),'punct method')
         section("no comma", function ()
         {
             lang('kode')

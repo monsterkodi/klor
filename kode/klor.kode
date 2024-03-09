@@ -250,6 +250,30 @@ dashArrow = ->
                 line.chunks[1].clss += ' method'
 
     if chunk.turd
+        
+        if chunk.turd.startsWith('○->') 
+            markFunc()
+            addValue 0 'function async'
+            addValue 1 'function tail'
+            addValue 2 'function head'
+            if line.chunks[0].clss == 'dictionary key' or line.chunks[0].turd?[..1] == '@:'
+                line.chunks[0].clss = 'method'
+                line.chunks[1].clss = 'punct method'
+            else if line.chunks[0].match == '@' and line.chunks[1].clss == 'dictionary key'
+                line.chunks[0].clss = 'punct method class'
+                line.chunks[1].clss = 'method class'
+                line.chunks[2].clss = 'punct method class'
+            return 3
+            
+        if chunk.turd.startsWith '○=>'
+            markFunc()
+            addValue 0 'function bound async'
+            addValue 1 'function bound tail'
+            addValue 2 'function bound head'
+            if line.chunks[0].clss == 'dictionary key'
+                line.chunks[0].clss = 'method'
+                line.chunks[1].clss = 'punct method'
+            return 3
 
         if chunk.turd.startsWith '->'
             markFunc()
@@ -333,8 +357,12 @@ kodeWord = ->
     return if notCode
         
     if chunk.match == 'use'
-        setValue 0 'keyword require'
-        return 1
+        if getChunk(1)?.start > chunk.start + chunk.length
+            setValue 0 'keyword require'
+            return 1
+        else
+            setValue 0 'text'
+            return 0
 
     if prev = getChunk -1
         
